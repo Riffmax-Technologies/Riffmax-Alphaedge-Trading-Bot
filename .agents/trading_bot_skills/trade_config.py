@@ -38,7 +38,7 @@ TELEGRAM_CHAT_ID = "915238743"
 USE_DERIV = True  # Set to False to use Exness credentials
 
 DERIV_CONFIG = {
-    "login": "32346236",
+    "login": 32346236,
     "password": "Iamgreat@2030",
     "server": "Deriv-Demo"
 }
