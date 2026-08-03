@@ -70,7 +70,7 @@ def send_test_buy(symbol: str) -> None:
         "tp": round(tp, info.digits),
         "comment": "ALPHAEDGE_TRADE",
         "type_time": mt5.ORDER_TIME_GTC,
-        "type_filling": mt5.ORDER_FILLING_IOC,
+    
     }
     result = mt5.order_send(request)
     if result and result.retcode == mt5.TRADE_RETCODE_DONE:
