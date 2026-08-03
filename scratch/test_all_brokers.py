@@ -102,6 +102,7 @@ def run_test(config: dict, broker_name: str) -> None:
     # Use custom terminal path for Deriv if provided
     if broker_name.lower().startswith("deriv") and MT5_PATH:
         init_kwargs["path"] = MT5_PATH
+    mt5.shutdown()
     if not mt5.initialize(**init_kwargs):
         print(f"[ERROR] Could not initialise MT5 for {broker_name}")
         return
