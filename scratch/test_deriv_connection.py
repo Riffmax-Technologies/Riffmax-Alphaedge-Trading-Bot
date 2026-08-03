@@ -24,5 +24,5 @@ if mt5.initialize(login=DERIV_CONFIG["login"], password=DERIV_CONFIG["password"]
     mt5.shutdown()
 else:
     last_error = mt5.last_error()
-    print(f"❌ MT5 initialise failed. Error: {last_error}")
+    print("[ERROR] MT5 initialise failed. Error: {}".format(last_error))
     sys.exit(1)
