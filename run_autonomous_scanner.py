@@ -45,6 +45,11 @@ def main():
         try:
             logger.info("Running AlphaEdge scan...")
             alphaedge.run_alphaedge()
+            # Notify via Telegram that scan completed
+            try:
+                send_telegram_alert("✅ AlphaEdge autonomous scan completed.")
+            except Exception:
+                logger.error("Failed to send Telegram alert for scan completion")
         except Exception as e:
             logger.error(f"Error executing AlphaEdge scan: {e}")
             
