@@ -13,7 +13,7 @@ import pandas as pd
 import numpy as np
 
 # Ensure the trade_config module can be imported
-BASE_DIR = Path(__file__).resolve().parents[2]
+BASE_DIR = Path(__file__).resolve().parents[1]
 CONFIG_PATH = BASE_DIR / ".agents" / "trading_bot_skills"
 sys.path.append(str(CONFIG_PATH))
 
