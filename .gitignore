@@ -1,0 +1,6 @@
+*.db
+*.db-journal
+.system_generated/tasks/
+.system_generated/terminals/
+.tempmediaStorage/
+browser/
