@@ -1,0 +1,4 @@
+{
+  "summary":  "Corrected audit script that links closing deals to opening deals via position ID to accurately identify bot vs manual trades.",
+  "updatedAt":  "2026-07-01T14:56:40.466204400Z"
+}

@@ -1,0 +1,1 @@
+{"id":"fcac248e-401a-4982-8b8a-1578c540b102", "recipient":"86033144-bf85-4d61-ac17-b7e233ed37cb", "sender":"86033144-bf85-4d61-ac17-b7e233ed37cb/task-5124", "priority":"MESSAGE_PRIORITY_HIGH", "timestamp":"2026-07-03T12:00:00.002952700Z", "renderDetails":{"messageTitle":"Recurring scan: Cron trigger #15"}, "content":"Run AlphaEdge autonomous scan (iteration 15)"}

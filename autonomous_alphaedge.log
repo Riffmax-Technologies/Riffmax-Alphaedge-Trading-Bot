@@ -1,0 +1,137 @@
+[2026-07-03 09:10:53,045] WARNING: Failed to import trading_bot_skills package: attempted relative import with no known parent package
+[2026-07-03 09:10:53,046] INFO: === AlphaEdge manual scan started ===
+[2026-07-03 09:10:53,047] ERROR: Error initializing trade logger: name 'trade_logger' is not defined
+[2026-07-03 09:10:53,047] INFO: AlphaEdge placeholder scan completed.
+[2026-07-03 09:45:57,864] WARNING: Failed to import trading_bot_skills: No module named 'trading_bot_skills'
+[2026-07-03 09:45:57,866] INFO: === AlphaEdge manual scan started ===
+[2026-07-03 09:45:57,867] INFO: Trade logger not available – continuing without it.
+[2026-07-03 09:45:57,869] INFO: AlphaEdge placeholder scan completed.
+[2026-07-03 10:32:46,857] INFO: NumExpr defaulting to 8 threads.
+[2026-07-03 10:33:00,105] INFO: === AlphaEdge manual scan started ===
+[2026-07-03 10:33:00,106] ERROR: Error initializing trade logger: module 'trading_bot_skills.trade_logger' has no attribute 'init_logger'
+[2026-07-03 10:33:00,107] INFO: AlphaEdge placeholder scan completed.
+[2026-07-03 12:10:05,360] INFO: NumExpr defaulting to 8 threads.
+[2026-07-03 12:10:20,721] INFO: === AlphaEdge manual scan started ===
+[2026-07-03 12:10:20,723] INFO: Configured scan interval: 10 minutes
+[2026-07-03 12:10:20,723] INFO: Manual trigger key: A
+[2026-07-03 12:10:32,002] ERROR: Error initializing trade logger: [Errno 13] Permission denied: 'C:\\Users\\Public\\Desktop\\trade_log.xlsx'
+[2026-07-03 12:10:32,003] INFO: AlphaEdge placeholder scan completed.
+[2026-07-03 12:15:59,552] INFO: NumExpr defaulting to 8 threads.
+[2026-07-03 12:16:03,142] INFO: === AlphaEdge manual scan started ===
+[2026-07-03 12:16:03,145] INFO: Configured scan interval: 10 minutes
+[2026-07-03 12:16:03,145] INFO: Manual trigger key: A
+[2026-07-03 12:16:06,185] INFO: Trade logger initialized via init_logger()
+[2026-07-03 12:16:06,185] INFO: Trade logger initialized.
+[2026-07-03 12:16:06,186] INFO: AlphaEdge placeholder scan completed.
+[2026-07-03 13:46:45,749] INFO: NumExpr defaulting to 8 threads.
+[2026-07-03 13:46:47,087] INFO: === AlphaEdge manual scan started ===
+[2026-07-03 13:46:47,088] INFO: Configured scan interval: 10 minutes
+[2026-07-03 13:46:47,088] INFO: Manual trigger key: A
+[2026-07-03 13:46:47,088] INFO: Trade logger initialized via init_logger()
+[2026-07-03 13:46:47,089] INFO: Trade logger initialized.
+[2026-07-03 13:46:47,129] INFO: Calculated safe lot size: 10000.0000
+[2026-07-03 13:46:47,130] INFO: [MT5 STUB] Sending BUY order for EURUSD – lots: 10000.0000, SL: 1.09800, TP: 1.10200
+[2026-07-03 13:46:48,429] INFO: Trade execution completed successfully.
+[2026-07-03 13:46:48,429] INFO: AlphaEdge placeholder scan completed.
+[2026-07-03 16:05:19,075] INFO: NumExpr defaulting to 8 threads.
+[2026-07-03 16:05:35,950] INFO: === AlphaEdge manual scan started ===
+[2026-07-03 16:05:35,951] INFO: Configured scan interval: 10 minutes
+[2026-07-03 16:05:35,952] INFO: Manual trigger key: A
+[2026-07-03 16:05:35,957] INFO: Trade logger initialized via init_logger()
+[2026-07-03 16:05:35,958] INFO: Trade logger initialized.
+[2026-07-03 16:05:36,024] INFO: Calculated safe lot size: 10000.0000
+[2026-07-03 16:05:36,025] INFO: [MT5 STUB] Sending BUY order for EURUSD – lots: 10000.0000, SL: 1.09800, TP: 1.10200
+[2026-07-03 16:05:49,951] INFO: Trade execution completed successfully.
+[2026-07-03 16:05:49,951] INFO: AlphaEdge placeholder scan completed.
+[2026-07-03 16:44:38,641] INFO: NumExpr defaulting to 8 threads.
+[2026-07-03 16:44:41,549] WARNING: Failed to import trading_bot_skills: cannot import name 'MAX_OVERALL_DRAWDOWN_PCT' from 'trading_bot_skills.trade_config' (C:\Users\DATA ENG. OLA\.gemini\antigravity\brain\86033144-bf85-4d61-ac17-b7e233ed37cb\.agents\trading_bot_skills\trade_config.py)
+[2026-07-03 16:44:41,549] INFO: === AlphaEdge manual scan started ===
+[2026-07-03 16:44:41,550] INFO: Configured scan interval: 10 minutes
+[2026-07-03 16:44:41,550] INFO: Manual trigger key: A
+[2026-07-03 16:44:41,550] INFO: Trade logger not available – continuing without it.
+[2026-07-03 16:44:41,554] INFO: AlphaEdge placeholder scan completed.
+[2026-07-03 16:46:03,369] INFO: NumExpr defaulting to 8 threads.
+[2026-07-03 16:46:04,743] INFO: MT5 initialized successfully.
+[2026-07-03 16:46:04,743] INFO: === AlphaEdge manual scan started ===
+[2026-07-03 16:46:04,744] INFO: Configured scan interval: 10 minutes
+[2026-07-03 16:46:04,745] INFO: Manual trigger key: A
+[2026-07-03 16:46:04,746] INFO: Trade logger initialized via init_logger()
+[2026-07-03 16:46:04,747] INFO: Trade logger initialized.
+[2026-07-03 16:46:04,750] INFO: Calculated safe lot size (capped): 0.1000
+[2026-07-03 16:46:04,760] ERROR: MT5 order failed for EURUSD retcode=10016
+[2026-07-03 16:46:04,761] ERROR: MT5 order placement failed.
+[2026-07-03 16:46:04,761] INFO: AlphaEdge placeholder scan completed.
+[2026-07-03 16:47:27,694] INFO: NumExpr defaulting to 8 threads.
+[2026-07-03 16:47:29,886] INFO: MT5 initialized successfully.
+[2026-07-03 16:47:29,887] INFO: === AlphaEdge manual scan started ===
+[2026-07-03 16:47:29,887] INFO: Configured scan interval: 10 minutes
+[2026-07-03 16:47:29,888] INFO: Manual trigger key: A
+[2026-07-03 16:47:29,889] INFO: Trade logger initialized via init_logger()
+[2026-07-03 16:47:29,890] INFO: Trade logger initialized.
+[2026-07-03 16:47:29,891] ERROR: Error during trade logger init or execution: execute_trade() got an unexpected keyword argument 'sl'
+[2026-07-03 16:47:29,893] INFO: AlphaEdge placeholder scan completed.
+[2026-07-03 16:48:00,598] INFO: NumExpr defaulting to 8 threads.
+[2026-07-03 16:48:01,667] INFO: MT5 initialized successfully.
+[2026-07-03 16:48:01,668] INFO: === AlphaEdge manual scan started ===
+[2026-07-03 16:48:01,669] INFO: Configured scan interval: 10 minutes
+[2026-07-03 16:48:01,669] INFO: Manual trigger key: A
+[2026-07-03 16:48:01,671] INFO: Trade logger initialized via init_logger()
+[2026-07-03 16:48:01,671] INFO: Trade logger initialized.
+[2026-07-03 16:48:01,677] INFO: Calculated safe lot size (capped): 0.1000
+[2026-07-03 16:48:01,681] ERROR: MT5 order failed for EURUSD retcode=10016
+[2026-07-03 16:48:01,681] ERROR: MT5 order placement failed.
+[2026-07-03 16:48:01,682] INFO: AlphaEdge placeholder scan completed.
+[2026-07-03 16:48:43,223] INFO: NumExpr defaulting to 8 threads.
+[2026-07-03 16:48:44,278] INFO: MT5 initialized successfully.
+[2026-07-03 16:48:44,279] INFO: === AlphaEdge manual scan started ===
+[2026-07-03 16:48:44,279] INFO: Configured scan interval: 10 minutes
+[2026-07-03 16:48:44,280] INFO: Manual trigger key: A
+[2026-07-03 16:48:44,280] INFO: Trade logger initialized via init_logger()
+[2026-07-03 16:48:44,281] INFO: Trade logger initialized.
+[2026-07-03 16:48:44,285] INFO: Calculated safe lot size (capped): 0.1000
+[2026-07-03 16:48:44,285] ERROR: Invalid SL: SL not below market price for BUY
+[2026-07-03 16:48:44,286] INFO: AlphaEdge placeholder scan completed.
+[2026-07-04 08:52:09,362] INFO: NumExpr defaulting to 8 threads.
+[2026-07-04 08:52:13,899] INFO: MT5 initialized successfully.
+[2026-07-04 08:52:13,900] INFO: === AlphaEdge manual scan started ===
+[2026-07-04 08:52:13,901] INFO: Configured scan interval: 10 minutes
+[2026-07-04 08:52:13,902] INFO: Manual trigger key: A
+[2026-07-04 08:52:13,903] INFO: Trade logger initialized via init_logger()
+[2026-07-04 08:52:13,903] INFO: Trade logger initialized.
+[2026-07-04 08:52:13,958] INFO: Calculated safe lot size (capped): 0.1000
+[2026-07-04 08:52:24,524] ERROR: MT5 order failed for EURUSD retcode=10018
+[2026-07-04 08:52:24,526] ERROR: MT5 order placement failed.
+[2026-07-04 08:52:24,527] INFO: AlphaEdge placeholder scan completed.
+[2026-07-04 09:01:52,429] INFO: NumExpr defaulting to 8 threads.
+[2026-07-04 09:01:55,121] INFO: MT5 initialized successfully.
+[2026-07-04 09:01:55,124] INFO: === AlphaEdge manual scan started ===
+[2026-07-04 09:01:55,125] INFO: Configured scan interval: 10 minutes
+[2026-07-04 09:01:55,126] INFO: Manual trigger key: A
+[2026-07-04 09:01:55,126] INFO: Trade logger initialized via init_logger()
+[2026-07-04 09:01:55,126] INFO: Trade logger initialized.
+[2026-07-04 09:01:55,134] INFO: Calculated safe lot size (capped): 0.1000
+[2026-07-04 09:01:55,218] ERROR: MT5 order failed for EURUSD retcode=10018
+[2026-07-04 09:01:55,218] ERROR: MT5 order placement failed.
+[2026-07-04 09:01:55,219] INFO: AlphaEdge placeholder scan completed.
+[2026-07-04 09:05:50,765] INFO: NumExpr defaulting to 8 threads.
+[2026-07-04 09:05:52,869] INFO: MT5 initialized successfully.
+[2026-07-04 09:05:52,870] INFO: === AlphaEdge manual scan started ===
+[2026-07-04 09:05:52,870] INFO: Configured scan interval: 10 minutes
+[2026-07-04 09:05:52,871] INFO: Manual trigger key: A
+[2026-07-04 09:05:52,871] INFO: Trade logger initialized via init_logger()
+[2026-07-04 09:05:52,871] INFO: Trade logger initialized.
+[2026-07-04 09:05:52,875] INFO: Calculated safe lot size (capped): 0.1000
+[2026-07-04 09:05:52,942] ERROR: MT5 order failed for EURUSD retcode=10018
+[2026-07-04 09:05:52,943] ERROR: MT5 order placement failed.
+[2026-07-04 09:05:52,943] INFO: AlphaEdge placeholder scan completed.
+[2026-07-06 11:19:39,638] INFO: NumExpr defaulting to 8 threads.
+[2026-07-06 11:19:41,891] INFO: MT5 initialized successfully.
+[2026-07-06 11:19:41,892] INFO: === AlphaEdge manual scan started ===
+[2026-07-06 11:19:41,892] INFO: Configured scan interval: 10 minutes
+[2026-07-06 11:19:41,892] INFO: Manual trigger key: A
+[2026-07-06 11:19:41,893] INFO: Trade logger initialized via init_logger()
+[2026-07-06 11:19:41,893] INFO: Trade logger initialized.
+[2026-07-06 11:19:41,938] INFO: Calculated safe lot size (capped): 0.0300
+[2026-07-06 11:19:43,987] ERROR: MT5 order failed for EURUSD retcode=10011
+[2026-07-06 11:19:43,988] ERROR: MT5 order placement failed.
+[2026-07-06 11:19:43,989] INFO: AlphaEdge placeholder scan completed.
