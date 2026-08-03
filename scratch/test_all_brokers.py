@@ -103,15 +103,6 @@ def run_test(config: dict, broker_name: str) -> None:
     mt5.shutdown()
     print(f"=== {broker_name} test completed ===\n")
 
-    """Initialise MT5 with *config* and place test buys on a set of symbols."""
-    print(f"\n=== Connecting to {broker_name} ===")
-    if not mt5.initialize(login=config["login"], password=config["password"], server=config["server"]):
-        print(f"[ERROR] Could not initialise MT5 for {broker_name}")
-        return
-    for sym in ["XAUUSD", "XAGUSD", "BTCUSD", "ETHUSD"]:
-        send_test_buy(sym)
-    mt5.shutdown()
-    print(f"=== {broker_name} test completed ===\n")
 
 
 def main():
