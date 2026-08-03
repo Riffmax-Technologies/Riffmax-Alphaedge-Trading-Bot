@@ -7,6 +7,7 @@ import time
 import logging
 from datetime import datetime
 
+from scratch.alphaedge import send_telegram_alert
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
