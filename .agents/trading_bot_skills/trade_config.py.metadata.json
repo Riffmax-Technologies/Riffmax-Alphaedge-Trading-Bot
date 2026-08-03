@@ -1,4 +1,4 @@
 {
-  "summary":  "Update trade_config with DAILY_PNL_PATH",
-  "updatedAt":  "2026-07-03T09:34:54.702066200Z"
+  "summary": "Refactored trade_config: removed Deriv config, eliminated Deriv broker, expanded Exness symbols to 30, simplified brokers dict.",
+  "updatedAt": "2026-08-03T16:25:46.320046800Z"
 }
