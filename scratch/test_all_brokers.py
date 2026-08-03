@@ -20,7 +20,7 @@ sys.path.append(str(CONFIG_PATH))
 try:
     from trade_config import DERIV_CONFIG, EXNESS_CONFIG
 except Exception as e:
-    print(f"Failed to import trade_config: {e}")
+    print(f"Failed to from trading_bot_skills import trade_config: {e}")
     sys.exit(1)
 
 
