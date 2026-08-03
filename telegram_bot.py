@@ -163,7 +163,7 @@ def main():
     if not TELEGRAM_TOKEN:
         logger.error("Telegram token not set in trade_config.py")
         return
-    updater = Updater(TELEGRAM_TOKEN, use_context=True)
+    updater = Updater(token=TELEGRAM_TOKEN, use_context=True)
     dp = updater.dispatcher
 
     # Restrict to the configured chat ID – simple check in each handler
