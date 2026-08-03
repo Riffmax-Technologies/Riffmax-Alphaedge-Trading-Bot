@@ -18,9 +18,12 @@ CONFIG_PATH = BASE_DIR / ".agents" / "trading_bot_skills"
 sys.path.append(str(CONFIG_PATH))
 
 try:
-    from trade_config import DERIV_CONFIG, EXNESS_CONFIG
+    from trading_bot_skills import trade_config as cfg
+    DERIV_CONFIG = cfg.DERIV_CONFIG
+    EXNESS_CONFIG = cfg.EXNESS_CONFIG
+    MT5_PATH = cfg.MT5_PATH if hasattr(cfg, "MT5_PATH") else ""
 except Exception as e:
-    print(f"Failed to from trading_bot_skills import trade_config: {e}")
+    print(f"Failed to import trade_config from package: {e}")
     sys.exit(1)
 
 
