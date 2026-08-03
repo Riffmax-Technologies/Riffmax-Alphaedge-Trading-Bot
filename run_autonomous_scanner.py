@@ -10,11 +10,10 @@ from datetime import datetime
 from scratch.alphaedge import send_telegram_alert
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.WARNING,
     format='[%(asctime)s] %(levelname)s: %(message)s',
     handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler("autonomous_trading.log", encoding="utf-8")
+        logging.StreamHandler(sys.stdout)
     ]
 )
 logger = logging.getLogger("AutonomousScanner")
