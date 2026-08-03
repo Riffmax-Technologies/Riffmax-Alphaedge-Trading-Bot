@@ -35,7 +35,7 @@ TELEGRAM_TOKEN = "8617130364:AAHiEg1W9A-L5f7XkqVzgV6mTotb7TSiJV0"
 TELEGRAM_CHAT_ID = "915238743"
 
 # Broker configuration
-USE_DERIV = True  # Set to False to use Exness credentials
+USE_DERIV = False  # Set to False to use Exness credentials
 
 DERIV_CONFIG = {
     "login": 32346236,
