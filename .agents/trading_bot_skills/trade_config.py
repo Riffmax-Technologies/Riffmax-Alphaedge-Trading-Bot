@@ -38,9 +38,9 @@ TELEGRAM_CHAT_ID = "915238743"
 USE_DERIV = True  # Set to False to use Exness credentials
 
 DERIV_CONFIG = {
-    "login": "<DERIV_ACCOUNT_ID>",  # Replace with your Deriv account ID
-    "password": "<DERIV_API_TOKEN>",  # Replace with your Deriv API token
-    "server": "Deriv-MT5"  # Example server name; verify with your broker
+    "login": "32346236",
+    "password": "Iamgreat@2030",
+    "server": "Deriv-Demo"
 }
 
 EXNESS_CONFIG = {
