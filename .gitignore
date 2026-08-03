@@ -3,4 +3,4 @@
 .system_generated/tasks/
 .system_generated/terminals/
 .tempmediaStorage/
-browser/
+browser/\n*.log
