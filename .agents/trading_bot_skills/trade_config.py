@@ -43,7 +43,7 @@ DERIV_CONFIG = {
     "server": "Deriv-Demo"
 }
 
-EXNESS_CONFIG = {
+MT5_PATH = ""  # Optional: full path to MT5 terminal executable if multiple accounts need separate binaries
     "login": 81627783,
     "password": "Iamgreat@2030",
     "server": "Exness-MT5Trial10"
