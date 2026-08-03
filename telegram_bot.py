@@ -14,7 +14,7 @@ import traceback
 
 import MetaTrader5 as mt5
 from telegram import Update, BotCommand
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+from telegram.ext import Updater, CommandHandler, CallbackContext
 
 # Load configuration
 import sys
@@ -57,44 +57,44 @@ def init_mt5():
     return ok
 
 # /status – basic health check
-async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def status(update: Update, context: CallbackContext):
     try:
-        await update.message.reply_text("🤖 AlphaEdge bot is online and ready.")
+        update.message.reply_text("🤖 AlphaEdge bot is online and ready.")
     except Exception as e:
         logger.error(f"Status command error: {e}")
-        await update.message.reply_text("❗ Error retrieving status.")
+        update.message.reply_text("❗ Error retrieving status.")
 
 # /scan – trigger a manual AlphaEdge scan
-async def scan(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def scan(update: Update, context: CallbackContext):
     try:
         # Import the AlphaEdge scan function lazily to avoid heavy imports at start‑up
         from alphaedge import run_alphaedge
-        await update.message.reply_text("🔎 Running manual scan…")
+        update.message.reply_text("🔎 Running manual scan…")
         run_alphaedge()
-        await update.message.reply_text("✅ Scan completed.")
+        update.message.reply_text("✅ Scan completed.")
     except Exception as e:
         tb = traceback.format_exc()
         logger.error(f"Scan command failed: {e}\n{tb}")
-        await update.message.reply_text(f"❗ Scan failed: {e}")
+        update.message.reply_text(f"❗ Scan failed: {e}")
 
 # /trade <symbol> <volume> <type>
 # type = BUY or SELL (case‑insensitive)
-async def trade(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def trade(update: Update, context: CallbackContext):
     try:
         args = context.args
         if len(args) != 3:
-            await update.message.reply_text("Usage: /trade <symbol> <volume> <BUY|SELL>")
+            update.message.reply_text("Usage: /trade <symbol> <volume> <BUY|SELL>")
             return
         symbol, volume_str, order_type = args
         volume = float(volume_str)
         order_type = order_type.upper()
         if order_type not in ("BUY", "SELL"):
-            await update.message.reply_text("Order type must be BUY or SELL.")
+            update.message.reply_text("Order type must be BUY or SELL.")
             return
         init_mt5()
         info = mt5.symbol_info(symbol)
         if not info:
-            await update.message.reply_text(f"Symbol {symbol} not found.")
+            update.message.reply_text(f"Symbol {symbol} not found.")
             return
         if not info.visible:
             mt5.symbol_select(symbol, True)
@@ -112,25 +112,25 @@ async def trade(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }
         result = mt5.order_send(request)
         if result and result.retcode == mt5.TRADE_RETCODE_DONE:
-            await update.message.reply_text(f"✅ {order_type} order placed on {symbol} – Ticket {result.order}")
+            update.message.reply_text(f"✅ {order_type} order placed on {symbol} – Ticket {result.order}")
         else:
             err = result.comment if result else "N/A"
             ret = result.retcode if result else "N/A"
-            await update.message.reply_text(f"❗ Trade failed: {err} (Retcode: {ret})")
+            update.message.reply_text(f"❗ Trade failed: {err} (Retcode: {ret})")
     except Exception as e:
         tb = traceback.format_exc()
-        logger.error(f"Trade command error: {e}\\n{tb}")
-        await update.message.reply_text(f"❗ Error placing trade: {e}")
+        logger.error(f"Trade command error: {e}\n{tb}")
+        update.message.reply_text(f"❗ Error placing trade: {e}")
     finally:
         mt5.shutdown()
 
 # /positions – list open positions
-async def positions(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def positions(update: Update, context: CallbackContext):
     try:
         init_mt5()
         pos = mt5.positions_get()
         if not pos:
-            await update.message.reply_text("No open positions.")
+            update.message.reply_text("No open positions.")
             return
         lines = []
         for p in pos:
@@ -138,48 +138,50 @@ async def positions(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"{p.ticket}: {p.symbol} {p.type} {p.volume}@{p.price} SL={p.sl} TP={p.tp} Profit={p.profit}"
             )
         msg = "📊 Open positions:\n" + "\n".join(lines)
-        await update.message.reply_text(msg)
+        update.message.reply_text(msg)
     except Exception as e:
         logger.error(f"Positions command error: {e}")
-        await update.message.reply_text(f"❗ Failed to fetch positions: {e}")
+        update.message.reply_text(f"❗ Failed to fetch positions: {e}")
     finally:
         mt5.shutdown()
 
 # /pnl – show today's P&L from the daily JSON file
-async def pnl(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def pnl(update: Update, context: CallbackContext):
     try:
         if DAILY_PNL_PATH.is_file():
             data = json.loads(DAILY_PNL_PATH.read_text())
             profit = data.get("profit", 0)
             loss = data.get("loss", 0)
-            await update.message.reply_text(f"📈 Today P&L – Profit: {profit:.2f}, Loss: {loss:.2f}")
+            update.message.reply_text(f"📈 Today P&L – Profit: {profit:.2f}, Loss: {loss:.2f}")
         else:
-            await update.message.reply_text("Daily P&L file not found.")
+            update.message.reply_text("Daily P&L file not found.")
     except Exception as e:
         logger.error(f"PNL command error: {e}")
-        await update.message.reply_text(f"❗ Error reading P&L: {e}")
+        update.message.reply_text(f"❗ Error reading P&L: {e}")
 
-async def main():
+def main():
     if not TELEGRAM_TOKEN:
         logger.error("Telegram token not set in trade_config.py")
         return
-    app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
+    updater = Updater(token=TELEGRAM_TOKEN, use_context=True)
+    dp = updater.dispatcher
 
     # Restrict to the configured chat ID – simple check in each handler
     def chat_filter(func):
-        async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        def wrapper(update: Update, context: CallbackContext):
             if str(update.effective_chat.id) != str(TELEGRAM_CHAT_ID):
-                await update.message.reply_text("❌ Unauthorized user.")
+                update.message.reply_text("❌ Unauthorized user.")
                 return
-            return await func(update, context)
+            return func(update, context)
         return wrapper
 
-    app.add_handler(CommandHandler("status", chat_filter(status)))
-    app.add_handler(CommandHandler("scan", chat_filter(scan)))
-    app.add_handler(CommandHandler("trade", chat_filter(trade)))
-    app.add_handler(CommandHandler("positions", chat_filter(positions)))
-    app.add_handler(CommandHandler("pnl", chat_filter(pnl)))
+    dp.add_handler(CommandHandler("status", chat_filter(status)))
+    dp.add_handler(CommandHandler("scan", chat_filter(scan)))
+    dp.add_handler(CommandHandler("trade", chat_filter(trade)))
+    dp.add_handler(CommandHandler("positions", chat_filter(positions)))
+    dp.add_handler(CommandHandler("pnl", chat_filter(pnl)))
 
+    # Set command list for user convenience
     commands = [
         BotCommand("status", "Bot health check"),
         BotCommand("scan", "Run manual AlphaEdge scan"),
@@ -187,11 +189,11 @@ async def main():
         BotCommand("positions", "List open positions"),
         BotCommand("pnl", "Show today P&L"),
     ]
-    app.bot.set_my_commands(commands)
+    updater.bot.set_my_commands(commands)
 
     logger.info("Starting Telegram bot…")
-    await app.run_polling()
+    updater.start_polling()
+    updater.idle()
 
 if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
+    main()
