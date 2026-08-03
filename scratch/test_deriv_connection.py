@@ -8,7 +8,7 @@ from pathlib import Path
 import MetaTrader5 as mt5
 
 # Add trade_config to path
-BASE_DIR = Path(__file__).resolve().parents[2]
+BASE_DIR = Path(__file__).resolve().parents[1]
 CONFIG_PATH = BASE_DIR / ".agents" / "trading_bot_skills"
 sys.path.append(str(CONFIG_PATH))
 
