@@ -17,7 +17,13 @@ from telegram import Update, BotCommand
 from telegram.ext import Updater, CommandHandler, CallbackContext
 
 # Load configuration
-from .trade_config import (
+import sys
+# Add the hidden agents directory to the Python path so we can import the configuration module
+agents_path = r"C:/Users/DATA ENG. OLA/.gemini/antigravity/brain/86033144-bf85-4d61-ac17-b7e233ed37cb/.agents/trading_bot_skills"
+if agents_path not in sys.path:
+    sys.path.insert(0, agents_path)
+
+from trade_config import (
     TELEGRAM_TOKEN,
     TELEGRAM_CHAT_ID,
     MT5_PATH,
