@@ -16,8 +16,7 @@ import numpy as np
 BASE_DIR = Path(__file__).resolve().parents[1]
 CONFIG_PATH = BASE_DIR / ".agents" / "trading_bot_skills"
 sys.path.append(str(CONFIG_PATH))
-
-    from trade_config import DERIV_CONFIG, EXNESS_CONFIG, MT5_PATH
+from trade_config import DERIV_CONFIG, EXNESS_CONFIG, MT5_PATH
 
 
 def calculate_atr(df: pd.DataFrame, period: int = 14) -> pd.DataFrame:
