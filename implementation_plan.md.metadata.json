@@ -1,6 +1,6 @@
 {
-  "summary":  "Implementation plan to integrate Telegram bot alerts into the trading bot configuration and execution flow",
-  "updatedAt":  "2026-07-20T16:18:25.213190700Z",
-  "requestFeedback":  true,
-  "userFacing":  true
+  "summary": "Implementation plan for adding RSI Momentum Recovery filter and updating Deriv credentials",
+  "updatedAt": "2026-08-03T13:50:41.775523900Z",
+  "requestFeedback": true,
+  "userFacing": true
 }
