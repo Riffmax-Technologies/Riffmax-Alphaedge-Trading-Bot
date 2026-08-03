@@ -44,8 +44,20 @@ DERIV_CONFIG = {
 }
 
 EXNESS_CONFIG = {
-    "login": 81627783,
-    "password": "Iamgreat@2030",
+    "Exness": [
+        "EURUSD",
+        "GBPUSD",
+        "USDJPY",
+        "XAUUSD",
+        "XAGUSD",
+        "BTCUSD",
+        "AUDJPY",
+        "USDCHF",
+        "EURGBP",
+        "USDCAD",
+        "ETHUSD",
+        # Add more symbols as needed
+    ],"password": "Iamgreat@2030",
     "server": "Exness-MT5Trial10"
 }
 
