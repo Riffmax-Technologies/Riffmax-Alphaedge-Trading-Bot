@@ -33,3 +33,18 @@ SCAN_INTERVAL_MINUTES = 10
 TELEGRAM_ENABLED = True  # Set to True once you enter your token and chat ID
 TELEGRAM_TOKEN = "8617130364:AAHiEg1W9A-L5f7XkqVzgV6mTotb7TSiJV0"
 TELEGRAM_CHAT_ID = "915238743"
+
+# Broker configuration
+USE_DERIV = True  # Set to False to use Exness credentials
+
+DERIV_CONFIG = {
+    "login": "<DERIV_ACCOUNT_ID>",  # Replace with your Deriv account ID
+    "password": "<DERIV_API_TOKEN>",  # Replace with your Deriv API token
+    "server": "Deriv-MT5"  # Example server name; verify with your broker
+}
+
+EXNESS_CONFIG = {
+    "login": 81627783,
+    "password": "Iamgreat@2030",
+    "server": "Exness-MT5Trial10"
+}
