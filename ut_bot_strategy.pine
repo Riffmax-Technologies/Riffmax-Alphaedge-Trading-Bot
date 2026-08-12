@@ -1,0 +1,141 @@
+//@version=6
+strategy(
+     title             = "UT Bot Strategy – Buy & Sell with SL/TP",
+     overlay           = true,
+     initial_capital   = 10000,
+     default_qty_type  = strategy.percent_of_equity,
+     default_qty_value = 100,
+     commission_type   = strategy.commission.percent,
+     commission_value  = 0.1,
+     slippage          = 2,
+     pyramiding        = 0
+     )
+
+// ═══════════════════════════════════════════════════
+//  INPUTS
+// ═══════════════════════════════════════════════════
+a                      = input.int(2,     title="Key Value – ATR Sensitivity")
+c                      = input.int(7,     title="ATR Period")
+h                      = input.bool(false,title="Use Heikin Ashi Candles")
+tradeDirection         = input.string("Both", title="Trade Direction", options=["Long Only", "Short Only", "Both"])
+
+// SL & TP Inputs
+useAtrSlTp             = input.bool(true,     title="Use ATR for SL/TP")
+slAtrMult              = input.float(1.5,     title="SL ATR Multiplier (if ATR enabled)")
+tpAtrMult              = input.float(3.0,     title="TP ATR Multiplier (if ATR enabled)")
+slPoints               = input.int(300,       title="Fixed SL in Points/Ticks (if ATR disabled)")
+tpPoints               = input.int(600,       title="Fixed TP in Points/Ticks (if ATR disabled)")
+
+// Time filtering
+enableTimeRangeDisable = input.bool(false,    title="Disable Signals in Defined Session")
+disableSession         = input.session("2200-0500", title="Disabled Session")
+enableCooldown         = input.bool(false,    title="Enable Cooldown Period")
+cooldownMinutes        = input.int(5,         title="Cooldown Period (minutes)", minval=1)
+
+// ═══════════════════════════════════════════════════
+//  ATR & SOURCE
+// ═══════════════════════════════════════════════════
+xATR  = ta.atr(c)
+nLoss = a * xATR
+
+src = h
+     ? request.security(ticker.heikinashi(syminfo.tickerid), timeframe.period, close, lookahead=barmerge.lookahead_off)
+     : close
+
+// ═══════════════════════════════════════════════════
+//  ATR TRAILING STOP
+// ═══════════════════════════════════════════════════
+f_calcTrailingStop(prev, src, nLoss) =>
+    if src > nz(prev, 0) and src[1] > nz(prev, 0)
+        math.max(nz(prev, 0), src - nLoss)
+    else if src < nz(prev, 0) and src[1] < nz(prev, 0)
+        math.min(nz(prev, 0), src + nLoss)
+    else
+        src > nz(prev, 0) ? src - nLoss : src + nLoss
+
+var float xATRTrailingStop = 0.0
+xATRTrailingStop := f_calcTrailingStop(xATRTrailingStop[1], src, nLoss)
+
+// ═══════════════════════════════════════════════════
+//  SIGNAL LOGIC
+// ═══════════════════════════════════════════════════
+ema_val = ta.ema(src, 1)
+
+strong_buy  = ta.crossover(ema_val, xATRTrailingStop) and src > xATRTrailingStop and ema_val > ema_val[1]
+strong_sell = ta.crossover(xATRTrailingStop, ema_val) and src < xATRTrailingStop and ema_val < ema_val[1]
+
+// Buffer zone confirmation
+buy_buffer  = strong_buy  and src > xATRTrailingStop + 0.2 * xATR
+sell_buffer = strong_sell and src < xATRTrailingStop - 0.2 * xATR
+
+// Persistent signal state: 1 = Long, -1 = Short
+var int utSignal = 0
+utSignal := buy_buffer ? 1 : sell_buffer ? -1 : utSignal
+
+utColor = utSignal == 1 ? color.green : utSignal == -1 ? color.red : color.blue
+
+// ═══════════════════════════════════════════════════
+//  TIME FILTERING
+// ═══════════════════════════════════════════════════
+inDisabledSession = enableTimeRangeDisable and not na(time(timeframe.period, disableSession))
+
+var int lastSignalTime = 0
+cooldownActive = enableCooldown and (time - lastSignalTime < cooldownMinutes * 60000)
+disableSignals = inDisabledSession or cooldownActive
+
+filteredBuy  = buy_buffer  and not disableSignals
+filteredSell = sell_buffer and not disableSignals
+
+if filteredBuy or filteredSell
+    lastSignalTime := time
+
+// ═══════════════════════════════════════════════════
+//  SL & TP LEVELS CALCULATION
+// ═══════════════════════════════════════════════════
+slOffset = useAtrSlTp ? (slAtrMult * xATR) : (slPoints * syminfo.mintick)
+tpOffset = useAtrSlTp ? (tpAtrMult * xATR) : (tpPoints * syminfo.mintick)
+
+buy_sl  = close - slOffset
+buy_tp  = close + tpOffset
+sell_sl = close + slOffset
+sell_tp = close - tpOffset
+
+// ═══════════════════════════════════════════════════
+//  STRATEGY EXECUTION
+// ═══════════════════════════════════════════════════
+allowLong  = tradeDirection == "Long Only"  or tradeDirection == "Both"
+allowShort = tradeDirection == "Short Only" or tradeDirection == "Both"
+
+// BUY: Close any Short first, then go Long
+if filteredBuy and allowLong
+    strategy.close("Short", comment="Close Short → Long")
+    strategy.entry("Long",  strategy.long,  comment="UT Buy")
+    strategy.exit("Exit Long", "Long", stop=buy_sl, limit=buy_tp)
+
+// SELL: Close any Long first, then go Short
+if filteredSell and allowShort
+    strategy.close("Long",  comment="Close Long → Short")
+    strategy.entry("Short", strategy.short, comment="UT Sell")
+    strategy.exit("Exit Short", "Short", stop=sell_sl, limit=sell_tp)
+
+// ═══════════════════════════════════════════════════
+//  ALERTS (Formatted as JSON for automated execution)
+// ═══════════════════════════════════════════════════
+if filteredBuy
+    alert('{"action": "buy", "symbol": "' + syminfo.ticker + '", "volume": 0.05, "sl": ' + str.tostring(buy_sl, "#.####") + ', "tp": ' + str.tostring(buy_tp, "#.####") + '}', alert.freq_once_per_bar)
+
+if filteredSell
+    alert('{"action": "sell", "symbol": "' + syminfo.ticker + '", "volume": 0.05, "sl": ' + str.tostring(sell_sl, "#.####") + ', "tp": ' + str.tostring(sell_tp, "#.####") + '}', alert.freq_once_per_bar)
+
+alertcondition(filteredBuy,  title="🟢 UT Buy",  message="UT BOT – BUY | {{ticker}} | Price: {{close}}")
+alertcondition(filteredSell, title="🔴 UT Sell", message="UT BOT – SELL | {{ticker}} | Price: {{close}}")
+
+// ═══════════════════════════════════════════════════
+//  VISUALS
+// ═══════════════════════════════════════════════════
+plotshape(filteredBuy,  title="Buy",  text="Buy",  style=shape.labelup,   location=location.belowbar, color=color.green, textcolor=color.white, size=size.tiny)
+plotshape(filteredSell, title="Sell", text="Sell", style=shape.labeldown, location=location.abovebar, color=color.red,   textcolor=color.white, size=size.tiny)
+
+barcolor(utSignal == 1 ? color.new(color.green, 0) : utSignal == -1 ? color.new(color.red, 0) : na)
+
+plot(xATRTrailingStop, title="ATR Trailing Stop", color=utColor,    linewidth=2)

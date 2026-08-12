@@ -1,0 +1,4 @@
+fastapi
+uvicorn
+metatrader-mcp-server
+pydantic

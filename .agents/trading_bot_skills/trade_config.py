@@ -34,54 +34,40 @@ TELEGRAM_ENABLED = True  # Set to True once you enter your token and chat ID
 TELEGRAM_TOKEN = "8617130364:AAHiEg1W9A-L5f7XkqVzgV6mTotb7TSiJV0"
 TELEGRAM_CHAT_ID = "915238743"
 
-# Broker configuration – using only Exness
-USE_DERIV = False  # Deriv disabled
+# Broker configuration – using Deriv (credentials in .env)
+USE_DERIV = True
 
-EXNESS_CONFIG = {
-    "login": 81627783,
-    "password": "Iamgreat@2030",
-    "server": "Exness-MT5Trial10",
+import os
+DERIV_CONFIG = {
+    "login": int(os.environ.get("MT5_LOGIN", "32346236")),
+    "password": os.environ.get("MT5_PASSWORD", "Iamgreat@2030"),
+    "server": os.environ.get("MT5_SERVER", "Deriv-Demo"),
 }
 
-# Symbol universe – 30 Exness symbols to scan
+# Symbol universe – 15 symbols to scan
 SYMBOLS = {
-    "Exness": [
+    "Deriv": [
+        "BTCUSD",
+        "ETHUSD",
+        "XAUUSD",
+        "US Oil",
+        "Wall Street 30",
+        "US Tech 100",
         "EURUSD",
         "GBPUSD",
         "USDJPY",
         "AUDUSD",
-        "NZDUSD",
         "USDCAD",
         "USDCHF",
-        "EURGBP",
-        "EURCHF",
+        "NZDUSD",
         "EURJPY",
-        "GBPJPY",
-        "AUDJPY",
-        "CADJPY",
-        "CHFJPY",
-        "NZDJPY",
-        "GBPCHF",
-        "EURCAD",
-        "AUDNZD",
-        "USDZAR",
-        "USDMXN",
-        "XAUUSD",
-        "XAGUSD",
-        "XPDUSD",
-        "XPTUSD",
-        "BTCUSD",
-        "ETHUSD",
-        "LTCUSD",
-        "BNBUSD",
-        "ADAUSD",
-        "SOLUSD",
+        "GBPJPY"
     ]
 }
 
-# Broker activation flags – only Exness enabled
+# Broker activation flags – only Deriv enabled
 BROKERS = {
-    "Exness": True,
+    "Deriv": True,
 }
 
 MT5_PATH = ""  # Optional: full path to MT5 executable if needed
