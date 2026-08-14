@@ -29156,3 +29156,1789 @@
 2026-08-14 12:40:57,250 [INFO] AutonomousScanner: Cycle completed in 2.3s. Next scan in 5.0 minutes.
 
 2026-08-14 12:40:57,320 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 12:45:55,087 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 12:45:55 ---
+2026-08-14 12:45:55,097 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 12:45:55,119 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 12:45:55,232 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 12:45:55,249 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 12:45:55,249 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 12:45:55,249 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 12:45:55,250 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 12:45:55,775 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 12:45:56,320 [INFO] AutonomousScanner: Cycle completed in 1.2s. Next scan in 5.0 minutes.
+
+2026-08-14 12:45:56,384 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 12:50:55,144 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 12:50:55 ---
+2026-08-14 12:50:55,146 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 12:50:55,181 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 12:50:55,196 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 12:50:55,212 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 12:50:55,214 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 12:50:55,218 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 12:50:55,220 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 12:50:56,496 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 12:50:57,015 [INFO] AutonomousScanner: Cycle completed in 1.9s. Next scan in 5.0 minutes.
+
+2026-08-14 12:50:57,087 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 12:55:55,243 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 12:55:55 ---
+2026-08-14 12:55:55,263 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 12:55:55,312 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 12:55:55,431 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 12:55:55,457 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 12:55:55,458 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 12:55:55,458 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 12:55:55,459 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 12:55:56,212 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 12:55:57,765 [INFO] AutonomousScanner: Cycle completed in 2.5s. Next scan in 5.0 minutes.
+
+2026-08-14 12:55:57,861 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 13:00:55,365 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 13:00:55 ---
+2026-08-14 13:00:55,400 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 13:00:55,463 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 13:00:55,561 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 13:00:55,588 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 13:00:55,589 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 13:00:55,590 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 13:00:55,591 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 13:00:57,917 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 13:00:58,461 [INFO] AutonomousScanner: Cycle completed in 3.1s. Next scan in 4.9 minutes.
+
+2026-08-14 13:00:58,693 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 13:05:55,612 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 13:05:55 ---
+2026-08-14 13:05:55,647 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 13:05:55,695 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 13:05:55,844 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 13:05:55,871 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 13:05:55,872 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 13:05:55,872 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 13:05:55,872 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 13:05:56,558 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 13:05:57,107 [INFO] AutonomousScanner: Cycle completed in 1.5s. Next scan in 5.0 minutes.
+
+2026-08-14 13:05:57,226 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 13:10:55,737 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 13:10:55 ---
+2026-08-14 13:10:55,762 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 13:10:55,813 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 13:10:55,992 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 13:10:56,030 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 13:10:56,031 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 13:10:56,032 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 13:10:56,033 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 13:10:57,137 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 13:10:57,669 [INFO] AutonomousScanner: Cycle completed in 2.0s. Next scan in 5.0 minutes.
+
+2026-08-14 13:10:57,771 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 13:15:55,820 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 13:15:55 ---
+2026-08-14 13:15:55,821 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 13:15:55,836 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 13:15:55,844 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 13:15:55,852 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 13:15:55,852 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 13:15:55,852 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 13:15:55,853 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 13:15:56,343 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 13:15:56,886 [INFO] AutonomousScanner: Cycle completed in 1.1s. Next scan in 5.0 minutes.
+
+2026-08-14 13:15:56,946 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 13:20:55,881 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 13:20:55 ---
+2026-08-14 13:20:55,882 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 13:20:55,901 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 13:20:55,907 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 13:20:55,914 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 13:20:55,914 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 13:20:55,915 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 13:20:55,915 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 13:20:56,528 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 13:20:57,006 [INFO] AutonomousScanner: Cycle completed in 1.1s. Next scan in 5.0 minutes.
+
+2026-08-14 13:20:57,080 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 13:25:55,956 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 13:25:55 ---
+2026-08-14 13:25:55,958 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 13:25:55,988 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 13:25:55,998 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 13:25:56,007 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 13:25:56,008 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 13:25:56,008 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 13:25:56,008 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 13:25:56,638 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 13:25:57,124 [INFO] AutonomousScanner: Cycle completed in 1.2s. Next scan in 5.0 minutes.
+
+2026-08-14 13:25:57,190 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 13:30:56,023 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 13:30:56 ---
+2026-08-14 13:30:56,025 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 13:30:56,046 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 13:30:56,053 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 13:30:56,059 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 13:30:56,059 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 13:30:56,060 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 13:30:56,060 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 13:30:56,696 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 13:30:57,183 [INFO] AutonomousScanner: Cycle completed in 1.2s. Next scan in 5.0 minutes.
+
+2026-08-14 13:30:57,258 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 13:35:56,102 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 13:35:56 ---
+2026-08-14 13:35:56,110 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 13:35:56,140 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 13:35:56,166 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 13:35:56,175 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 13:35:56,175 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 13:35:56,176 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 13:35:56,177 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 13:35:56,853 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 13:35:57,328 [INFO] AutonomousScanner: Cycle completed in 1.2s. Next scan in 5.0 minutes.
+
+2026-08-14 13:35:57,404 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 13:40:56,178 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 13:40:56 ---
+2026-08-14 13:40:56,179 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 13:40:56,198 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 13:40:56,207 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 13:40:56,213 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 13:40:56,214 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 13:40:56,214 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 13:40:56,214 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 13:40:57,005 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 13:40:57,531 [INFO] AutonomousScanner: Cycle completed in 1.4s. Next scan in 5.0 minutes.
+
+2026-08-14 13:40:57,598 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 13:45:56,245 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 13:45:56 ---
+2026-08-14 13:45:56,247 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 13:45:56,271 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 13:45:56,280 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 13:45:56,291 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 13:45:56,291 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 13:45:56,291 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 13:45:56,292 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 13:45:57,001 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 13:45:57,514 [INFO] AutonomousScanner: Cycle completed in 1.3s. Next scan in 5.0 minutes.
+
+2026-08-14 13:45:57,579 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 13:50:56,311 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 13:50:56 ---
+2026-08-14 13:50:56,313 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 13:50:56,345 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 13:50:56,357 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 13:50:56,370 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 13:50:56,371 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 13:50:56,371 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 13:50:56,372 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 13:50:57,387 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 13:50:58,033 [INFO] AutonomousScanner: Cycle completed in 1.7s. Next scan in 5.0 minutes.
+
+2026-08-14 13:50:58,145 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 13:55:56,427 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 13:55:56 ---
+2026-08-14 13:55:56,430 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 13:55:56,472 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 13:55:56,490 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 13:55:56,508 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 13:55:56,508 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 13:55:56,509 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 13:55:56,509 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 13:55:57,728 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 13:55:58,208 [INFO] AutonomousScanner: Cycle completed in 1.8s. Next scan in 5.0 minutes.
+
+2026-08-14 13:55:58,356 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 14:00:56,579 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 14:00:56 ---
+2026-08-14 14:00:56,582 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 14:00:56,644 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 14:00:56,670 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 14:00:56,693 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 14:00:56,702 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 14:00:56,708 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 14:00:56,710 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 14:00:58,691 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 14:00:59,188 [INFO] AutonomousScanner: Cycle completed in 2.6s. Next scan in 5.0 minutes.
+
+2026-08-14 14:00:59,358 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 14:05:56,752 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 14:05:56 ---
+2026-08-14 14:05:56,763 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 14:05:56,839 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 14:05:56,854 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 14:05:56,901 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 14:05:56,909 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 14:05:56,911 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 14:05:56,912 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 14:06:09,604 [INFO] AutonomousScanner: Successfully imported AlphaEdge strategy.
+2026-08-14 14:06:09,605 [INFO] AutonomousScanner: === Starting Autonomous Strategy Trader (5-Minute Cycle) ===
+2026-08-14 14:06:09,605 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 14:06:09 ---
+2026-08-14 14:06:09,607 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 14:06:09,658 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 14:06:09,698 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 14:06:09,715 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 14:06:09,716 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 14:06:09,717 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 14:06:09,718 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 14:06:10,911 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 14:06:13,817 [INFO] AutonomousScanner: Cycle completed in 4.2s. Next scan in 4.9 minutes.
+
+2026-08-14 14:06:21,981 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 14:11:17,771 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 14:11:17 ---
+2026-08-14 14:11:17,772 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 14:11:17,808 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 14:11:17,821 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 14:11:17,839 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 14:11:17,840 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 14:11:17,841 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 14:11:17,841 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 14:11:18,948 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 14:11:19,530 [INFO] AutonomousScanner: Cycle completed in 1.8s. Next scan in 5.0 minutes.
+
+2026-08-14 14:11:19,623 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 14:16:17,866 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 14:16:17 ---
+2026-08-14 14:16:17,869 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 14:16:17,902 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 14:16:17,917 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 14:16:17,938 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 14:16:17,939 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 14:16:17,940 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 14:16:17,941 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 14:16:18,970 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 14:16:19,460 [INFO] AutonomousScanner: Cycle completed in 1.6s. Next scan in 5.0 minutes.
+
+2026-08-14 14:16:19,591 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 14:21:18,002 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 14:21:17 ---
+2026-08-14 14:21:18,009 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 14:21:18,029 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 14:21:18,106 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 14:21:18,117 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 14:21:18,118 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 14:21:18,118 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 14:21:18,118 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 14:21:18,679 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 14:21:19,196 [INFO] AutonomousScanner: Cycle completed in 1.2s. Next scan in 5.0 minutes.
+
+2026-08-14 14:21:19,289 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 14:26:18,093 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 14:26:18 ---
+2026-08-14 14:26:18,094 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 14:26:18,124 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 14:26:18,133 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 14:26:18,143 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 14:26:18,143 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 14:26:18,144 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 14:26:18,144 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 14:26:18,809 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 14:26:19,294 [INFO] AutonomousScanner: Cycle completed in 1.2s. Next scan in 5.0 minutes.
+
+2026-08-14 14:26:19,376 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 14:31:18,176 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 14:31:18 ---
+2026-08-14 14:31:18,177 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 14:31:18,194 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 14:31:18,204 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 14:31:18,209 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 14:31:18,210 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 14:31:18,210 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 14:31:18,210 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 14:31:18,770 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 14:31:19,265 [INFO] AutonomousScanner: Cycle completed in 1.1s. Next scan in 5.0 minutes.
+
+2026-08-14 14:31:19,319 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 14:36:18,231 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 14:36:18 ---
+2026-08-14 14:36:18,235 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 14:36:18,278 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 14:36:18,290 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 14:36:18,304 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 14:36:18,305 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 14:36:18,305 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 14:36:18,306 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 14:36:19,512 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 14:36:20,048 [INFO] AutonomousScanner: Cycle completed in 1.8s. Next scan in 5.0 minutes.
+
+2026-08-14 14:36:20,162 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 14:41:18,368 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 14:41:18 ---
+2026-08-14 14:41:18,386 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 14:41:18,423 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 14:41:18,553 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 14:41:18,569 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 14:41:18,570 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 14:41:18,570 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 14:41:18,571 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 14:41:19,350 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 14:41:19,941 [INFO] AutonomousScanner: Cycle completed in 1.6s. Next scan in 5.0 minutes.
+
+2026-08-14 14:41:20,072 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 14:46:18,487 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 14:46:18 ---
+2026-08-14 14:46:18,489 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 14:46:18,513 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 14:46:18,527 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 14:46:18,534 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 14:46:18,535 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 14:46:18,535 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 14:46:18,536 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 14:46:19,243 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 14:46:19,775 [INFO] AutonomousScanner: Cycle completed in 1.3s. Next scan in 5.0 minutes.
+
+2026-08-14 14:46:19,871 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 14:51:18,584 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 14:51:18 ---
+2026-08-14 14:51:18,585 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 14:51:18,612 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 14:51:18,624 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 14:51:18,634 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 14:51:18,635 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 14:51:18,635 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 14:51:18,636 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 14:51:19,688 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 14:51:20,222 [INFO] AutonomousScanner: Cycle completed in 1.6s. Next scan in 5.0 minutes.
+
+2026-08-14 14:51:20,362 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 14:56:18,730 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 14:56:18 ---
+2026-08-14 14:56:18,732 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 14:56:18,754 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 14:56:18,761 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 14:56:18,769 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 14:56:18,769 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 14:56:18,770 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 14:56:18,770 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 14:56:19,401 [INFO] AlphaEdge: Strategy BREAKOUT signals BUY for XAUUSDm at 4367.04900 (SL=4346.64848, TP=4407.85004)
+2026-08-14 14:56:19,401 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 14:56:19,488 [INFO] AlphaEdge: Successfully opened BUY market trade on XAUUSDm (Ticket: 3087851933, SL: 4346.64848, TP: 4407.85004)
+2026-08-14 14:56:20,472 [INFO] AutonomousScanner: Cycle completed in 1.7s. Next scan in 5.0 minutes.
+
+2026-08-14 14:56:20,565 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 15:01:18,827 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 15:01:18 ---
+2026-08-14 15:01:18,830 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 15:01:18,858 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 15:01:18,885 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 15:01:18,898 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 15:01:18,898 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 15:01:18,898 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 15:01:18,899 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 15:01:19,885 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 15:01:20,361 [INFO] AutonomousScanner: Cycle completed in 1.5s. Next scan in 5.0 minutes.
+
+2026-08-14 15:01:20,428 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 15:06:18,894 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 15:06:18 ---
+2026-08-14 15:06:18,895 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 15:06:18,912 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 15:06:18,928 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 15:06:18,934 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 15:06:18,935 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 15:06:18,935 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 15:06:18,936 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 15:06:19,717 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 15:06:20,212 [INFO] AutonomousScanner: Cycle completed in 1.3s. Next scan in 5.0 minutes.
+
+2026-08-14 15:06:20,292 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 15:11:18,975 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 15:11:18 ---
+2026-08-14 15:11:18,977 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 15:11:18,998 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 15:11:19,006 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 15:11:19,014 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 15:11:19,014 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 15:11:19,015 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 15:11:19,015 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 15:11:19,669 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 15:11:20,156 [INFO] AutonomousScanner: Cycle completed in 1.2s. Next scan in 5.0 minutes.
+
+2026-08-14 15:11:20,228 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 15:16:19,049 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 15:16:19 ---
+2026-08-14 15:16:19,050 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 15:16:19,072 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 15:16:19,081 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 15:16:19,090 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 15:16:19,090 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 15:16:19,091 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 15:16:19,091 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 15:16:19,760 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 15:16:20,247 [INFO] AutonomousScanner: Cycle completed in 1.2s. Next scan in 5.0 minutes.
+
+2026-08-14 15:16:20,310 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 15:21:19,113 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 15:21:19 ---
+2026-08-14 15:21:19,114 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 15:21:19,128 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 15:21:19,145 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 15:21:19,153 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 15:21:19,153 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 15:21:19,153 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 15:21:19,154 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 15:21:19,735 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 15:21:20,249 [INFO] AutonomousScanner: Cycle completed in 1.1s. Next scan in 5.0 minutes.
+
+2026-08-14 15:21:20,304 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 15:26:19,169 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 15:26:19 ---
+2026-08-14 15:26:19,170 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 15:26:19,195 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 15:26:19,202 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 15:26:19,209 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 15:26:19,209 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 15:26:19,210 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 15:26:19,210 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 15:26:19,796 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 15:26:20,273 [INFO] AutonomousScanner: Cycle completed in 1.1s. Next scan in 5.0 minutes.
+
+2026-08-14 15:26:20,326 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 15:31:19,223 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 15:31:19 ---
+2026-08-14 15:31:19,224 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 15:31:19,243 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 15:31:19,249 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 15:31:19,257 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 15:31:19,257 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 15:31:19,258 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 15:31:19,258 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 15:31:19,906 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 15:31:20,384 [INFO] AutonomousScanner: Cycle completed in 1.2s. Next scan in 5.0 minutes.
+
+2026-08-14 15:31:20,445 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 15:36:19,285 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 15:36:19 ---
+2026-08-14 15:36:19,314 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 15:36:20,441 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 15:36:20,450 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 15:36:20,457 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 15:36:20,457 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 15:36:20,458 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 15:36:20,458 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 15:36:21,100 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 15:36:21,579 [INFO] AutonomousScanner: Cycle completed in 2.3s. Next scan in 5.0 minutes.
+
+2026-08-14 15:36:21,656 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 15:41:19,363 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 15:41:19 ---
+2026-08-14 15:41:19,372 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 15:41:19,391 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 15:41:19,398 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 15:41:19,406 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 15:41:19,406 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 15:41:19,407 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 15:41:19,407 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 15:41:20,038 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 15:41:20,523 [INFO] AutonomousScanner: Cycle completed in 1.2s. Next scan in 5.0 minutes.
+
+2026-08-14 15:41:20,595 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 15:46:19,436 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 15:46:19 ---
+2026-08-14 15:46:19,438 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 15:46:19,457 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 15:46:19,464 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 15:46:19,473 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 15:46:19,473 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 15:46:19,474 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 15:46:19,474 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 15:46:20,093 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 15:46:20,591 [INFO] AutonomousScanner: Cycle completed in 1.2s. Next scan in 5.0 minutes.
+
+2026-08-14 15:46:20,687 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 15:51:19,534 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 15:51:19 ---
+2026-08-14 15:51:19,535 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 15:51:19,552 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 15:51:19,560 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 15:51:19,566 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 15:51:19,567 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 15:51:19,567 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 15:51:19,567 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 15:51:20,180 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 15:51:20,688 [INFO] AutonomousScanner: Cycle completed in 1.2s. Next scan in 5.0 minutes.
+
+2026-08-14 15:51:20,766 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 15:56:19,613 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 15:56:19 ---
+2026-08-14 15:56:19,614 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 15:56:19,631 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 15:56:19,645 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 15:56:19,654 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m']
+2026-08-14 15:56:19,654 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 15:56:19,655 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 15:56:19,655 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 15:56:20,284 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 15:56:20,779 [INFO] AutonomousScanner: Cycle completed in 1.2s. Next scan in 5.0 minutes.
+
+2026-08-14 15:56:20,845 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 16:01:19,680 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 16:01:19 ---
+2026-08-14 16:01:19,681 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 16:01:19,701 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 16:01:19,708 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 16:01:19,715 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 16:01:19,716 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 16:01:19,716 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 16:01:19,716 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 16:01:20,781 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 16:01:21,279 [INFO] AutonomousScanner: Cycle completed in 1.6s. Next scan in 5.0 minutes.
+
+2026-08-14 16:01:21,346 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 16:06:19,748 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 16:06:19 ---
+2026-08-14 16:06:19,749 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 16:06:19,765 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 16:06:19,769 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 16:06:19,776 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 16:06:19,777 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 16:06:19,777 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 16:06:19,777 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 16:06:20,549 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 16:06:21,070 [INFO] AutonomousScanner: Cycle completed in 1.3s. Next scan in 5.0 minutes.
+
+2026-08-14 16:06:21,148 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 16:11:19,827 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 16:11:19 ---
+2026-08-14 16:11:19,828 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 16:11:19,851 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 16:11:19,860 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 16:11:19,868 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 16:11:19,869 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 16:11:19,869 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 16:11:19,869 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 16:11:20,662 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 16:11:21,148 [INFO] AutonomousScanner: Cycle completed in 1.3s. Next scan in 5.0 minutes.
+
+2026-08-14 16:11:21,202 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 16:16:19,881 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 16:16:19 ---
+2026-08-14 16:16:19,882 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 16:16:19,904 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 16:16:19,914 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 16:16:19,923 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 16:16:19,925 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 16:16:19,925 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 16:16:19,926 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 16:16:20,666 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 16:16:21,206 [INFO] AutonomousScanner: Cycle completed in 1.3s. Next scan in 5.0 minutes.
+
+2026-08-14 16:16:21,278 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 16:21:19,954 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 16:21:19 ---
+2026-08-14 16:21:19,955 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 16:21:19,978 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 16:21:19,984 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 16:21:19,990 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 16:21:19,990 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 16:21:19,991 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 16:21:19,991 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 16:21:20,748 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 16:21:21,213 [INFO] AutonomousScanner: Cycle completed in 1.3s. Next scan in 5.0 minutes.
+
+2026-08-14 16:21:21,281 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 16:26:20,023 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 16:26:20 ---
+2026-08-14 16:26:20,024 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 16:26:20,053 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 16:26:20,059 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 16:26:20,067 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 16:26:20,067 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 16:26:20,068 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 16:26:20,068 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 16:26:20,867 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 16:26:21,359 [INFO] AutonomousScanner: Cycle completed in 1.3s. Next scan in 5.0 minutes.
+
+2026-08-14 16:26:21,427 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 16:31:20,092 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 16:31:20 ---
+2026-08-14 16:31:20,095 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 16:31:20,144 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 16:31:20,158 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 16:31:20,171 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 16:31:20,172 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 16:31:20,173 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 16:31:20,173 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 16:31:21,642 [INFO] AlphaEdge: Strategy BREAKOUT signals BUY for XAUUSDm at 4388.04600 (SL=4374.43268, TP=4415.27264)
+2026-08-14 16:31:21,643 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 16:31:21,644 [INFO] AlphaEdge: Skipping XAUUSDm: BREAKOUT trade already active on this symbol.
+2026-08-14 16:31:22,155 [INFO] AutonomousScanner: Cycle completed in 2.1s. Next scan in 5.0 minutes.
+
+2026-08-14 16:31:22,282 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 16:36:20,225 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 16:36:20 ---
+2026-08-14 16:36:20,236 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 16:36:20,271 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 16:36:20,286 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 16:36:20,297 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 16:36:20,297 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 16:36:20,298 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 16:36:20,298 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 16:36:21,445 [INFO] AlphaEdge: Strategy BREAKOUT signals BUY for XAUUSDm at 4392.63400 (SL=4358.64251, TP=4460.61697)
+2026-08-14 16:36:21,446 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 16:36:21,447 [INFO] AlphaEdge: Skipping XAUUSDm: BREAKOUT trade already active on this symbol.
+2026-08-14 16:36:21,941 [INFO] AutonomousScanner: Cycle completed in 1.7s. Next scan in 5.0 minutes.
+
+2026-08-14 16:36:22,048 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 16:41:20,333 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 16:41:20 ---
+2026-08-14 16:41:20,335 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 16:41:20,378 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 16:41:20,403 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 16:41:20,418 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 16:41:20,419 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 16:41:20,419 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 16:41:20,420 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 16:41:21,837 [INFO] AlphaEdge: Strategy BREAKOUT signals BUY for XAUUSDm at 4392.88400 (SL=4358.54884, TP=4461.55433)
+2026-08-14 16:41:21,838 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 16:41:21,838 [INFO] AlphaEdge: Skipping XAUUSDm: BREAKOUT trade already active on this symbol.
+2026-08-14 16:41:22,325 [INFO] AutonomousScanner: Cycle completed in 2.0s. Next scan in 5.0 minutes.
+
+2026-08-14 16:41:22,434 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 16:46:20,443 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 16:46:20 ---
+2026-08-14 16:46:20,474 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 16:46:20,908 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 16:46:20,923 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 16:46:20,939 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 16:46:20,940 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 16:46:20,940 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 16:46:20,942 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 16:46:22,440 [INFO] AlphaEdge: Strategy BREAKOUT signals BUY for XAUUSDm at 4393.24600 (SL=4344.89983, TP=4489.93834)
+2026-08-14 16:46:22,441 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 16:46:22,442 [INFO] AlphaEdge: Skipping XAUUSDm: BREAKOUT trade already active on this symbol.
+2026-08-14 16:46:22,975 [INFO] AutonomousScanner: Cycle completed in 2.5s. Next scan in 5.0 minutes.
+
+2026-08-14 16:46:23,155 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 16:51:20,625 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 16:51:20 ---
+2026-08-14 16:51:20,627 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 16:51:20,665 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 16:51:20,680 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 16:51:20,695 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 16:51:20,696 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 16:51:20,696 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 16:51:20,697 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 16:51:22,106 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 16:51:22,599 [INFO] AutonomousScanner: Cycle completed in 2.0s. Next scan in 5.0 minutes.
+
+2026-08-14 16:51:22,720 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 16:56:20,749 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 16:56:20 ---
+2026-08-14 16:56:20,751 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 16:56:20,783 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 16:56:20,799 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 16:56:20,814 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 16:56:20,815 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 16:56:20,815 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 16:56:20,816 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 16:56:22,336 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 16:56:22,843 [INFO] AutonomousScanner: Cycle completed in 2.1s. Next scan in 5.0 minutes.
+
+2026-08-14 16:56:22,969 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 17:01:20,877 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 17:01:20 ---
+2026-08-14 17:01:20,879 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 17:01:20,917 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 17:01:20,941 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 17:01:20,957 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 17:01:20,957 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 17:01:20,958 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 17:01:20,959 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 17:01:22,392 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 17:01:22,898 [INFO] AutonomousScanner: Cycle completed in 2.0s. Next scan in 5.0 minutes.
+
+2026-08-14 17:01:23,012 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 17:06:21,001 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 17:06:21 ---
+2026-08-14 17:06:21,003 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 17:06:21,040 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 17:06:21,052 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 17:06:21,065 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 17:06:21,066 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 17:06:21,067 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 17:06:21,067 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 17:06:22,476 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 17:06:23,057 [INFO] AutonomousScanner: Cycle completed in 2.1s. Next scan in 5.0 minutes.
+
+2026-08-14 17:06:23,176 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 17:11:21,121 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 17:11:21 ---
+2026-08-14 17:11:21,123 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 17:11:21,167 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 17:11:21,177 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 17:11:21,188 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 17:11:21,189 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 17:11:21,189 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 17:11:21,190 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 17:11:22,826 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 17:11:23,377 [INFO] AutonomousScanner: Cycle completed in 2.3s. Next scan in 5.0 minutes.
+
+2026-08-14 17:11:23,500 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 17:16:21,246 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 17:16:21 ---
+2026-08-14 17:16:21,249 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 17:16:21,297 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 17:16:21,314 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 17:16:21,333 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 17:16:21,336 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 17:16:21,337 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 17:16:21,337 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 17:16:22,796 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 17:16:23,311 [INFO] AutonomousScanner: Cycle completed in 2.1s. Next scan in 5.0 minutes.
+
+2026-08-14 17:16:23,451 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 17:21:21,390 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 17:21:21 ---
+2026-08-14 17:21:21,392 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 17:21:21,420 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 17:21:21,443 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 17:21:21,454 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 17:21:21,455 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 17:21:21,455 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 17:21:21,456 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 17:21:22,704 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 17:21:23,248 [INFO] AutonomousScanner: Cycle completed in 1.9s. Next scan in 5.0 minutes.
+
+2026-08-14 17:21:23,347 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 17:26:21,490 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 17:26:21 ---
+2026-08-14 17:26:21,492 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 17:26:21,526 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 17:26:21,537 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 17:26:21,549 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 17:26:21,550 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 17:26:21,550 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 17:26:21,551 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 17:26:22,786 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 17:26:23,358 [INFO] AutonomousScanner: Cycle completed in 1.9s. Next scan in 5.0 minutes.
+
+2026-08-14 17:26:23,458 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 17:31:21,602 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 17:31:21 ---
+2026-08-14 17:31:21,605 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 17:31:21,654 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 17:31:21,680 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 17:31:21,695 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 17:31:21,695 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 17:31:21,696 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 17:31:21,697 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 17:31:23,379 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 17:31:23,878 [INFO] AutonomousScanner: Cycle completed in 2.3s. Next scan in 5.0 minutes.
+
+2026-08-14 17:31:24,064 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 17:36:21,787 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 17:36:21 ---
+2026-08-14 17:36:21,797 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 17:36:21,863 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 17:36:21,916 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 17:36:21,956 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 17:36:21,957 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 17:36:21,960 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 17:36:21,961 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 17:36:23,665 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 17:36:24,188 [INFO] AutonomousScanner: Cycle completed in 2.4s. Next scan in 5.0 minutes.
+
+2026-08-14 17:36:24,379 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 17:41:21,976 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 17:41:21 ---
+2026-08-14 17:41:21,980 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 17:41:22,050 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 17:41:22,084 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 17:41:22,102 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 17:41:22,103 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 17:41:22,103 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 17:41:22,103 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 17:41:23,551 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 17:41:24,033 [INFO] AutonomousScanner: Cycle completed in 2.1s. Next scan in 5.0 minutes.
+
+2026-08-14 17:41:24,193 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 17:46:22,137 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 17:46:22 ---
+2026-08-14 17:46:22,139 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 17:46:22,160 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 17:46:22,176 [INFO] AlphaEdge: Current Daily Net P&L: $+0.00 (Trading Uncapped)
+2026-08-14 17:46:22,188 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 17:46:22,188 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 17:46:22,188 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 17:46:22,189 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 17:46:22,978 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals SELL for EURGBPm at 0.85461 (SL=0.85549, TP=0.85285)
+2026-08-14 17:46:22,978 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 17:46:23,076 [INFO] AlphaEdge: Successfully opened SELL market trade on EURGBPm (Ticket: 3089007268, SL: 0.85549, TP: 0.85285)
+2026-08-14 17:46:24,017 [INFO] AutonomousScanner: Cycle completed in 1.9s. Next scan in 5.0 minutes.
+
+2026-08-14 17:46:24,093 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 17:49:21,824 [INFO] AutonomousScanner: Bot manually stopped by user.
+2026-08-14 17:51:22,901 [INFO] AutonomousScanner: Successfully imported AlphaEdge strategy.
+2026-08-14 17:51:22,904 [INFO] AutonomousScanner: === Starting Autonomous Strategy Trader (5-Minute Cycle) ===
+2026-08-14 17:51:22,904 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 17:51:22 ---
+2026-08-14 17:51:22,908 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 17:51:22,985 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 17:51:23,150 [INFO] AlphaEdge: Current Daily Net P&L: $-57.97 (Trading Uncapped)
+2026-08-14 17:51:23,184 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 17:51:23,186 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 17:51:23,186 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 17:51:23,187 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 17:51:24,313 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals SELL for EURGBPm at 0.85461 (SL=0.85551, TP=0.85281)
+2026-08-14 17:51:24,313 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 17:51:24,314 [INFO] AlphaEdge: Skipping EURGBPm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 17:51:25,308 [INFO] AutonomousScanner: Cycle completed in 2.4s. Next scan in 5.0 minutes.
+
+2026-08-14 17:51:33,844 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 17:56:31,470 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 17:56:31 ---
+2026-08-14 17:56:31,491 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 17:56:31,543 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 17:56:31,854 [INFO] AlphaEdge: Current Daily Net P&L: $-57.97 (Trading Uncapped)
+2026-08-14 17:56:31,884 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 17:56:31,884 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 17:56:31,885 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 17:56:31,886 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 17:56:33,478 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 17:56:34,092 [INFO] AutonomousScanner: Cycle completed in 2.6s. Next scan in 5.0 minutes.
+
+2026-08-14 17:56:34,238 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 18:01:31,612 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 18:01:31 ---
+2026-08-14 18:01:31,618 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 18:01:31,687 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 18:01:31,719 [INFO] AlphaEdge: Current Daily Net P&L: $-57.97 (Trading Uncapped)
+2026-08-14 18:01:31,742 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 18:01:31,744 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 18:01:31,745 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 18:01:31,746 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 18:01:33,874 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 18:01:35,178 [INFO] AutonomousScanner: Cycle completed in 3.6s. Next scan in 4.9 minutes.
+
+2026-08-14 18:01:35,354 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 18:06:31,810 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 18:06:31 ---
+2026-08-14 18:06:31,848 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 18:06:31,926 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 18:06:32,231 [INFO] AlphaEdge: Current Daily Net P&L: $-57.97 (Trading Uncapped)
+2026-08-14 18:06:32,267 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 18:06:32,269 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 18:06:32,271 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 18:06:32,273 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 18:06:34,381 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 18:06:35,066 [INFO] AutonomousScanner: Cycle completed in 3.3s. Next scan in 4.9 minutes.
+
+2026-08-14 18:06:35,255 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 18:11:32,291 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 18:11:32 ---
+2026-08-14 18:11:32,463 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 18:11:32,793 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 18:11:35,385 [INFO] AlphaEdge: Current Daily Net P&L: $-57.97 (Trading Uncapped)
+2026-08-14 18:11:35,446 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 18:11:35,456 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 18:11:35,460 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 18:11:35,461 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 18:11:38,041 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 18:11:38,596 [INFO] AutonomousScanner: Cycle completed in 6.5s. Next scan in 4.9 minutes.
+
+2026-08-14 18:11:38,814 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 18:16:32,386 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 18:16:32 ---
+2026-08-14 18:16:32,415 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 18:16:32,515 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 18:16:32,761 [INFO] AlphaEdge: Current Daily Net P&L: $-57.97 (Trading Uncapped)
+2026-08-14 18:16:32,792 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 18:16:32,793 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 18:16:32,794 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 18:16:32,795 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 18:16:34,508 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 18:16:35,154 [INFO] AutonomousScanner: Cycle completed in 2.8s. Next scan in 5.0 minutes.
+
+2026-08-14 18:16:35,360 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 18:21:32,594 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 18:21:32 ---
+2026-08-14 18:21:32,613 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 18:21:32,657 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 18:21:32,866 [INFO] AlphaEdge: Current Daily Net P&L: $-57.97 (Trading Uncapped)
+2026-08-14 18:21:32,887 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 18:21:32,888 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 18:21:32,889 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 18:21:32,890 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 18:21:33,807 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 18:21:34,481 [INFO] AutonomousScanner: Cycle completed in 1.9s. Next scan in 5.0 minutes.
+
+2026-08-14 18:21:34,568 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 18:26:32,677 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 18:26:32 ---
+2026-08-14 18:26:32,695 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 18:26:32,737 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 18:26:32,816 [INFO] AlphaEdge: Current Daily Net P&L: $-57.97 (Trading Uncapped)
+2026-08-14 18:26:32,840 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 18:26:32,840 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 18:26:32,841 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 18:26:32,841 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 18:26:33,749 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 18:26:34,236 [INFO] AutonomousScanner: Cycle completed in 1.6s. Next scan in 5.0 minutes.
+
+2026-08-14 18:26:34,368 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 18:31:32,806 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 18:31:32 ---
+2026-08-14 18:31:32,809 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 18:31:32,846 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 18:31:32,865 [INFO] AlphaEdge: Current Daily Net P&L: $-57.97 (Trading Uncapped)
+2026-08-14 18:31:32,874 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 18:31:32,875 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 18:31:32,875 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 18:31:32,875 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 18:31:33,751 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 18:31:34,296 [INFO] AutonomousScanner: Cycle completed in 1.5s. Next scan in 5.0 minutes.
+
+2026-08-14 18:31:34,372 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 18:36:32,885 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 18:36:32 ---
+2026-08-14 18:36:32,890 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 18:36:32,926 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 18:36:32,966 [INFO] AlphaEdge: Current Daily Net P&L: $-57.97 (Trading Uncapped)
+2026-08-14 18:36:32,977 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 18:36:32,978 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 18:36:32,978 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 18:36:32,979 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 18:36:33,903 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 18:36:34,403 [INFO] AutonomousScanner: Cycle completed in 1.5s. Next scan in 5.0 minutes.
+
+2026-08-14 18:36:34,472 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 18:41:32,959 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 18:41:32 ---
+2026-08-14 18:41:32,966 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 18:41:32,999 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 18:41:33,092 [INFO] AlphaEdge: Current Daily Net P&L: $-57.97 (Trading Uncapped)
+2026-08-14 18:41:33,108 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 18:41:33,108 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 18:41:33,109 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 18:41:33,110 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 18:41:33,996 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 18:41:35,774 [INFO] AutonomousScanner: Cycle completed in 2.8s. Next scan in 5.0 minutes.
+
+2026-08-14 18:41:35,849 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 18:46:33,041 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 18:46:33 ---
+2026-08-14 18:46:33,051 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 18:46:33,084 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 18:46:33,125 [INFO] AlphaEdge: Current Daily Net P&L: $-57.97 (Trading Uncapped)
+2026-08-14 18:46:33,137 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 18:46:33,138 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 18:46:33,138 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 18:46:33,139 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 18:46:33,894 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 18:46:34,413 [INFO] AutonomousScanner: Cycle completed in 1.4s. Next scan in 5.0 minutes.
+
+2026-08-14 18:46:34,481 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 18:51:33,104 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 18:51:33 ---
+2026-08-14 18:51:33,105 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 18:51:33,132 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 18:51:33,144 [INFO] AlphaEdge: Current Daily Net P&L: $-57.97 (Trading Uncapped)
+2026-08-14 18:51:33,155 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 18:51:33,155 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 18:51:33,156 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 18:51:33,156 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 18:51:34,124 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 18:51:34,630 [INFO] AutonomousScanner: Cycle completed in 1.5s. Next scan in 5.0 minutes.
+
+2026-08-14 18:51:34,707 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 18:56:33,236 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 18:56:33 ---
+2026-08-14 18:56:33,268 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 18:56:33,379 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 18:56:33,722 [INFO] AlphaEdge: Current Daily Net P&L: $-57.97 (Trading Uncapped)
+2026-08-14 18:56:33,766 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'London', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'AUDUSDm', 'EURAUDm', 'EURGBPm', 'EURJPYm', 'EURUSDm', 'GBPAUDm', 'GBPJPYm', 'GBPUSDm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'UK100m', 'US30m', 'USTECm']
+2026-08-14 18:56:33,767 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 18:56:33,768 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 18:56:33,770 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 18:56:35,614 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 18:56:36,144 [INFO] AutonomousScanner: Cycle completed in 2.9s. Next scan in 5.0 minutes.
+
+2026-08-14 18:56:36,395 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 19:01:33,476 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 19:01:33 ---
+2026-08-14 19:01:33,490 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 19:01:33,514 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 19:01:33,629 [INFO] AlphaEdge: Current Daily Net P&L: $-57.97 (Trading Uncapped)
+2026-08-14 19:01:33,640 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 19:01:33,641 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 19:01:33,641 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 19:01:33,641 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 19:01:34,060 [INFO] AlphaEdge: Strategy BREAKOUT signals BUY for XAUUSDm at 4395.95500 (SL=4384.56779, TP=4418.72943)
+2026-08-14 19:01:34,060 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 19:01:34,061 [INFO] AlphaEdge: Skipping XAUUSDm: BREAKOUT trade already active on this symbol.
+2026-08-14 19:01:34,623 [INFO] AutonomousScanner: Cycle completed in 1.2s. Next scan in 5.0 minutes.
+
+2026-08-14 19:01:34,699 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 19:05:39,194 [INFO] AutonomousScanner: Bot manually stopped by user.
+2026-08-14 19:05:46,696 [INFO] AutonomousScanner: Successfully imported AlphaEdge strategy.
+2026-08-14 19:05:46,696 [INFO] AutonomousScanner: === Starting Autonomous Strategy Trader (5-Minute Cycle) ===
+2026-08-14 19:05:46,697 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 19:05:46 ---
+2026-08-14 19:05:46,698 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 19:05:46,746 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 19:05:46,786 [INFO] AlphaEdge: Current Daily Net P&L: $-57.97 (Trading Uncapped)
+2026-08-14 19:05:46,808 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 19:05:46,811 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 19:05:46,812 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 19:05:46,812 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 19:05:47,614 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 19:05:48,339 [INFO] AutonomousScanner: Cycle completed in 1.6s. Next scan in 5.0 minutes.
+
+2026-08-14 19:05:49,464 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 19:10:47,824 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 19:10:47 ---
+2026-08-14 19:10:47,826 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 19:10:47,857 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 19:10:47,888 [INFO] AlphaEdge: Current Daily Net P&L: $-57.97 (Trading Uncapped)
+2026-08-14 19:10:47,900 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 19:10:47,900 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 19:10:47,900 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 19:10:47,901 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 19:10:48,386 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 19:10:49,446 [INFO] AutonomousScanner: Cycle completed in 1.6s. Next scan in 5.0 minutes.
+
+2026-08-14 19:10:49,524 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 19:15:47,903 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 19:15:47 ---
+2026-08-14 19:15:47,904 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 19:15:47,922 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 19:15:47,927 [INFO] AlphaEdge: Current Daily Net P&L: $-57.97 (Trading Uncapped)
+2026-08-14 19:15:47,934 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 19:15:47,934 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 19:15:47,935 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 19:15:47,935 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 19:15:48,373 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 19:15:48,883 [INFO] AutonomousScanner: Cycle completed in 1.0s. Next scan in 5.0 minutes.
+
+2026-08-14 19:15:48,928 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 19:20:47,949 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 19:20:47 ---
+2026-08-14 19:20:47,950 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 19:20:47,977 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 19:20:47,989 [INFO] AlphaEdge: Current Daily Net P&L: $-57.97 (Trading Uncapped)
+2026-08-14 19:20:47,998 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 19:20:47,999 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 19:20:47,999 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 19:20:47,999 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 19:20:48,550 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 19:20:49,017 [INFO] AutonomousScanner: Cycle completed in 1.1s. Next scan in 5.0 minutes.
+
+2026-08-14 19:20:49,078 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 19:25:48,011 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 19:25:48 ---
+2026-08-14 19:25:48,012 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 19:25:48,042 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 19:25:48,051 [INFO] AlphaEdge: Current Daily Net P&L: $-57.97 (Trading Uncapped)
+2026-08-14 19:25:48,057 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 19:25:48,058 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 19:25:48,058 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 19:25:48,058 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 19:25:48,623 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 19:25:50,121 [INFO] AutonomousScanner: Cycle completed in 2.1s. Next scan in 5.0 minutes.
+
+2026-08-14 19:25:50,178 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 19:30:48,069 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 19:30:48 ---
+2026-08-14 19:30:48,071 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 19:30:48,093 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 19:30:48,102 [INFO] AlphaEdge: Current Daily Net P&L: $-57.97 (Trading Uncapped)
+2026-08-14 19:30:48,108 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 19:30:48,108 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 19:30:48,109 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 19:30:48,109 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 19:30:48,634 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 19:30:49,172 [INFO] AutonomousScanner: Cycle completed in 1.1s. Next scan in 5.0 minutes.
+
+2026-08-14 19:30:49,234 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 19:35:48,136 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 19:35:48 ---
+2026-08-14 19:35:48,142 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 19:35:48,168 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 19:35:48,207 [INFO] AlphaEdge: Current Daily Net P&L: $-5.67 (Trading Uncapped)
+2026-08-14 19:35:48,217 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 19:35:48,217 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 19:35:48,217 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 19:35:48,218 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 19:35:48,758 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 19:35:49,256 [INFO] AutonomousScanner: Cycle completed in 1.1s. Next scan in 5.0 minutes.
+
+2026-08-14 19:35:49,323 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 19:40:48,201 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 19:40:48 ---
+2026-08-14 19:40:48,203 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 19:40:48,228 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 19:40:48,239 [INFO] AlphaEdge: Current Daily Net P&L: $-5.67 (Trading Uncapped)
+2026-08-14 19:40:48,249 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 19:40:48,249 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 19:40:48,250 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 19:40:48,250 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 19:40:48,795 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 19:40:49,366 [INFO] AutonomousScanner: Cycle completed in 1.2s. Next scan in 5.0 minutes.
+
+2026-08-14 19:40:49,436 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 19:45:48,276 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 19:45:48 ---
+2026-08-14 19:45:48,278 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 19:45:48,329 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 19:45:48,362 [INFO] AlphaEdge: Current Daily Net P&L: $-5.67 (Trading Uncapped)
+2026-08-14 19:45:48,378 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 19:45:48,385 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 19:45:48,385 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 19:45:48,386 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 19:45:49,493 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 19:45:49,974 [INFO] AutonomousScanner: Cycle completed in 1.7s. Next scan in 5.0 minutes.
+
+2026-08-14 19:45:50,126 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 19:50:48,428 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 19:50:48 ---
+2026-08-14 19:50:48,429 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 19:50:48,454 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 19:50:48,466 [INFO] AlphaEdge: Current Daily Net P&L: $-5.67 (Trading Uncapped)
+2026-08-14 19:50:48,476 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 19:50:48,476 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 19:50:48,477 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 19:50:48,477 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 19:50:48,998 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 19:50:49,526 [INFO] AutonomousScanner: Cycle completed in 1.1s. Next scan in 5.0 minutes.
+
+2026-08-14 19:50:49,617 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 19:53:51,240 [INFO] AutonomousScanner: Bot manually stopped by user.
+2026-08-14 19:54:00,672 [INFO] AutonomousScanner: Successfully imported AlphaEdge strategy.
+2026-08-14 19:54:00,677 [INFO] AutonomousScanner: === Starting Autonomous Strategy Trader (5-Minute Cycle) ===
+2026-08-14 19:54:00,681 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 19:54:00 ---
+2026-08-14 19:54:00,682 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 19:54:00,768 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 19:54:00,807 [INFO] AlphaEdge: Current Daily Net P&L: $-5.67 (Trading Uncapped)
+2026-08-14 19:54:00,854 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 19:54:00,873 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 19:54:00,881 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 19:54:00,897 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 19:54:01,617 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 19:54:02,301 [INFO] AutonomousScanner: Cycle completed in 1.6s. Next scan in 5.0 minutes.
+
+2026-08-14 19:54:03,159 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 19:59:01,546 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 19:59:01 ---
+2026-08-14 19:59:01,558 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 19:59:01,596 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 19:59:01,719 [INFO] AlphaEdge: Current Daily Net P&L: $-5.67 (Trading Uncapped)
+2026-08-14 19:59:01,728 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 19:59:01,728 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 19:59:01,728 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 19:59:01,729 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 19:59:02,325 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 19:59:02,870 [INFO] AutonomousScanner: Cycle completed in 1.3s. Next scan in 5.0 minutes.
+
+2026-08-14 19:59:02,955 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 20:04:01,627 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 20:04:01 ---
+2026-08-14 20:04:01,629 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 20:04:01,653 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 20:04:01,662 [INFO] AlphaEdge: Current Daily Net P&L: $-5.67 (Trading Uncapped)
+2026-08-14 20:04:01,671 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 20:04:01,672 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 20:04:01,672 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 20:04:01,673 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 20:04:02,102 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 20:04:02,657 [INFO] AutonomousScanner: Cycle completed in 1.0s. Next scan in 5.0 minutes.
+
+2026-08-14 20:04:02,723 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 20:09:01,695 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 20:09:01 ---
+2026-08-14 20:09:01,696 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 20:09:01,727 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 20:09:01,742 [INFO] AlphaEdge: Current Daily Net P&L: $-5.67 (Trading Uncapped)
+2026-08-14 20:09:01,752 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 20:09:01,753 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 20:09:01,753 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 20:09:01,754 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 20:09:02,274 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 20:09:02,759 [INFO] AutonomousScanner: Cycle completed in 1.1s. Next scan in 5.0 minutes.
+
+2026-08-14 20:09:02,835 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 20:14:01,772 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 20:14:01 ---
+2026-08-14 20:14:01,774 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 20:14:01,814 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 20:14:01,845 [INFO] AlphaEdge: Current Daily Net P&L: $-5.67 (Trading Uncapped)
+2026-08-14 20:14:01,856 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 20:14:01,857 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 20:14:01,858 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 20:14:01,858 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 20:14:02,587 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 20:14:03,075 [INFO] AutonomousScanner: Cycle completed in 1.3s. Next scan in 5.0 minutes.
+
+2026-08-14 20:14:03,144 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 20:19:01,842 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 20:19:01 ---
+2026-08-14 20:19:01,844 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 20:19:01,885 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 20:19:01,896 [INFO] AlphaEdge: Current Daily Net P&L: $-5.67 (Trading Uncapped)
+2026-08-14 20:19:01,906 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 20:19:01,906 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 20:19:01,907 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 20:19:01,907 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 20:19:02,421 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 20:19:03,713 [INFO] AutonomousScanner: Cycle completed in 1.9s. Next scan in 5.0 minutes.
+
+2026-08-14 20:19:03,775 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 20:24:01,905 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 20:24:01 ---
+2026-08-14 20:24:01,906 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 20:24:01,936 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 20:24:01,945 [INFO] AlphaEdge: Current Daily Net P&L: $-5.67 (Trading Uncapped)
+2026-08-14 20:24:01,952 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 20:24:01,952 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 20:24:01,952 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 20:24:01,953 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 20:24:02,374 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 20:24:02,878 [INFO] AutonomousScanner: Cycle completed in 1.0s. Next scan in 5.0 minutes.
+
+2026-08-14 20:24:02,943 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 20:29:01,972 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 20:29:01 ---
+2026-08-14 20:29:01,973 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 20:29:01,996 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 20:29:02,006 [INFO] AlphaEdge: Current Daily Net P&L: $-5.67 (Trading Uncapped)
+2026-08-14 20:29:02,015 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 20:29:02,015 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 20:29:02,016 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 20:29:02,016 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 20:29:02,424 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 20:29:03,112 [INFO] AutonomousScanner: Cycle completed in 1.1s. Next scan in 5.0 minutes.
+
+2026-08-14 20:29:03,171 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 20:34:02,033 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 20:34:02 ---
+2026-08-14 20:34:02,034 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 20:34:02,067 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 20:34:02,076 [INFO] AlphaEdge: Current Daily Net P&L: $-5.67 (Trading Uncapped)
+2026-08-14 20:34:02,084 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 20:34:02,085 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 20:34:02,085 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 20:34:02,085 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 20:34:02,506 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 20:34:02,987 [INFO] AutonomousScanner: Cycle completed in 1.0s. Next scan in 5.0 minutes.
+
+2026-08-14 20:34:03,054 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 20:39:02,100 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 20:39:02 ---
+2026-08-14 20:39:02,109 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 20:39:02,131 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 20:39:02,140 [INFO] AlphaEdge: Current Daily Net P&L: $-5.67 (Trading Uncapped)
+2026-08-14 20:39:02,148 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 20:39:02,149 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 20:39:02,149 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 20:39:02,149 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 20:39:02,574 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 20:39:03,140 [INFO] AutonomousScanner: Cycle completed in 1.0s. Next scan in 5.0 minutes.
+
+2026-08-14 20:39:03,202 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 20:44:02,164 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 20:44:02 ---
+2026-08-14 20:44:02,165 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 20:44:02,187 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 20:44:02,195 [INFO] AlphaEdge: Current Daily Net P&L: $-5.67 (Trading Uncapped)
+2026-08-14 20:44:02,202 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 20:44:02,203 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 20:44:02,203 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 20:44:02,203 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 20:44:02,621 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 20:44:03,149 [INFO] AutonomousScanner: Cycle completed in 1.0s. Next scan in 5.0 minutes.
+
+2026-08-14 20:44:03,229 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 20:49:02,245 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 20:49:02 ---
+2026-08-14 20:49:02,246 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 20:49:02,272 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 20:49:02,280 [INFO] AlphaEdge: Current Daily Net P&L: $-5.67 (Trading Uncapped)
+2026-08-14 20:49:02,288 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 20:49:02,289 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 20:49:02,289 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 20:49:02,289 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 20:49:02,712 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 20:49:03,247 [INFO] AutonomousScanner: Cycle completed in 1.0s. Next scan in 5.0 minutes.
+
+2026-08-14 20:49:03,300 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 20:54:02,299 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 20:54:02 ---
+2026-08-14 20:54:02,300 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 20:54:02,321 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 20:54:02,332 [INFO] AlphaEdge: Current Daily Net P&L: $-5.67 (Trading Uncapped)
+2026-08-14 20:54:02,339 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 20:54:02,339 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 20:54:02,340 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 20:54:02,340 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 20:54:02,786 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 20:54:03,258 [INFO] AutonomousScanner: Cycle completed in 1.0s. Next scan in 5.0 minutes.
+
+2026-08-14 20:54:03,322 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 20:59:02,364 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 20:59:02 ---
+2026-08-14 20:59:02,365 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 20:59:02,382 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 20:59:02,399 [INFO] AlphaEdge: Current Daily Net P&L: $-5.67 (Trading Uncapped)
+2026-08-14 20:59:02,405 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 20:59:02,405 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 20:59:02,406 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 20:59:02,406 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 20:59:02,795 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 20:59:03,313 [INFO] AutonomousScanner: Cycle completed in 0.9s. Next scan in 5.0 minutes.
+
+2026-08-14 20:59:03,366 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 21:04:02,419 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 21:04:02 ---
+2026-08-14 21:04:02,421 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 21:04:02,451 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 21:04:02,463 [INFO] AlphaEdge: Current Daily Net P&L: $-5.67 (Trading Uncapped)
+2026-08-14 21:04:02,472 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 21:04:02,473 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 21:04:02,473 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 21:04:02,473 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 21:04:02,887 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 21:04:03,411 [INFO] AutonomousScanner: Cycle completed in 1.0s. Next scan in 5.0 minutes.
+
+2026-08-14 21:04:03,475 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 21:09:02,484 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 21:09:02 ---
+2026-08-14 21:09:02,485 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 21:09:02,519 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 21:09:02,530 [INFO] AlphaEdge: Current Daily Net P&L: $-5.67 (Trading Uncapped)
+2026-08-14 21:09:02,538 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 21:09:02,539 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 21:09:02,539 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 21:09:02,539 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 21:09:03,039 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 21:09:03,546 [INFO] AutonomousScanner: Cycle completed in 1.1s. Next scan in 5.0 minutes.
+
+2026-08-14 21:09:03,635 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 21:14:02,574 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 21:14:02 ---
+2026-08-14 21:14:02,575 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 21:14:02,599 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 21:14:02,606 [INFO] AlphaEdge: Current Daily Net P&L: $-5.67 (Trading Uncapped)
+2026-08-14 21:14:02,614 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 21:14:02,615 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 21:14:02,615 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 21:14:02,615 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 21:14:03,028 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 21:14:03,513 [INFO] AutonomousScanner: Cycle completed in 0.9s. Next scan in 5.0 minutes.
+
+2026-08-14 21:14:03,574 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 21:19:02,635 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 21:19:02 ---
+2026-08-14 21:19:02,637 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 21:19:02,658 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 21:19:02,669 [INFO] AlphaEdge: Current Daily Net P&L: $-5.67 (Trading Uncapped)
+2026-08-14 21:19:02,678 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 21:19:02,678 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 21:19:02,678 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 21:19:02,679 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 21:19:03,142 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 21:19:03,650 [INFO] AutonomousScanner: Cycle completed in 1.0s. Next scan in 5.0 minutes.
+
+2026-08-14 21:19:03,706 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 21:24:02,693 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 21:24:02 ---
+2026-08-14 21:24:02,695 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 21:24:02,724 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 21:24:02,731 [INFO] AlphaEdge: Current Daily Net P&L: $-5.67 (Trading Uncapped)
+2026-08-14 21:24:02,739 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 21:24:02,740 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 21:24:02,740 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 21:24:02,740 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 21:24:03,131 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 21:24:03,646 [INFO] AutonomousScanner: Cycle completed in 1.0s. Next scan in 5.0 minutes.
+
+2026-08-14 21:24:03,720 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 21:29:02,767 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 21:29:02 ---
+2026-08-14 21:29:02,768 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 21:29:02,790 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 21:29:02,796 [INFO] AlphaEdge: Current Daily Net P&L: $-5.67 (Trading Uncapped)
+2026-08-14 21:29:02,804 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 21:29:02,805 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 21:29:02,805 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 21:29:02,806 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 21:29:03,232 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 21:29:03,697 [INFO] AutonomousScanner: Cycle completed in 0.9s. Next scan in 5.0 minutes.
+
+2026-08-14 21:29:03,747 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 21:34:02,818 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 21:34:02 ---
+2026-08-14 21:34:02,820 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 21:35:03,785 [ERROR] metatrader_client: MT5 initialize failed: (-10005, 'IPC timeout')
+2026-08-14 21:35:03,788 [ERROR] metatrader_client: MT5Client.connect() error: MT5 initialize failed: (-10005, 'IPC timeout')
+2026-08-14 21:35:03,789 [ERROR] AlphaEdge: MT5 connection failed: MT5 initialize failed: (-10005, 'IPC timeout')
+2026-08-14 21:35:03,789 [ERROR] AutonomousScanner: Error executing AlphaEdge scan: MT5 connection failed: MT5 initialize failed: (-10005, 'IPC timeout')
+2026-08-14 21:35:03,797 [ERROR] AlphaEdge: Failed to send Telegram alert: <urlopen error [Errno 11001] getaddrinfo failed>
+2026-08-14 21:35:03,798 [INFO] AutonomousScanner: Cycle completed in 61.0s. Next scan in 4.0 minutes.
+
+2026-08-14 21:35:03,991 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 21:39:03,013 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 21:39:03 ---
+2026-08-14 21:39:03,015 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 21:40:03,913 [ERROR] metatrader_client: MT5 initialize failed: (-10005, 'IPC timeout')
+2026-08-14 21:40:03,914 [ERROR] metatrader_client: MT5Client.connect() error: MT5 initialize failed: (-10005, 'IPC timeout')
+2026-08-14 21:40:03,915 [ERROR] AlphaEdge: MT5 connection failed: MT5 initialize failed: (-10005, 'IPC timeout')
+2026-08-14 21:40:03,921 [ERROR] AutonomousScanner: Error executing AlphaEdge scan: MT5 connection failed: MT5 initialize failed: (-10005, 'IPC timeout')
+2026-08-14 21:40:03,930 [ERROR] AlphaEdge: Failed to send Telegram alert: <urlopen error [Errno 11001] getaddrinfo failed>
+2026-08-14 21:40:03,931 [INFO] AutonomousScanner: Cycle completed in 60.9s. Next scan in 4.0 minutes.
+
+2026-08-14 21:40:04,060 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 21:44:03,143 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 21:44:03 ---
+2026-08-14 21:44:03,152 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 21:45:04,075 [ERROR] metatrader_client: MT5 initialize failed: (-10005, 'IPC timeout')
+2026-08-14 21:45:04,076 [ERROR] metatrader_client: MT5Client.connect() error: MT5 initialize failed: (-10005, 'IPC timeout')
+2026-08-14 21:45:04,077 [ERROR] AlphaEdge: MT5 connection failed: MT5 initialize failed: (-10005, 'IPC timeout')
+2026-08-14 21:45:04,078 [ERROR] AutonomousScanner: Error executing AlphaEdge scan: MT5 connection failed: MT5 initialize failed: (-10005, 'IPC timeout')
+2026-08-14 21:45:04,089 [ERROR] AlphaEdge: Failed to send Telegram alert: <urlopen error [Errno 11001] getaddrinfo failed>
+2026-08-14 21:45:04,090 [INFO] AutonomousScanner: Cycle completed in 60.9s. Next scan in 4.0 minutes.
+
+2026-08-14 21:45:04,210 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 21:49:03,269 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 21:49:03 ---
+2026-08-14 21:49:03,278 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 21:49:03,322 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 21:49:03,505 [INFO] AlphaEdge: Current Daily Net P&L: $-5.67 (Trading Uncapped)
+2026-08-14 21:49:03,528 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 21:49:03,532 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 21:49:03,537 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 21:49:03,541 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 21:49:04,922 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals BUY for XAGUSDm at 64.75800 (SL=64.40543, TP=65.46314)
+2026-08-14 21:49:04,925 [INFO] AlphaEdge: Strategy BREAKOUT signals SELL for XAUUSDm at 4374.80200 (SL=4381.08481, TP=4362.23637)
+2026-08-14 21:49:04,928 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 21:49:05,020 [INFO] AlphaEdge: Successfully opened BUY market trade on XAGUSDm (Ticket: 3090066529, SL: 64.40543, TP: 65.46314)
+2026-08-14 21:49:05,692 [INFO] AlphaEdge: Successfully opened SELL market trade on XAUUSDm (Ticket: 3090066555, SL: 4381.08481, TP: 4362.23637)
+2026-08-14 21:49:06,765 [INFO] AutonomousScanner: Cycle completed in 3.5s. Next scan in 4.9 minutes.
+
+2026-08-14 21:49:06,969 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 21:54:03,472 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 21:54:03 ---
+2026-08-14 21:54:03,499 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 21:54:04,320 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 21:54:04,484 [INFO] AlphaEdge: Current Daily Net P&L: $-4.76 (Trading Uncapped)
+2026-08-14 21:54:04,505 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 21:54:04,506 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 21:54:04,507 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 21:54:04,507 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 21:54:05,343 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals BUY for XAGUSDm at 64.74700 (SL=64.41721, TP=65.40657)
+2026-08-14 21:54:05,343 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 21:54:05,344 [INFO] AlphaEdge: Skipping XAGUSDm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 21:54:05,814 [INFO] AutonomousScanner: Cycle completed in 2.3s. Next scan in 5.0 minutes.
+
+2026-08-14 21:54:06,088 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 21:59:03,748 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 21:59:03 ---
+2026-08-14 21:59:03,750 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 21:59:03,776 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 21:59:03,788 [INFO] AlphaEdge: Current Daily Net P&L: $-4.76 (Trading Uncapped)
+2026-08-14 21:59:03,797 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 21:59:03,798 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 21:59:03,799 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 21:59:03,799 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 21:59:04,231 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals BUY for XAGUSDm at 64.71800 (SL=64.42321, TP=65.30757)
+2026-08-14 21:59:04,231 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 21:59:04,234 [INFO] AlphaEdge: Skipping XAGUSDm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 21:59:04,731 [INFO] AutonomousScanner: Cycle completed in 1.0s. Next scan in 5.0 minutes.
+
+2026-08-14 21:59:04,781 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 22:04:03,799 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 22:04:03 ---
+2026-08-14 22:04:03,800 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 22:04:03,817 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 22:04:03,835 [INFO] AlphaEdge: Current Daily Net P&L: $-4.76 (Trading Uncapped)
+2026-08-14 22:04:03,843 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 22:04:03,843 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 22:04:03,844 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 22:04:03,844 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 22:04:04,264 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals BUY for XAGUSDm at 64.68700 (SL=64.42921, TP=65.20257)
+2026-08-14 22:04:04,264 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 22:04:04,266 [INFO] AlphaEdge: Skipping XAGUSDm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 22:04:04,771 [INFO] AutonomousScanner: Cycle completed in 1.0s. Next scan in 5.0 minutes.
+
+2026-08-14 22:04:04,836 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 22:09:03,864 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 22:09:03 ---
+2026-08-14 22:09:03,866 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 22:09:03,884 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 22:09:03,905 [INFO] AlphaEdge: Current Daily Net P&L: $-4.76 (Trading Uncapped)
+2026-08-14 22:09:03,913 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 22:09:03,913 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 22:09:03,913 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 22:09:03,914 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 22:09:04,399 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals BUY for XAGUSDm at 64.68900 (SL=64.41679, TP=65.23343)
+2026-08-14 22:09:04,399 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 22:09:04,400 [INFO] AlphaEdge: Skipping XAGUSDm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 22:09:04,892 [INFO] AutonomousScanner: Cycle completed in 1.0s. Next scan in 5.0 minutes.
+
+2026-08-14 22:09:04,954 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 22:14:03,927 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 22:14:03 ---
+2026-08-14 22:14:03,928 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 22:14:03,949 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 22:14:03,955 [INFO] AlphaEdge: Current Daily Net P&L: $-4.76 (Trading Uncapped)
+2026-08-14 22:14:03,962 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 22:14:03,962 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 22:14:03,962 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 22:14:03,963 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 22:14:04,365 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals BUY for XAGUSDm at 64.74800 (SL=64.42643, TP=65.39114)
+2026-08-14 22:14:04,365 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 22:14:04,366 [INFO] AlphaEdge: Skipping XAGUSDm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 22:14:04,868 [INFO] AutonomousScanner: Cycle completed in 0.9s. Next scan in 5.0 minutes.
+
+2026-08-14 22:14:04,935 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 22:19:03,996 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 22:19:03 ---
+2026-08-14 22:19:03,997 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 22:19:04,021 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 22:19:04,033 [INFO] AlphaEdge: Current Daily Net P&L: $-4.76 (Trading Uncapped)
+2026-08-14 22:19:04,043 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 22:19:04,043 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 22:19:04,044 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 22:19:04,044 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 22:19:04,529 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals BUY for XAGUSDm at 64.73400 (SL=64.44121, TP=65.31957)
+2026-08-14 22:19:04,529 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 22:19:04,530 [INFO] AlphaEdge: Skipping XAGUSDm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 22:19:05,013 [INFO] AutonomousScanner: Cycle completed in 1.0s. Next scan in 5.0 minutes.
+
+2026-08-14 22:19:05,064 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 22:24:04,047 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 22:24:04 ---
+2026-08-14 22:24:04,049 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 22:24:04,073 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 22:24:04,082 [INFO] AlphaEdge: Current Daily Net P&L: $-4.76 (Trading Uncapped)
+2026-08-14 22:24:04,090 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 22:24:04,091 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 22:24:04,091 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 22:24:04,091 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 22:24:04,510 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals BUY for XAGUSDm at 64.76100 (SL=64.44443, TP=65.39414)
+2026-08-14 22:24:04,510 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 22:24:04,511 [INFO] AlphaEdge: Skipping XAGUSDm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 22:24:05,021 [INFO] AutonomousScanner: Cycle completed in 1.0s. Next scan in 5.0 minutes.
+
+2026-08-14 22:24:05,087 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 22:29:04,115 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 22:29:04 ---
+2026-08-14 22:29:04,125 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 22:29:04,162 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 22:29:04,173 [INFO] AlphaEdge: Current Daily Net P&L: $-4.76 (Trading Uncapped)
+2026-08-14 22:29:04,183 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 22:29:04,183 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 22:29:04,184 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 22:29:04,186 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 22:29:04,541 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals BUY for XAGUSDm at 64.76500 (SL=64.44764, TP=65.39971)
+2026-08-14 22:29:04,542 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals SELL for USTECm at 30018.86000 (SL=30064.77500, TP=29927.03000)
+2026-08-14 22:29:04,542 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 22:29:04,542 [INFO] AlphaEdge: Skipping XAGUSDm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 22:29:04,635 [INFO] AlphaEdge: Successfully opened SELL market trade on USTECm (Ticket: 3090166352, SL: 30064.77500, TP: 29927.03000)
+2026-08-14 22:29:05,675 [INFO] AutonomousScanner: Cycle completed in 1.6s. Next scan in 5.0 minutes.
+
+2026-08-14 22:29:05,822 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 22:34:04,267 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 22:34:04 ---
+2026-08-14 22:34:04,268 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 22:34:04,291 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 22:34:04,302 [INFO] AlphaEdge: Current Daily Net P&L: $-4.76 (Trading Uncapped)
+2026-08-14 22:34:04,311 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 22:34:04,312 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 22:34:04,312 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 22:34:04,312 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 22:34:04,698 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals BUY for XAGUSDm at 64.76500 (SL=64.44979, TP=65.39543)
+2026-08-14 22:34:04,699 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals SELL for USTECm at 30019.11000 (SL=30064.26500, TP=29928.80000)
+2026-08-14 22:34:04,699 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 22:34:04,699 [INFO] AlphaEdge: Skipping XAGUSDm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 22:34:04,700 [INFO] AlphaEdge: Skipping USTECm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 22:34:05,250 [INFO] AutonomousScanner: Cycle completed in 1.0s. Next scan in 5.0 minutes.
+
+2026-08-14 22:34:05,304 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 22:39:04,323 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 22:39:04 ---
+2026-08-14 22:39:04,324 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 22:39:04,352 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 22:39:04,361 [INFO] AlphaEdge: Current Daily Net P&L: $-4.76 (Trading Uncapped)
+2026-08-14 22:39:04,368 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 22:39:04,368 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 22:39:04,369 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 22:39:04,369 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 22:39:04,735 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals BUY for XAGUSDm at 64.78900 (SL=64.45386, TP=65.45929)
+2026-08-14 22:39:04,736 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals SELL for USTECm at 30025.61000 (SL=30066.67857, TP=29943.47286)
+2026-08-14 22:39:04,736 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 22:39:04,737 [INFO] AlphaEdge: Skipping XAGUSDm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 22:39:04,737 [INFO] AlphaEdge: Skipping USTECm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 22:39:05,222 [INFO] AutonomousScanner: Cycle completed in 0.9s. Next scan in 5.0 minutes.
+
+2026-08-14 22:39:05,282 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 22:44:04,384 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 22:44:04 ---
+2026-08-14 22:44:04,385 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 22:44:04,408 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 22:44:04,416 [INFO] AlphaEdge: Current Daily Net P&L: $-4.76 (Trading Uncapped)
+2026-08-14 22:44:04,428 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 22:44:04,429 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 22:44:04,431 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 22:44:04,432 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 22:44:04,861 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals BUY for XAGUSDm at 64.76500 (SL=64.46114, TP=65.37271)
+2026-08-14 22:44:04,861 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals SELL for USTECm at 30033.48000 (SL=30073.78500, TP=29952.87000)
+2026-08-14 22:44:04,861 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 22:44:04,862 [INFO] AlphaEdge: Skipping XAGUSDm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 22:44:04,862 [INFO] AlphaEdge: Skipping USTECm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 22:44:05,383 [INFO] AutonomousScanner: Cycle completed in 1.0s. Next scan in 5.0 minutes.
+
+2026-08-14 22:44:05,440 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 22:49:04,442 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 22:49:04 ---
+2026-08-14 22:49:04,443 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 22:49:04,463 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 22:49:04,471 [INFO] AlphaEdge: Current Daily Net P&L: $-4.76 (Trading Uncapped)
+2026-08-14 22:49:04,479 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 22:49:04,480 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 22:49:04,480 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 22:49:04,480 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 22:49:04,824 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals BUY for XAGUSDm at 64.70700 (SL=64.46007, TP=65.20086)
+2026-08-14 22:49:04,824 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals SELL for USTECm at 30029.36000 (SL=30073.48929, TP=29941.10143)
+2026-08-14 22:49:04,825 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 22:49:04,825 [INFO] AlphaEdge: Skipping XAGUSDm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 22:49:04,825 [INFO] AlphaEdge: Skipping USTECm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 22:49:05,292 [INFO] AutonomousScanner: Cycle completed in 0.9s. Next scan in 5.0 minutes.
+
+2026-08-14 22:49:05,341 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 22:54:04,491 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 22:54:04 ---
+2026-08-14 22:54:04,493 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 22:54:04,530 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 22:54:04,543 [INFO] AlphaEdge: Current Daily Net P&L: $-4.76 (Trading Uncapped)
+2026-08-14 22:54:04,555 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 22:54:04,556 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 22:54:04,556 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 22:54:04,556 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 22:54:05,084 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals BUY for XAGUSDm at 64.76800 (SL=64.46243, TP=65.37914)
+2026-08-14 22:54:05,085 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals SELL for USTECm at 30039.37000 (SL=30087.63429, TP=29942.84143)
+2026-08-14 22:54:05,086 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 22:54:05,086 [INFO] AlphaEdge: Skipping XAGUSDm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 22:54:05,087 [INFO] AlphaEdge: Skipping USTECm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 22:54:05,798 [INFO] AutonomousScanner: Cycle completed in 1.3s. Next scan in 5.0 minutes.
+
+2026-08-14 22:54:05,883 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 22:59:04,581 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 22:59:04 ---
+2026-08-14 22:59:04,582 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 22:59:04,600 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 22:59:04,614 [INFO] AlphaEdge: Current Daily Net P&L: $-4.76 (Trading Uncapped)
+2026-08-14 22:59:04,621 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 22:59:04,621 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 22:59:04,622 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 22:59:04,622 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 22:59:04,962 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals BUY for XAGUSDm at 64.70800 (SL=64.46714, TP=65.18971)
+2026-08-14 22:59:04,962 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals SELL for USTECm at 30044.73000 (SL=30089.76214, TP=29954.66571)
+2026-08-14 22:59:04,963 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 22:59:04,963 [INFO] AlphaEdge: Skipping XAGUSDm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 22:59:04,964 [INFO] AlphaEdge: Skipping USTECm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 22:59:05,437 [INFO] AutonomousScanner: Cycle completed in 0.9s. Next scan in 5.0 minutes.
+
+2026-08-14 22:59:05,493 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 23:04:04,638 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 23:04:04 ---
+2026-08-14 23:04:04,639 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 23:04:04,713 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 23:04:04,750 [INFO] AlphaEdge: Current Daily Net P&L: $-64.32 (Trading Uncapped)
+2026-08-14 23:04:04,770 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 23:04:04,771 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 23:04:04,772 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 23:04:04,772 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 23:04:06,221 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals BUY for XAGUSDm at 64.69000 (SL=64.47057, TP=65.12886)
+2026-08-14 23:04:06,222 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals SELL for USTECm at 30066.36000 (SL=30116.91786, TP=29965.24429)
+2026-08-14 23:04:06,223 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 23:04:06,224 [INFO] AlphaEdge: Skipping XAGUSDm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 23:04:06,321 [INFO] AlphaEdge: Successfully opened SELL market trade on USTECm (Ticket: 3090248948, SL: 30116.91786, TP: 29965.24429)
+2026-08-14 23:04:08,347 [INFO] AutonomousScanner: Cycle completed in 3.7s. Next scan in 4.9 minutes.
+
+2026-08-14 23:04:08,447 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 23:09:04,740 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 23:09:04 ---
+2026-08-14 23:09:04,741 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 23:09:04,762 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 23:09:04,771 [INFO] AlphaEdge: Current Daily Net P&L: $-64.32 (Trading Uncapped)
+2026-08-14 23:09:04,780 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 23:09:04,780 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 23:09:04,781 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 23:09:04,781 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 23:09:05,224 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals BUY for XAGUSDm at 64.67400 (SL=64.44714, TP=65.12771)
+2026-08-14 23:09:05,224 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals SELL for USTECm at 30052.87000 (SL=30117.47929, TP=29923.65143)
+2026-08-14 23:09:05,224 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 23:09:05,225 [INFO] AlphaEdge: Skipping XAGUSDm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 23:09:05,225 [INFO] AlphaEdge: Skipping USTECm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 23:09:05,754 [INFO] AutonomousScanner: Cycle completed in 1.0s. Next scan in 5.0 minutes.
+
+2026-08-14 23:09:05,829 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 23:10:09,943 [INFO] AutonomousScanner: Bot manually stopped by user.
+2026-08-14 23:10:31,238 [INFO] AutonomousScanner: Successfully imported AlphaEdge strategy.
+2026-08-14 23:10:31,238 [INFO] AutonomousScanner: === Starting Autonomous Strategy Trader (5-Minute Cycle) ===
+2026-08-14 23:10:31,239 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 23:10:31 ---
+2026-08-14 23:10:31,240 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 23:10:31,286 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 23:10:31,390 [INFO] AlphaEdge: Current Daily Net P&L: $-84.42 (Trading Uncapped)
+2026-08-14 23:10:31,407 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 23:10:31,408 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 23:10:31,409 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 23:10:31,409 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 23:10:31,877 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals SELL for USTECm at 30057.62000 (SL=30116.54071, TP=29939.77857)
+2026-08-14 23:10:31,878 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 23:10:31,878 [INFO] AlphaEdge: Skipping USTECm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 23:10:32,639 [INFO] AutonomousScanner: Cycle completed in 1.4s. Next scan in 5.0 minutes.
+
+2026-08-14 23:10:37,780 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 23:15:36,381 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 23:15:36 ---
+2026-08-14 23:15:36,382 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 23:15:36,413 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 23:15:36,423 [INFO] AlphaEdge: Current Daily Net P&L: $-84.42 (Trading Uncapped)
+2026-08-14 23:15:36,432 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 23:15:36,433 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 23:15:36,433 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 23:15:36,434 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 23:15:36,812 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals SELL for USTECm at 30051.99000 (SL=30114.10643, TP=29927.75714)
+2026-08-14 23:15:36,812 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 23:15:36,812 [INFO] AlphaEdge: Skipping USTECm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 23:15:37,337 [INFO] AutonomousScanner: Cycle completed in 1.0s. Next scan in 5.0 minutes.
+
+2026-08-14 23:15:37,427 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 23:20:36,472 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 23:20:36 ---
+2026-08-14 23:20:36,473 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 23:20:36,514 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 23:20:36,526 [INFO] AlphaEdge: Current Daily Net P&L: $-84.42 (Trading Uncapped)
+2026-08-14 23:20:36,545 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 23:20:36,546 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 23:20:36,547 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 23:20:36,547 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 23:20:37,055 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals SELL for USTECm at 30050.36000 (SL=30112.49929, TP=29926.08143)
+2026-08-14 23:20:37,055 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 23:20:37,056 [INFO] AlphaEdge: Skipping USTECm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 23:20:37,516 [INFO] AutonomousScanner: Cycle completed in 1.0s. Next scan in 5.0 minutes.
+
+2026-08-14 23:20:37,606 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 23:25:36,566 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 23:25:36 ---
+2026-08-14 23:25:36,569 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 23:25:36,593 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 23:25:36,690 [INFO] AlphaEdge: Current Daily Net P&L: $-84.42 (Trading Uncapped)
+2026-08-14 23:25:36,705 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 23:25:36,705 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 23:25:36,706 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 23:25:36,706 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 23:25:37,161 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals SELL for USTECm at 30048.86000 (SL=30111.05071, TP=29924.47857)
+2026-08-14 23:25:37,162 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 23:25:37,162 [INFO] AlphaEdge: Skipping USTECm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 23:25:37,679 [INFO] AutonomousScanner: Cycle completed in 1.1s. Next scan in 5.0 minutes.
+
+2026-08-14 23:25:37,775 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 23:30:36,663 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 23:30:36 ---
+2026-08-14 23:30:36,664 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 23:30:36,694 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 23:30:36,704 [INFO] AlphaEdge: Current Daily Net P&L: $-84.42 (Trading Uncapped)
+2026-08-14 23:30:36,715 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 23:30:36,717 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 23:30:36,718 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 23:30:36,718 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 23:30:37,153 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals SELL for USTECm at 30047.74000 (SL=30110.22143, TP=29922.77714)
+2026-08-14 23:30:37,154 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 23:30:37,154 [INFO] AlphaEdge: Skipping USTECm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 23:30:37,651 [INFO] AutonomousScanner: Cycle completed in 1.0s. Next scan in 5.0 minutes.
+
+2026-08-14 23:30:37,716 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 23:35:36,729 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 23:35:36 ---
+2026-08-14 23:35:36,730 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 23:35:36,765 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 23:35:36,788 [INFO] AlphaEdge: Current Daily Net P&L: $-75.26 (Trading Uncapped)
+2026-08-14 23:35:36,796 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 23:35:36,796 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 23:35:36,796 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 23:35:36,797 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 23:35:37,247 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals SELL for USTECm at 30061.11000 (SL=30109.50143, TP=29964.32714)
+2026-08-14 23:35:37,247 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 23:35:37,322 [INFO] AlphaEdge: Successfully opened SELL market trade on USTECm (Ticket: 3090303045, SL: 30109.50143, TP: 29964.32714)
+2026-08-14 23:35:38,450 [INFO] AutonomousScanner: Cycle completed in 1.7s. Next scan in 5.0 minutes.
+
+2026-08-14 23:35:38,550 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 23:40:36,832 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 23:40:36 ---
+2026-08-14 23:40:36,836 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 23:40:37,052 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 23:40:37,104 [INFO] AlphaEdge: Current Daily Net P&L: $-75.26 (Trading Uncapped)
+2026-08-14 23:40:37,124 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 23:40:37,133 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 23:40:37,190 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 23:40:37,199 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 23:40:38,183 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals SELL for USTECm at 30057.86000 (SL=30108.05714, TP=29957.46571)
+2026-08-14 23:40:38,185 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 23:40:38,191 [INFO] AlphaEdge: Skipping USTECm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 23:40:38,724 [INFO] AutonomousScanner: Cycle completed in 1.9s. Next scan in 5.0 minutes.
+
+2026-08-14 23:40:38,900 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 23:45:37,011 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 23:45:37 ---
+2026-08-14 23:45:37,012 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 23:45:37,060 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 23:45:37,100 [INFO] AlphaEdge: Current Daily Net P&L: $-75.26 (Trading Uncapped)
+2026-08-14 23:45:37,121 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 23:45:37,131 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 23:45:37,139 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 23:45:37,139 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 23:45:37,551 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals SELL for USTECm at 30061.36000 (SL=30106.56143, TP=29970.95714)
+2026-08-14 23:45:37,552 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 23:45:37,552 [INFO] AlphaEdge: Skipping USTECm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 23:45:38,644 [INFO] AutonomousScanner: Cycle completed in 1.6s. Next scan in 5.0 minutes.
+
+2026-08-14 23:45:38,710 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 23:48:38,926 [INFO] AutonomousScanner: Bot manually stopped by user.
+2026-08-14 23:48:53,405 [INFO] AutonomousScanner: Successfully imported AlphaEdge strategy.
+2026-08-14 23:48:53,406 [INFO] AutonomousScanner: === Starting Autonomous Strategy Trader (1-Minute Hyper-Scan Cycle) ===
+2026-08-14 23:48:53,407 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 23:48:53 ---
+2026-08-14 23:48:53,407 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 23:48:53,447 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 23:48:53,491 [INFO] AlphaEdge: Current Daily Net P&L: $-75.26 (Trading Uncapped)
+2026-08-14 23:48:53,504 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 23:48:53,504 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 23:48:53,506 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 23:48:53,508 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 23:48:54,060 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 23:48:54,729 [INFO] AutonomousScanner: Cycle completed in 1.3s. Sleeping for 58.7s...
+2026-08-14 23:48:55,681 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 23:49:54,360 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 23:49:54 ---
+2026-08-14 23:49:54,362 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 23:49:54,389 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 23:49:54,397 [INFO] AlphaEdge: Current Daily Net P&L: $-75.26 (Trading Uncapped)
+2026-08-14 23:49:54,411 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 23:49:54,412 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 23:49:54,412 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 23:49:54,412 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 23:49:54,784 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals SELL for USTECm at 30060.86000 (SL=30113.09250, TP=29956.39500)
+2026-08-14 23:49:54,785 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 23:49:54,785 [INFO] AlphaEdge: Skipping USTECm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 23:49:55,309 [INFO] AutonomousScanner: Cycle completed in 0.9s. Sleeping for 59.1s...
+2026-08-14 23:49:55,360 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 23:50:54,412 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 23:50:54 ---
+2026-08-14 23:50:54,413 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 23:50:54,436 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 23:50:54,442 [INFO] AlphaEdge: Current Daily Net P&L: $-75.26 (Trading Uncapped)
+2026-08-14 23:50:54,448 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 23:50:54,449 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 23:50:54,449 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 23:50:54,449 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 23:50:54,804 [INFO] AlphaEdge: -> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.
+2026-08-14 23:50:55,288 [INFO] AutonomousScanner: Generating Daily Performance Report...
+2026-08-14 23:50:55,288 [ERROR] AutonomousScanner: Failed to send daily report: name 'timedelta' is not defined
+2026-08-14 23:50:55,289 [INFO] AutonomousScanner: Generating Weekly Performance Report...
+2026-08-14 23:50:55,289 [ERROR] AutonomousScanner: Failed to send weekly report: name 'timedelta' is not defined
+2026-08-14 23:50:55,289 [INFO] AutonomousScanner: Cycle completed in 0.9s. Sleeping for 59.1s...
+2026-08-14 23:50:55,350 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 23:51:54,473 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 23:51:54 ---
+2026-08-14 23:51:54,474 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 23:51:54,488 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 23:51:54,503 [INFO] AlphaEdge: Current Daily Net P&L: $-75.26 (Trading Uncapped)
+2026-08-14 23:51:54,515 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 23:51:54,516 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 23:51:54,517 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 23:51:54,518 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 23:51:54,800 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals SELL for USTECm at 30063.36000 (SL=30111.40500, TP=29967.27000)
+2026-08-14 23:51:54,800 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 23:51:54,801 [INFO] AlphaEdge: Skipping USTECm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 23:51:55,270 [INFO] AutonomousScanner: Generating Daily Performance Report...
+2026-08-14 23:51:55,271 [ERROR] AutonomousScanner: Failed to send daily report: name 'timedelta' is not defined
+2026-08-14 23:51:55,272 [INFO] AutonomousScanner: Generating Weekly Performance Report...
+2026-08-14 23:51:55,272 [ERROR] AutonomousScanner: Failed to send weekly report: name 'timedelta' is not defined
+2026-08-14 23:51:55,272 [INFO] AutonomousScanner: Cycle completed in 0.8s. Sleeping for 59.2s...
+2026-08-14 23:51:55,398 [INFO] AutonomousScanner: Desktop trade report refreshed.
+2026-08-14 23:52:54,612 [INFO] AutonomousScanner: --- Starting scan cycle at 2026-08-14 23:52:54 ---
+2026-08-14 23:52:54,613 [INFO] AutonomousScanner: Running AlphaEdge scan...
+2026-08-14 23:52:54,633 [INFO] AlphaEdge: AlphaEdge Strategy initialized.
+2026-08-14 23:52:54,642 [INFO] AlphaEdge: Current Daily Net P&L: $-75.26 (Trading Uncapped)
+2026-08-14 23:52:54,651 [INFO] AlphaEdge: [Weekday Mode] Active Sessions: ['24/7', 'NY']. Scanning symbols: ['BTCUSDm', 'ETHUSDm', 'USOILm', 'AUDJPYm', 'EURJPYm', 'GBPJPYm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAUUSDm', 'US30m', 'USTECm']
+2026-08-14 23:52:54,652 [INFO] AlphaEdge: === -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===
+2026-08-14 23:52:54,652 [INFO] AlphaEdge: | Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |
+2026-08-14 23:52:54,652 [INFO] AlphaEdge: | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+2026-08-14 23:52:55,035 [INFO] AlphaEdge: Strategy CORE_SYSTEM signals SELL for USTECm at 30062.61000 (SL=30111.40500, TP=29965.02000)
+2026-08-14 23:52:55,035 [INFO] AlphaEdge: === -> Executing Structural Edge Orders ===
+2026-08-14 23:52:55,035 [INFO] AlphaEdge: Skipping USTECm: CORE_SYSTEM trade already active on this symbol.
+2026-08-14 23:52:55,554 [INFO] AutonomousScanner: Generating Daily Performance Report...
+2026-08-14 23:52:55,554 [ERROR] AutonomousScanner: Failed to send daily report: name 'timedelta' is not defined
+2026-08-14 23:52:55,555 [INFO] AutonomousScanner: Generating Weekly Performance Report...
+2026-08-14 23:52:55,555 [ERROR] AutonomousScanner: Failed to send weekly report: name 'timedelta' is not defined
+2026-08-14 23:52:55,555 [INFO] AutonomousScanner: Cycle completed in 0.9s. Sleeping for 59.1s...
+2026-08-14 23:52:55,608 [INFO] AutonomousScanner: Desktop trade report refreshed.

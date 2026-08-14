@@ -50,8 +50,8 @@ MT5_CONFIG = {
 
 ASSET_CONFIG = {
     # Metals & Energies
-    "XAUUSDm": {"strategies": ["core_system", "liquidity_sweep", "breakout"], "timeframes": [mt5.TIMEFRAME_M5, mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
-    "XAGUSDm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["London", "NY"]},
+    "XAUUSDm": {"strategies": ["core_system", "breakout"], "timeframes": [mt5.TIMEFRAME_M5, mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
+
     "USOILm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["NY"]},
     
     # Indices
@@ -404,21 +404,28 @@ def analyze_core_system_df(df: pd.DataFrame, symbol: str):
     sweep_low = recent['low'].min()
     
     last_close = last['close']
+    last_open = last['open']
+    last_high = last['high']
+    last_low = last['low']
     last_atr = last['atr']
     
+    body_size = abs(last_close - last_open)
+    lower_wick = min(last_close, last_open) - last_low
+    upper_wick = last_high - max(last_close, last_open)
+    
     if bias == "BEARISH" and sweep_high >= pdh and pdh > 0:
-        if last_close > last['ema50'] and last_close < sweep_high:
-            sl = sweep_high + (3.0 * last_atr)
+        if last_close > last['ema50'] and last_close < sweep_high and upper_wick > body_size:
+            sl = sweep_high + (3.5 * last_atr)
             tp = last_close - 2.0 * (sl - last_close)
             sl, tp = assess_risk("SELL", sl, tp, last_close, last_atr, "neutral")
-            return "SELL", sl, tp, last_close, f"Core System: PDH Sweep ({pdh:.5f}) & Retest"
+            return "SELL", sl, tp, last_close, f"Core System: PDH Sweep & Wick Rejection. UW={upper_wick:.5f} > Body={body_size:.5f}"
             
     if bias == "BULLISH" and sweep_low <= pdl and pdl < float('inf'):
-        if last_close < last['ema50'] and last_close > sweep_low:
-            sl = sweep_low - (3.0 * last_atr)
+        if last_close < last['ema50'] and last_close > sweep_low and lower_wick > body_size:
+            sl = sweep_low - (3.5 * last_atr)
             tp = last_close + 2.0 * (last_close - sl)
             sl, tp = assess_risk("BUY", sl, tp, last_close, last_atr, "neutral")
-            return "BUY", sl, tp, last_close, f"Core System: PDL Sweep ({pdl:.5f}) & Retest"
+            return "BUY", sl, tp, last_close, f"Core System: PDL Sweep & Wick Rejection. LW={lower_wick:.5f} > Body={body_size:.5f}"
             
     return "NEUTRAL", 0.0, 0.0, 0.0, f"No core setup. Bias: {bias}, PDH: {pdh:.5f}, PDL: {pdl:.5f}"
 
@@ -669,23 +676,7 @@ def run_alphaedge(execute_orders: bool = False, approved_symbols: set[str] | Non
                 "strategy": strategy
             }
         
-    # Apply Metals Correlation Filter (XAUUSD and XAGUSD)
-    xau = scan_results.get("XAUUSD")
-    xag = scan_results.get("XAGUSD")
-    if xau and xag:
-        xau_action = xau["action"]
-        xag_action = xag["action"]
-        if (xau_action in ["BUY", "SELL"] or xag_action in ["BUY", "SELL"]) and (xau_action != xag_action):
-            if xau_action in ["BUY", "SELL"]:
-                xau["details"] = f"Blocked by Metals Correlation. Gold triggered {xau_action} but Silver is {xag_action}."
-                xau["action"] = "NEUTRAL"
-                xau["sl"] = 0.0
-                xau["tp"] = 0.0
-            if xag_action in ["BUY", "SELL"]:
-                xag["details"] = f"Blocked by Metals Correlation. Silver triggered {xag_action} but Gold is {xau_action}."
-                xag["action"] = "NEUTRAL"
-                xag["sl"] = 0.0
-                xag["tp"] = 0.0
+
                 
     # --- Autonomous trading: place orders only when the structural edge strategy signals BUY or SELL ---
     triggers = []
