@@ -49,17 +49,38 @@ MT5_CONFIG = {
 }
 
 ASSET_CONFIG = {
-    "XAUUSDm": {"strategies": ["core_system"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["London", "NY"]},
-    "BTCUSDm": {"strategies": ["core_system"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["24/7"]},
-    "ETHUSDm": {"strategies": ["core_system"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["24/7"]},
-    "USOILm": {"strategies": ["core_system"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["NY"]},
-    "USTECm": {"strategies": ["core_system"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["NY"]},
-    "XAGUSDm": {"strategies": ["core_system"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["London", "NY"]},
-    "EURUSDm": {"strategies": ["core_system"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["London"]},
-    "GBPUSDm": {"strategies": ["core_system"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["London"]},
-    "USDJPYm": {"strategies": ["core_system"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London", "NY"]},
-    "AUDUSDm": {"strategies": ["core_system"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London"]},
-    "USDCADm": {"strategies": ["core_system"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["NY"]}
+    # Metals & Energies
+    "XAUUSDm": {"strategies": ["core_system", "liquidity_sweep", "breakout"], "timeframes": [mt5.TIMEFRAME_M5, mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
+    "XAGUSDm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["London", "NY"]},
+    "USOILm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["NY"]},
+    
+    # Indices
+    "USTECm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["NY"]},
+    "US30m": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["NY"]},
+    "SPX500m": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["NY"]},
+    "GER30m": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["London"]},
+    "UK100m": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["London"]},
+
+    # Crypto
+    "BTCUSDm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["24/7"]},
+    "ETHUSDm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["24/7"]},
+    
+    # Major Forex
+    "EURUSDm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["London"]},
+    "GBPUSDm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["London"]},
+    "USDJPYm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London", "NY"]},
+    "AUDUSDm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London"]},
+    "USDCADm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["NY"]},
+    "NZDUSDm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London"]},
+    "USDCHFm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London", "NY"]},
+
+    # Minor/Cross Forex
+    "EURJPYm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London", "NY"]},
+    "GBPJPYm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London", "NY"]},
+    "EURGBPm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London"]},
+    "EURAUDm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London"]},
+    "GBPAUDm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London"]},
+    "AUDJPYm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London", "NY"]},
 }
 SYMBOLS = list(ASSET_CONFIG.keys())
 MAX_DAILY_LOSS_USD = 50.0
@@ -297,7 +318,7 @@ def analyze_liquidity_reversion_df(df: pd.DataFrame, symbol: str | None = None):
     rr_threshold = 2.0
 
     if sweep_buy and ema_buy_ok and h1_buy_ok:
-        sl = min(last_low, swing_low) - (1.0 * last_atr)
+        sl = min(last_low, swing_low) - (2.5 * last_atr)
         tp = max(bb_mid, last_close + max(2.5 * last_atr, 0.6 * (swing_high - last_close)))
         sl, tp = assess_risk("BUY", sl, tp, entry_price, last_atr, risk_level="neutral")
         risk = entry_price - sl
@@ -309,19 +330,19 @@ def analyze_liquidity_reversion_df(df: pd.DataFrame, symbol: str | None = None):
             details = f"BUY sweep rejected by R:R ({reward/risk:.2f})."
 
     elif basic_buy and h1_buy_ok:
-        sl = last_low - (1.0 * last_atr)
+        sl = last_low - (2.5 * last_atr)
         tp = last_close + max(2.5 * last_atr, bb_mid - last_close, 0.6 * (swing_high - last_close))
         sl, tp = assess_risk("BUY", sl, tp, entry_price, last_atr, risk_level="neutral")
         risk = entry_price - sl
         reward = tp - entry_price
         if risk > 0 and reward > 0 and (reward / risk) >= rr_threshold:
             action = "BUY"
-            details = f"Aggressive BUY. Close {last_close:.5f} <= BB lower {bb_lower:.5f} or RSI {last_rsi:.1f}. H1 {h1_status}. R:R {reward/risk:.2f}"
+            details = f"Aggressive BUY. Close {last_close:.5f} below BB lower {bb_lower:.5f} or RSI {last_rsi:.1f}. H1 {h1_status}. R:R {reward/risk:.2f}"
         else:
             details = f"Aggressive BUY rejected by R:R ({reward/risk:.2f})."
 
     elif sweep_sell and ema_sell_ok and h1_sell_ok:
-        sl = max(last_high, swing_high) + (1.0 * last_atr)
+        sl = max(last_high, swing_high) + (2.5 * last_atr)
         tp = min(bb_mid, last_close - max(2.5 * last_atr, 0.6 * (last_close - swing_low)))
         sl, tp = assess_risk("SELL", sl, tp, entry_price, last_atr, risk_level="neutral")
         risk = sl - entry_price
@@ -333,14 +354,14 @@ def analyze_liquidity_reversion_df(df: pd.DataFrame, symbol: str | None = None):
             details = f"SELL sweep rejected by R:R ({reward/risk:.2f})."
 
     elif basic_sell and h1_sell_ok:
-        sl = last_high + (1.0 * last_atr)
+        sl = last_high + (2.5 * last_atr)
         tp = last_close - max(2.5 * last_atr, last_close - bb_mid, 0.6 * (last_close - swing_low))
         sl, tp = assess_risk("SELL", sl, tp, entry_price, last_atr, risk_level="neutral")
         risk = sl - entry_price
         reward = entry_price - tp
         if risk > 0 and reward > 0 and (reward / risk) >= rr_threshold:
             action = "SELL"
-            details = f"Aggressive SELL. Close {last_close:.5f} >= BB upper {bb_upper:.5f} or RSI {last_rsi:.1f}. H1 {h1_status}. R:R {reward/risk:.2f}"
+            details = f"Aggressive SELL. Close {last_close:.5f} above BB upper {bb_upper:.5f} or RSI {last_rsi:.1f}. H1 {h1_status}. R:R {reward/risk:.2f}"
         else:
             details = f"Aggressive SELL rejected by R:R ({reward/risk:.2f})."
 
@@ -378,19 +399,46 @@ def analyze_core_system_df(df: pd.DataFrame, symbol: str):
     
     if bias == "BEARISH" and sweep_high >= pdh and pdh > 0:
         if last_close > last['ema50'] and last_close < sweep_high:
-            sl = sweep_high + (0.5 * last_atr)
+            sl = sweep_high + (3.0 * last_atr)
             tp = last_close - 2.0 * (sl - last_close)
             sl, tp = assess_risk("SELL", sl, tp, last_close, last_atr, "neutral")
             return "SELL", sl, tp, last_close, f"Core System: PDH Sweep ({pdh:.5f}) & Retest"
             
     if bias == "BULLISH" and sweep_low <= pdl and pdl < float('inf'):
         if last_close < last['ema50'] and last_close > sweep_low:
-            sl = sweep_low - (0.5 * last_atr)
+            sl = sweep_low - (3.0 * last_atr)
             tp = last_close + 2.0 * (last_close - sl)
             sl, tp = assess_risk("BUY", sl, tp, last_close, last_atr, "neutral")
             return "BUY", sl, tp, last_close, f"Core System: PDL Sweep ({pdl:.5f}) & Retest"
             
     return "NEUTRAL", 0.0, 0.0, 0.0, f"No core setup. Bias: {bias}, PDH: {pdh:.5f}, PDL: {pdl:.5f}"
+
+def analyze_breakout_df(df: pd.DataFrame, symbol: str):
+    """Volatility expansion breakout strategy."""
+    if len(df) < 50:
+        return "NEUTRAL", 0.0, 0.0, 0.0, "Insufficient data"
+    df = df.copy()
+    df = calculate_bollinger_bands(df)
+    df = calculate_atr(df)
+    last = df.iloc[-1]
+    prev = df.iloc[-2]
+    
+    last_close = last['close']
+    last_atr = last['atr']
+    
+    if last_close > last['bb_upper'] and prev['close'] <= prev['bb_upper']:
+        sl = last['bb_mid'] - (0.5 * last_atr)
+        tp = last_close + 2.0 * (last_close - sl)
+        sl, tp = assess_risk("BUY", sl, tp, last_close, last_atr, "neutral")
+        return "BUY", sl, tp, last_close, f"Breakout BUY. Close above BB_upper."
+        
+    if last_close < last['bb_lower'] and prev['close'] >= prev['bb_lower']:
+        sl = last['bb_mid'] + (0.5 * last_atr)
+        tp = last_close - 2.0 * (sl - last_close)
+        sl, tp = assess_risk("SELL", sl, tp, last_close, last_atr, "neutral")
+        return "SELL", sl, tp, last_close, f"Breakout SELL. Close below BB_lower."
+        
+    return "NEUTRAL", 0.0, 0.0, 0.0, "No breakout."
 
 def analyze_strategies(symbol: str):
     config = ASSET_CONFIG.get(symbol, {"strategies": ["liquidity_sweep"], "timeframes": [MAIN_TIMEFRAME]})
@@ -398,7 +446,7 @@ def analyze_strategies(symbol: str):
     timeframes = config["timeframes"]
     
     best_action = "NEUTRAL"
-    best_result = ("NEUTRAL", 0.0, 0.0, 0.0, "No setup found across any strategy or timeframe")
+    best_result = ("NEUTRAL", 0.0, 0.0, 0.0, "No setup found across any strategy or timeframe", "NONE")
     
     try:
         for tf in timeframes:
@@ -424,12 +472,12 @@ def analyze_strategies(symbol: str):
                 action, sl, tp, ep, details = res
                 if action in ["BUY", "SELL"]:
                     details = f"[{strategy.upper()} on {tf}] " + details
-                    return action, sl, tp, ep, details  
+                    return action, sl, tp, ep, details, strategy.upper()
                     
         return best_result
     except Exception as e:
         logger.error(f"Failed to analyze structural edge for {symbol}: {e}")
-        return "NEUTRAL", 0.0, 0.0, 0.0, f"Error: {e}"
+        return "NEUTRAL", 0.0, 0.0, 0.0, f"Error: {e}", "NONE"
 def run_alphaedge(execute_orders: bool = False, approved_symbols: set[str] | None = None):
     client = MT5Client(MT5_CONFIG)
     try:
@@ -548,48 +596,42 @@ def run_alphaedge(execute_orders: bool = False, approved_symbols: set[str] | Non
         if any(s in active_sessions for s in config.get("sessions", [])):
             session_symbols.append(sym)
     
-    # Fetch open symbols to filter them out of the scan completely
-    open_symbols = []
-    if open_positions:
-        open_symbols = [pos.symbol for pos in open_positions if getattr(pos, 'comment', '') == "ALPHAEDGE_TRADE"]
-
     if is_weekend:
         # Scan only major crypto symbols on weekends
-        active_symbols = [s.name for s in mt5.symbols_get() if s.visible and s.name in session_symbols and ("BTC" in s.name or "ETH" in s.name) and s.name not in open_symbols]
+        active_symbols = [s.name for s in mt5.symbols_get() if s.visible and s.name in session_symbols and ("BTC" in s.name or "ETH" in s.name)]
         logger.info(f"[Weekend Mode] Scanning Crypto only: {active_symbols}")
     else:
         # Scan symbols that are in our custom SYMBOLS list AND currently in an active session
-        active_symbols = [s.name for s in mt5.symbols_get() if s.visible and s.name in session_symbols and s.name not in open_symbols]
+        active_symbols = [s.name for s in mt5.symbols_get() if s.visible and s.name in session_symbols]
         logger.info(f"[Weekday Mode] Active Sessions: {active_sessions}. Scanning symbols: {active_symbols}")
 
     logger.info("=== -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===")
     logger.info("| Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |")
     logger.info("| :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
     
-    open_symbols = [p.symbol for p in open_positions] if open_positions else []
-    
     scan_results = {}
     
     def scan_symbol(symbol):
         symbol_info = mt5.symbol_info(symbol)
         if not symbol_info or not symbol_info.visible:
-            return symbol, ("NEUTRAL", 0.0, 0.0, 0.0, "Symbol not available/visible")
+            return symbol, ("NEUTRAL", 0.0, 0.0, 0.0, "Symbol not available/visible", "NONE")
         try:
             res = analyze_strategies(symbol)
             return symbol, res
         except Exception as e:
-            return symbol, ("NEUTRAL", 0.0, 0.0, 0.0, f"Error: {e}")
+            return symbol, ("NEUTRAL", 0.0, 0.0, 0.0, f"Error: {e}", "NONE")
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         futures = {executor.submit(scan_symbol, s): s for s in active_symbols}
         for future in concurrent.futures.as_completed(futures):
-            symbol, (action, sl, tp, entry_price, details) = future.result()
+            symbol, (action, sl, tp, entry_price, details, strategy) = future.result()
             scan_results[symbol] = {
                 "action": action,
                 "sl": sl,
                 "tp": tp,
                 "entry_price": entry_price,
-                "details": details
+                "details": details,
+                "strategy": strategy
             }
         
     # Apply Metals Correlation Filter (XAUUSD and XAGUSD)
@@ -619,8 +661,9 @@ def run_alphaedge(execute_orders: bool = False, approved_symbols: set[str] | Non
         sl = result["sl"]
         tp = result["tp"]
         entry_price = result["entry_price"]
-        logger.info(f"Strategy signals {action} for {symbol} at {entry_price:.5f} (SL={sl:.5f}, TP={tp:.5f})")
-        triggers.append((symbol, action, sl, tp, entry_price, result["details"]))
+        strategy = result["strategy"]
+        logger.info(f"Strategy {strategy} signals {action} for {symbol} at {entry_price:.5f} (SL={sl:.5f}, TP={tp:.5f})")
+        triggers.append((symbol, action, sl, tp, entry_price, result["details"], strategy))
 
     if not triggers:
         logger.info("-> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.")
@@ -629,26 +672,26 @@ def run_alphaedge(execute_orders: bool = False, approved_symbols: set[str] | Non
 
     if not execute_orders:
         logger.info("=== -> Approval Required: no orders submitted ===")
-        for symbol, action, sl, tp, entry_price, details in triggers:
-            logger.info(f"PENDING | {symbol} | {action} | Entry {entry_price:.5f} | SL {sl:.5f} | TP {tp:.5f}")
+        for symbol, action, sl, tp, entry_price, details, strategy in triggers:
+            logger.info(f"PENDING | {symbol} | {action} | Entry {entry_price:.5f} | SL {sl:.5f} | TP {tp:.5f} | Strategy: {strategy}")
         client.disconnect()
         return triggers
 
     logger.info("=== -> Executing Structural Edge Orders ===")
     open_positions = mt5.positions_get()
-    active_symbols = []
+    active_trades = []
     if open_positions:
-        active_symbols = [pos.symbol for pos in open_positions if getattr(pos, 'comment', '') == "ALPHAEDGE_TRADE"]
+        active_trades = [(pos.symbol, getattr(pos, 'comment', '')) for pos in open_positions]
     pending_orders = mt5.orders_get() or []
-    active_symbols.extend(order.symbol for order in pending_orders if getattr(order, 'comment', '') == "ALPHAEDGE_TRADE")
+    active_trades.extend([(order.symbol, getattr(order, 'comment', '')) for order in pending_orders])
 
-    for symbol, action, sl, tp, entry_price, details in triggers:
+    for symbol, action, sl, tp, entry_price, details, strategy_name in triggers:
         if approved_symbols is not None and symbol not in approved_symbols:
             logger.info(f"Skipping {symbol}: not in the approved symbol list.")
             continue
-        # Prevent duplicate trades: skip if a trade is already active on this symbol
-        if symbol in active_symbols:
-            logger.info(f"Skipping {symbol}: trade already active on this symbol.")
+        # Prevent duplicate trades: skip if THIS specific strategy already has a trade open on this symbol
+        if (symbol, strategy_name) in active_trades:
+            logger.info(f"Skipping {symbol}: {strategy_name} trade already active on this symbol.")
             continue
             
         volume = get_lot_size(symbol, sl, entry_price)
@@ -669,7 +712,7 @@ def run_alphaedge(execute_orders: bool = False, approved_symbols: set[str] | Non
                 "sl": round(sl, 5),
                 "tp": round(tp, 5),
                 "deviation": 20,
-                "comment": "ALPHAEDGE_TRADE",
+                "comment": strategy_name,
                 "type_filling": mt5.ORDER_FILLING_FOK,
                 "type_time": mt5.ORDER_TIME_GTC,
             }
@@ -677,10 +720,10 @@ def run_alphaedge(execute_orders: bool = False, approved_symbols: set[str] | Non
             if result and result.retcode == mt5.TRADE_RETCODE_DONE:
                 ticket = result.order
                 logger.info(f"Successfully opened {action} market trade on {symbol} (Ticket: {ticket}, SL: {sl:.5f}, TP: {tp:.5f})")
-                msg = f"🚀 <b>[AlphaEdge Market Trade Opened]</b>\nSymbol: {symbol}\nAction: {action}\nConfirmation: {details}\nLot Size: {volume}\nSL: {sl:.5f}\nTP: {tp:.5f}"
+                msg = f"🚀 <b>[AlphaEdge Market Trade Opened]</b>\nStrategy: {strategy_name}\nSymbol: {symbol}\nAction: {action}\nConfirmation: {details}\nLot Size: {volume}\nSL: {sl:.5f}\nTP: {tp:.5f}"
                 send_telegram_alert(msg)
                 try:
-                    log_trade(symbol, action, entry_price, sl, tp, volume, "ALPHAEDGE_TRADE")
+                    log_trade(symbol, action, entry_price, sl, tp, volume, strategy_name)
                 except Exception as log_err:
                     logger.error(f"Failed to log trade for {symbol}: {log_err}")
             else:
