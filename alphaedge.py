@@ -13,6 +13,7 @@ from metatrader_client import MT5Client
 from metatrader_client.order.send_order import send_order
 from metatrader_client.types import TradeRequestActions, OrderType
 import MetaTrader5 as mt5
+from prop_firm_config import PropFirmEngine
 
 # Set up logging to both console and file
 logging.basicConfig(
@@ -47,6 +48,9 @@ MT5_CONFIG = {
     "password": os.environ["MT5_PASSWORD"],
     "server": os.environ["MT5_SERVER"],
 }
+
+if "PROP_FIRM_STARTING_BALANCE" in os.environ:
+    PROP_FIRM_STARTING_BALANCE = float(os.environ["PROP_FIRM_STARTING_BALANCE"])
 
 ASSET_CONFIG = {
     # Metals & Energies
@@ -498,10 +502,15 @@ def run_alphaedge(execute_orders: bool = False, approved_symbols: set[str] | Non
     client = MT5Client(MT5_CONFIG)
     try:
         client.connect()
+        mt5.login(MT5_CONFIG["login"], password=MT5_CONFIG["password"], server=MT5_CONFIG["server"])
         logger.info("AlphaEdge Strategy initialized.")
     except Exception as e:
         logger.error(f"MT5 connection failed: {e}")
         raise RuntimeError(f"MT5 connection failed: {e}")
+        
+    prop_engine = None
+    if PROP_FIRM_MODE:
+        prop_engine = PropFirmEngine(starting_balance=PROP_FIRM_STARTING_BALANCE, current_phase=1)
         
     # 1. Calculate Daily Profit (For Logging Only - No Limits)
     now = datetime.now()
