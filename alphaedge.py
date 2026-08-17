@@ -284,6 +284,7 @@ def analyze_liquidity_reversion_df(df: pd.DataFrame, symbol: str | None = None):
         and bullish_rejection
         and last_rsi <= 40
         and lower_wick > body_size
+        and lower_wick > (0.4 * last_atr)
     )
     sweep_sell = (
         last_high > swing_high + (0.18 * last_atr)
@@ -291,6 +292,7 @@ def analyze_liquidity_reversion_df(df: pd.DataFrame, symbol: str | None = None):
         and bearish_rejection
         and last_rsi >= 60
         and upper_wick > body_size
+        and upper_wick > (0.4 * last_atr)
     )
 
     ema_buy_ok = last_ema8 <= last_ema21
@@ -418,14 +420,14 @@ def analyze_core_system_df(df: pd.DataFrame, symbol: str):
     upper_wick = last_high - max(last_close, last_open)
     
     if bias == "BEARISH" and sweep_high >= pdh and pdh > 0:
-        if last_close > last['ema50'] and last_close < sweep_high and upper_wick > body_size:
+        if last_close > last['ema50'] and last_close < sweep_high and upper_wick > body_size and upper_wick > (0.4 * last_atr):
             sl = sweep_high + (3.5 * last_atr)
             tp = last_close - 2.0 * (sl - last_close)
             sl, tp = assess_risk("SELL", sl, tp, last_close, last_atr, "neutral")
             return "SELL", sl, tp, last_close, f"Core System: PDH Sweep & Wick Rejection. UW={upper_wick:.5f} > Body={body_size:.5f}"
             
     if bias == "BULLISH" and sweep_low <= pdl and pdl < float('inf'):
-        if last_close < last['ema50'] and last_close > sweep_low and lower_wick > body_size:
+        if last_close < last['ema50'] and last_close > sweep_low and lower_wick > body_size and lower_wick > (0.4 * last_atr):
             sl = sweep_low - (3.5 * last_atr)
             tp = last_close + 2.0 * (last_close - sl)
             sl, tp = assess_risk("BUY", sl, tp, last_close, last_atr, "neutral")
