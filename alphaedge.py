@@ -178,7 +178,7 @@ def get_lot_size(symbol: str, sl_price: float = 0.0, entry_price: float = 0.0) -
         return vol_min
         
     balance = account.balance
-    risk_percentage = 0.005 # 0.5% risk per trade
+    risk_percentage = 0.002  # 0.2% risk per trade (~$30 on $15K account)
     risk_usd = balance * risk_percentage
     
     price_distance = abs(entry_price - sl_price)
@@ -388,8 +388,8 @@ def analyze_liquidity_reversion_df(df: pd.DataFrame, symbol: str | None = None):
     details = f"H4:{h4_bias} | RSI:{last_rsi:.1f} | Vol:{'OK' if volume_confirmed else 'LOW'} | Asian:{'HIT' if (asian_sweep_buy or asian_sweep_sell) else 'MISS'}"
 
     if sweep_buy:
-        # UPGRADE 4: Institutional SL — just below the wick, not 3.5 ATR away
-        sl = prev_low - (0.3 * last_atr)
+        # SL placed 1.0 ATR below the wick low — enough room beyond spread noise
+        sl = prev_low - (1.0 * last_atr)
         tp = last_close + max(2.5 * (last_close - sl), bb_mid - last_close, 0.6 * (swing_high - last_close))
         sl, tp = assess_risk("BUY", sl, tp, entry_price, last_atr, risk_level="neutral")
         risk = entry_price - sl
@@ -402,8 +402,8 @@ def analyze_liquidity_reversion_df(df: pd.DataFrame, symbol: str | None = None):
             details = f"BUY sweep valid but R:R insufficient ({reward/risk:.2f} < {rr_threshold})."
 
     elif sweep_sell:
-        # UPGRADE 4: Institutional SL — just above the wick
-        sl = prev_high + (0.3 * last_atr)
+        # SL placed 1.0 ATR above the wick high — enough room beyond spread noise
+        sl = prev_high + (1.0 * last_atr)
         tp = last_close - max(2.5 * (sl - last_close), last_close - bb_mid, 0.6 * (last_close - swing_low))
         sl, tp = assess_risk("SELL", sl, tp, entry_price, last_atr, risk_level="neutral")
         risk = sl - entry_price
@@ -495,8 +495,8 @@ def analyze_core_system_df(df: pd.DataFrame, symbol: str):
                 and volume_confirmed
             )
             if wick_valid:
-                # UPGRADE 3: Institutional SL just above wick high
-                sl = prev_high + (0.3 * last_atr)
+                # SL placed 1.0 ATR above wick high — room beyond spread
+                sl = prev_high + (1.0 * last_atr)
                 tp = last_close - 2.5 * (sl - last_close)
                 sl, tp = assess_risk("SELL", sl, tp, last_close, last_atr, "neutral")
                 risk = sl - last_close
@@ -522,8 +522,8 @@ def analyze_core_system_df(df: pd.DataFrame, symbol: str):
                 and volume_confirmed
             )
             if wick_valid:
-                # UPGRADE 3: Institutional SL just below wick low
-                sl = prev_low - (0.3 * last_atr)
+                # SL placed 1.0 ATR below wick low — room beyond spread
+                sl = prev_low - (1.0 * last_atr)
                 tp = last_close + 2.5 * (last_close - sl)
                 sl, tp = assess_risk("BUY", sl, tp, last_close, last_atr, "neutral")
                 risk = last_close - sl
@@ -604,7 +604,7 @@ def analyze_breakout_df(df: pd.DataFrame, symbol: str):
             ob_mid  = (ob_high + ob_low) / 2
             # Price must currently be returning INTO the OB zone
             if ob_low <= last_close <= ob_high and last_rsi <= 50:
-                sl = ob_low - (0.3 * last_atr)
+                sl = ob_low - (1.0 * last_atr)
                 tp = last_close + 3.0 * (last_close - sl)
                 sl, tp = assess_risk("BUY", sl, tp, last_close, last_atr, "neutral")
                 risk = last_close - sl
@@ -634,7 +634,7 @@ def analyze_breakout_df(df: pd.DataFrame, symbol: str):
             ob_high = best_ob['high']
             ob_low  = best_ob['low']
             if ob_low <= last_close <= ob_high and last_rsi >= 50:
-                sl = ob_high + (0.3 * last_atr)
+                sl = ob_high + (1.0 * last_atr)
                 tp = last_close - 3.0 * (sl - last_close)
                 sl, tp = assess_risk("SELL", sl, tp, last_close, last_atr, "neutral")
                 risk = sl - last_close
@@ -759,7 +759,7 @@ def analyze_gold_system_df(df: pd.DataFrame, symbol: str):
                 and volume_ok
             )
             if wick_valid:
-                sl = prev_high + (0.5 * last_atr)  # slightly wider for Gold spread
+                sl = prev_high + (1.0 * last_atr)  # 1 ATR above wick for Gold spread
                 tp = last_close - 2.5 * (sl - last_close)
                 sl, tp = assess_risk("SELL", sl, tp, last_close, last_atr, "neutral")
                 risk = sl - last_close
@@ -787,7 +787,7 @@ def analyze_gold_system_df(df: pd.DataFrame, symbol: str):
                 and volume_ok
             )
             if wick_valid:
-                sl = prev_low - (0.5 * last_atr)
+                sl = prev_low - (1.0 * last_atr)
                 tp = last_close + 2.5 * (last_close - sl)
                 sl, tp = assess_risk("BUY", sl, tp, last_close, last_atr, "neutral")
                 risk = last_close - sl
