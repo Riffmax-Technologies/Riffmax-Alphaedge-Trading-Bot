@@ -184,8 +184,7 @@ def get_lot_size(symbol: str, sl_price: float = 0.0, entry_price: float = 0.0) -
         return 0.0
 
     balance = account.balance
-    risk_percentage = 0.002   # 0.2% per trade — ~$30 on a $15,000 account
-    risk_usd = balance * risk_percentage
+    risk_usd = 50.0  # Fixed $50 risk per trade regardless of balance
 
     price_distance = abs(entry_price - sl_price)
     if price_distance == 0:
