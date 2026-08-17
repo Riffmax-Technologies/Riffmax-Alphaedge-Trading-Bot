@@ -409,25 +409,31 @@ def analyze_core_system_df(df: pd.DataFrame, symbol: str):
     sweep_high = recent['high'].max()
     sweep_low = recent['low'].min()
     
+    # Structural patterns must be evaluated on the previously CLOSED candle (prev)
+    prev = df.iloc[-2]
+    prev_close = prev['close']
+    prev_open = prev['open']
+    prev_high = prev['high']
+    prev_low = prev['low']
+    
     last_close = last['close']
-    last_open = last['open']
-    last_high = last['high']
-    last_low = last['low']
     last_atr = last['atr']
     
-    body_size = abs(last_close - last_open)
-    lower_wick = min(last_close, last_open) - last_low
-    upper_wick = last_high - max(last_close, last_open)
+    body_size = abs(prev_close - prev_open)
+    lower_wick = min(prev_close, prev_open) - prev_low
+    upper_wick = prev_high - max(prev_close, prev_open)
     
     if bias == "BEARISH" and sweep_high >= pdh and pdh > 0:
-        if last_close > last['ema50'] and last_close < sweep_high and upper_wick > body_size and upper_wick > (0.4 * last_atr):
+        # Evaluate rejection on the PREVIOUS closed candle, not the live current candle
+        if prev_close < sweep_high and upper_wick > body_size and upper_wick > (0.4 * last_atr):
             sl = sweep_high + (3.5 * last_atr)
             tp = last_close - 2.0 * (sl - last_close)
             sl, tp = assess_risk("SELL", sl, tp, last_close, last_atr, "neutral")
             return "SELL", sl, tp, last_close, f"Core System: PDH Sweep & Wick Rejection. UW={upper_wick:.5f} > Body={body_size:.5f}"
             
     if bias == "BULLISH" and sweep_low <= pdl and pdl < float('inf'):
-        if last_close < last['ema50'] and last_close > sweep_low and lower_wick > body_size and lower_wick > (0.4 * last_atr):
+        # Evaluate rejection on the PREVIOUS closed candle
+        if prev_close > sweep_low and lower_wick > body_size and lower_wick > (0.4 * last_atr):
             sl = sweep_low - (3.5 * last_atr)
             tp = last_close + 2.0 * (last_close - sl)
             sl, tp = assess_risk("BUY", sl, tp, last_close, last_atr, "neutral")
