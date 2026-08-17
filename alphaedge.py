@@ -161,49 +161,76 @@ def send_telegram_alert(message: str):
         logger.error(f"Failed to send Telegram alert: {e}")
 
 def get_lot_size(symbol: str, sl_price: float = 0.0, entry_price: float = 0.0) -> float:
-    """Calculate lot size based on 0.5% dynamic risk using ATR-based stop loss distance."""
+    """
+    Calculate lot size based on 0.2% dynamic risk (~$30 per trade on $15K account).
+    
+    Returns 0.0 if the trade is not viable — i.e., even the broker minimum lot
+    would risk more than 1.5x the intended risk ($45). In that case the bot
+    skips the trade rather than overexpose the account.
+    """
     symbol_info = mt5.symbol_info(symbol)
     if not symbol_info:
-        return 0.01
-        
-    vol_min = symbol_info.volume_min
-    vol_max = symbol_info.volume_max
+        return 0.0
+
+    vol_min  = symbol_info.volume_min
+    vol_max  = symbol_info.volume_max
     vol_step = symbol_info.volume_step
-    
+
     if sl_price == 0.0 or entry_price == 0.0:
-        return max(vol_min, round(vol_min * AE_LOT_MULTIPLIER, 2))
-        
+        return vol_min
+
     account = mt5.account_info()
     if not account:
-        return vol_min
-        
+        return 0.0
+
     balance = account.balance
-    risk_percentage = 0.002  # 0.2% risk per trade (~$30 on $15K account)
+    risk_percentage = 0.002   # 0.2% per trade — ~$30 on a $15,000 account
     risk_usd = balance * risk_percentage
-    
+
     price_distance = abs(entry_price - sl_price)
     if price_distance == 0:
-        return vol_min
-        
-    tick_size = symbol_info.trade_tick_size
+        return 0.0
+
+    tick_size  = symbol_info.trade_tick_size
     tick_value = symbol_info.trade_tick_value
     if tick_size == 0 or tick_value == 0:
-        return vol_min
-        
-    ticks_at_risk = price_distance / tick_size
-    loss_for_one_lot = ticks_at_risk * tick_value
-    
-    if loss_for_one_lot == 0:
-        return vol_min
-        
-    optimal_volume = risk_usd / loss_for_one_lot
-    
+        return 0.0
+
+    ticks_at_risk    = price_distance / tick_size
+    loss_per_one_lot = ticks_at_risk * tick_value
+
+    if loss_per_one_lot == 0:
+        return 0.0
+
+    optimal_volume = risk_usd / loss_per_one_lot
+
+    # Round to the broker's volume step
     if vol_step > 0:
         optimal_volume = round(optimal_volume / vol_step) * vol_step
-        
-    optimal_volume = max(vol_min, min(optimal_volume, vol_max))
+
+    # Clamp between broker min and max
+    clamped_volume = max(vol_min, min(optimal_volume, vol_max))
+
+    # -------------------------------------------------------
+    # VIABILITY CHECK: If the broker minimum lot forces us to
+    # risk more than 1.5x our intended risk, skip the trade.
+    # This prevents over-risking on assets like Gold and BTC
+    # where a wide ATR-based SL + minimum 0.01 lot can mean
+    # the actual loss far exceeds the $30 target.
+    # -------------------------------------------------------
+    actual_risk_at_min = vol_min * loss_per_one_lot
+    max_acceptable_risk = risk_usd * 1.5   # Allow up to $45 max (1.5x $30)
+
+    if optimal_volume < vol_min and actual_risk_at_min > max_acceptable_risk:
+        logger.info(
+            f"[Lot Sizing] {symbol} SKIPPED — min lot risk ${actual_risk_at_min:.2f} "
+            f"exceeds max acceptable ${max_acceptable_risk:.2f}. "
+            f"SL distance too wide for safe sizing."
+        )
+        return 0.0   # Signal to caller: do not place this trade
+
     decimals = len(str(vol_step).split('.')[1]) if '.' in str(vol_step) else 0
-    return round(optimal_volume, decimals)
+    return round(clamped_volume, decimals)
 
 # Simple test lot size that respects the instrument's minimum volume
 def get_test_lot(symbol: str) -> float:
@@ -1114,6 +1141,9 @@ def run_alphaedge(execute_orders: bool = False, approved_symbols: set[str] | Non
             continue
             
         volume = get_lot_size(symbol, sl, entry_price)
+        if volume == 0.0:
+            logger.info(f"Skipping {symbol}: lot size calculation returned 0 (min lot would over-risk the account).")
+            continue
         order_type = mt5.ORDER_TYPE_BUY if action == "BUY" else mt5.ORDER_TYPE_SELL
         try:
             # Get current market price for the order
