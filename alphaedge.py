@@ -62,8 +62,6 @@ ASSET_CONFIG = {
     # Indices
     "USTECm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["NY"]},
     "US30m": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["NY"]},
-    "SPX500m": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["NY"]},
-    "GER30m": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["London"]},
     "UK100m": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["London"]},
 
     # Crypto (BTC only — ETH removed per user decision)
