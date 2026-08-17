@@ -49,12 +49,13 @@ MT5_CONFIG = {
     "server": os.environ["MT5_SERVER"],
 }
 
+PROP_FIRM_STARTING_BALANCE = 15000.0  # Default — overridden by .env
 if "PROP_FIRM_STARTING_BALANCE" in os.environ:
     PROP_FIRM_STARTING_BALANCE = float(os.environ["PROP_FIRM_STARTING_BALANCE"])
 
 ASSET_CONFIG = {
-    # Metals & Energies
-    "XAUUSDm": {"strategies": ["core_system", "breakout"], "timeframes": [mt5.TIMEFRAME_M5, mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
+    # Metals & Energies — Gold uses dedicated gold_system strategy
+    "XAUUSDm": {"strategies": ["gold_system", "core_system"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
 
     "USOILm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["NY"]},
     
@@ -65,9 +66,8 @@ ASSET_CONFIG = {
     "GER30m": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["London"]},
     "UK100m": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["London"]},
 
-    # Crypto
+    # Crypto (BTC only — ETH removed per user decision)
     "BTCUSDm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["24/7"]},
-    "ETHUSDm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["24/7"]},
     
     # Major Forex
     "EURUSDm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["London"]},
@@ -117,7 +117,7 @@ if MODE == "M5_FAST":
     # faster, looser defaults for higher frequency
     AE_PULLBACK_ATR_FRACTION = float(os.getenv("AE_PULLBACK_ATR_FRACTION", "0.3"))
     AE_ATR_SL_MULTIPLIER = float(os.getenv("AE_ATR_SL_MULTIPLIER", "0.8"))
-    AE_RR_MIN = float(os.getenv("240", "1.5"))
+    AE_RR_MIN = float(os.getenv("AE_RR_MIN", "1.5"))
 else:
     MAIN_TIMEFRAME = mt5.TIMEFRAME_M30
     CONFIRM_TIMEFRAME = mt5.TIMEFRAME_M5
@@ -646,6 +646,161 @@ def analyze_breakout_df(df: pd.DataFrame, symbol: str):
 
     return "NEUTRAL", 0.0, 0.0, 0.0, f"No OB setup. H4:{h4_bias}. Close:{last_close:.5f}"
 
+
+def analyze_gold_system_df(df: pd.DataFrame, symbol: str):
+    """
+    Gold-Specific Trading Strategy (XAUUSDm).
+    Gold moves differently from Forex and indices. Key characteristics:
+    - Gold is highly sensitive to USD strength (inverse relationship)
+    - Gold respects round numbers ($100 increments) as psychological levels
+    - Gold makes sharp liquidity sweeps during London open (07:00-09:00 UTC)
+      and NY open (13:00-14:30 UTC) before reversing
+    - Gold trends strongly — mean-reversion works best only at extremes
+
+    Entry logic:
+    1. H4 bias for trend direction (same as other strategies)
+    2. Previous Day High/Low sweep + wick rejection on closed candle
+    3. Round number confluence — price must be near a $100 or $50 round level
+    4. RSI divergence check — price makes new extreme but RSI is improving
+    5. Institutional SL just beyond the wick extreme
+    6. Minimum R:R of 2.5 (Gold has wide spreads, needs higher reward)
+    """
+    if len(df) < 50:
+        return "NEUTRAL", 0.0, 0.0, 0.0, "Insufficient data for Gold System"
+
+    df = df.copy()
+    df = calculate_atr(df)
+    df = calculate_rsi(df)
+    df['ema21'] = calculate_ema(df, 21)
+    df['ema50'] = calculate_ema(df, 50)
+
+    last = df.iloc[-1]
+    prev = df.iloc[-2]  # Closed candle for geometry
+
+    last_close = last['close']
+    last_atr   = last['atr']
+    last_rsi   = last['rsi']
+    last_ema21 = last['ema21']
+    last_ema50 = last['ema50']
+
+    # H4 Bias
+    h4_bias = get_h4_bias(symbol)
+    if h4_bias == "NEUTRAL":
+        return "NEUTRAL", 0.0, 0.0, 0.0, "Gold: H4 NEUTRAL — waiting for clear trend"
+
+    # Previous Day High/Low
+    pdh, pdl = 0.0, float('inf')
+    rates_d1 = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_D1, 1, 3)
+    if rates_d1 is not None and len(rates_d1) >= 1:
+        pdh = rates_d1[0]['high']
+        pdl = rates_d1[0]['low']
+    if pdh == 0.0 or pdl == float('inf'):
+        return "NEUTRAL", 0.0, 0.0, 0.0, "Gold: Cannot read Daily levels"
+
+    # Previous Week High/Low for confluence
+    pwh, pwl = 0.0, float('inf')
+    rates_w1 = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_W1, 1, 2)
+    if rates_w1 is not None and len(rates_w1) >= 1:
+        pwh = rates_w1[0]['high']
+        pwl = rates_w1[0]['low']
+
+    # Closed candle geometry
+    prev_close = prev['close']
+    prev_open  = prev['open']
+    prev_high  = prev['high']
+    prev_low   = prev['low']
+    prev_rsi   = prev['rsi']
+    prev_vol   = prev['tick_volume']
+
+    body_size  = abs(prev_close - prev_open)
+    lower_wick = min(prev_close, prev_open) - prev_low
+    upper_wick = prev_high - max(prev_close, prev_open)
+
+    # Volume filter
+    avg_vol = df['tick_volume'].iloc[-21:-1].mean() if len(df) >= 21 else df['tick_volume'].mean()
+    volume_ok = prev_vol >= 1.2 * avg_vol
+
+    # Round number confluence — Gold respects $50 and $100 levels
+    # Check if the PDH/PDL is near a $50 round number (e.g. 2300, 2350, 2400)
+    def near_round_level(price, tolerance=8.0):
+        """Returns True if price is within tolerance of a $50 increment."""
+        nearest_50 = round(price / 50) * 50
+        return abs(price - nearest_50) <= tolerance
+
+    # Recent sweep high/low across last 20 candles
+    recent = df.iloc[-20:]
+    sweep_high = recent['high'].max()
+    sweep_low  = recent['low'].min()
+
+    # --- RSI Divergence check (simplified) ---
+    # For BUY: price swept lower than PDL, but RSI is not making new lows (improving)
+    rsi_diverge_buy  = prev_rsi < 40 and prev_rsi > df['rsi'].iloc[-10:-2].min()
+    rsi_diverge_sell = prev_rsi > 60 and prev_rsi < df['rsi'].iloc[-10:-2].max()
+
+    action = "NEUTRAL"
+    sl = 0.0
+    tp = 0.0
+    round_note = ""
+
+    # --- SELL Setup: H4 Bearish, PDH swept, bearish wick rejection ---
+    if h4_bias == "BEARISH" and pdh > 0:
+        pdh_swept = sweep_high >= pdh - (0.1 * last_atr)  # slight tolerance for Gold
+        pwh_swept = pwh > 0 and sweep_high >= pwh - (0.1 * last_atr)
+
+        if pdh_swept or pwh_swept:
+            level_val  = pdh if pdh_swept else pwh
+            level_name = "PDH" if pdh_swept else "PWH"
+            round_ok   = near_round_level(level_val)
+            round_note = f" Round ${round(level_val/50)*50:.0f}" if round_ok else ""
+
+            wick_valid = (
+                prev_close < prev_open           # bearish closed candle
+                and prev_close < sweep_high       # closed back below swept high
+                and upper_wick > body_size
+                and upper_wick > (0.5 * last_atr) # Gold needs bigger wick (wider spread)
+                and volume_ok
+            )
+            if wick_valid:
+                sl = prev_high + (0.5 * last_atr)  # slightly wider for Gold spread
+                tp = last_close - 2.5 * (sl - last_close)
+                sl, tp = assess_risk("SELL", sl, tp, last_close, last_atr, "neutral")
+                risk = sl - last_close
+                reward = last_close - tp
+                if risk > 0 and reward > 0 and (reward / risk) >= 2.5:
+                    div_note = " [RSI Div]" if rsi_diverge_sell else ""
+                    return "SELL", sl, tp, last_close, f"Gold SELL: {level_name}{round_note}{div_note}. H4:BEARISH. Vol:OK. UW={upper_wick:.2f}. R:R {reward/risk:.2f}"
+
+    # --- BUY Setup: H4 Bullish, PDL swept, bullish wick rejection ---
+    if h4_bias == "BULLISH" and pdl < float('inf'):
+        pdl_swept = sweep_low <= pdl + (0.1 * last_atr)
+        pwl_swept = pwl < float('inf') and sweep_low <= pwl + (0.1 * last_atr)
+
+        if pdl_swept or pwl_swept:
+            level_val  = pdl if pdl_swept else pwl
+            level_name = "PDL" if pdl_swept else "PWL"
+            round_ok   = near_round_level(level_val)
+            round_note = f" Round ${round(level_val/50)*50:.0f}" if round_ok else ""
+
+            wick_valid = (
+                prev_close > prev_open           # bullish closed candle
+                and prev_close > sweep_low        # closed back above swept low
+                and lower_wick > body_size
+                and lower_wick > (0.5 * last_atr)
+                and volume_ok
+            )
+            if wick_valid:
+                sl = prev_low - (0.5 * last_atr)
+                tp = last_close + 2.5 * (last_close - sl)
+                sl, tp = assess_risk("BUY", sl, tp, last_close, last_atr, "neutral")
+                risk = last_close - sl
+                reward = tp - last_close
+                if risk > 0 and reward > 0 and (reward / risk) >= 2.5:
+                    div_note = " [RSI Div]" if rsi_diverge_buy else ""
+                    return "BUY", sl, tp, last_close, f"Gold BUY: {level_name}{round_note}{div_note}. H4:BULLISH. Vol:OK. LW={lower_wick:.2f}. R:R {reward/risk:.2f}"
+
+    return "NEUTRAL", 0.0, 0.0, 0.0, f"Gold: No setup. H4:{h4_bias}, PDH:{pdh:.2f}, PDL:{pdl:.2f}, Close:{last_close:.2f}"
+
+
 def analyze_strategies(symbol: str):
     config = ASSET_CONFIG.get(symbol, {"strategies": ["liquidity_sweep"], "timeframes": [MAIN_TIMEFRAME]})
     strategies = config["strategies"]
@@ -666,6 +821,8 @@ def analyze_strategies(symbol: str):
                     res = analyze_core_system_df(df, symbol)
                 elif strategy == "liquidity_sweep":
                     res = analyze_liquidity_reversion_df(df, symbol)
+                elif strategy == "gold_system":
+                    res = analyze_gold_system_df(df, symbol)
                 elif strategy in ["breakout", "breakout_retest"]:
                     res = analyze_breakout_df(df, symbol)
                 elif strategy in ["trend_continuation", "trend_pullback"]:
