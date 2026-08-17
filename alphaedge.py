@@ -54,35 +54,26 @@ if "PROP_FIRM_STARTING_BALANCE" in os.environ:
     PROP_FIRM_STARTING_BALANCE = float(os.environ["PROP_FIRM_STARTING_BALANCE"])
 
 ASSET_CONFIG = {
-    # Metals & Energies — Gold uses dedicated gold_system strategy
-    "XAUUSDm": {"strategies": ["gold_system", "core_system"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
-
-    "USOILm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["NY"]},
+    # Gold
+    "XAUUSDz": {"strategies": ["core_system", "liquidity_sweep", "breakout"], "timeframes": [mt5.TIMEFRAME_M5, mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
     
-    # Indices
-    "USTECm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["NY"]},
-    "US30m": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["NY"]},
-    "UK100m": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["London"]},
-
-    # Crypto (BTC only — ETH removed per user decision)
-    "BTCUSDm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["24/7"]},
+    # Major Indices
+    "USTECz": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["NY"]},
+    "US30z": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["NY"]},
     
-    # Major Forex
-    "EURUSDm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["London"]},
-    "GBPUSDm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M5], "sessions": ["London"]},
-    "USDJPYm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London", "NY"]},
-    "AUDUSDm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London"]},
-    "USDCADm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["NY"]},
-    "NZDUSDm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London"]},
-    "USDCHFm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London", "NY"]},
-
-    # Minor/Cross Forex
-    "EURJPYm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London", "NY"]},
-    "GBPJPYm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London", "NY"]},
-    "EURGBPm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London"]},
-    "EURAUDm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London"]},
-    "GBPAUDm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London"]},
-    "AUDJPYm": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London", "NY"]},
+    # Forex Majors
+    "EURUSDz": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
+    "GBPUSDz": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
+    "USDJPYz": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
+    "AUDUSDz": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
+    "USDCADz": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
+    "USDCHFz": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
+    
+    # Forex Crosses (High Liquidity)
+    "EURJPYz": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
+    "GBPJPYz": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
+    "EURGBPz": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
+    "AUDJPYz": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]}
 }
 SYMBOLS = list(ASSET_CONFIG.keys())
 MAX_DAILY_LOSS_USD = 50.0
@@ -103,7 +94,7 @@ AE_TRAIL_PROFIT_ATR = float(os.getenv("AE_TRAIL_PROFIT_ATR", "1.0"))
 AE_TRAIL_SL_MULT = float(os.getenv("AE_TRAIL_SL_MULT", "0.5"))
 PROP_FIRM_MODE = True  # Always ON for Prop Firm Challenge account
 PROP_FIRM_DAILY_DD_LIMIT = -3.0   # 3% daily loss limit
-PROP_FIRM_MAX_OPEN_TRADES = 4     # Max 4 concurrent trades
+PROP_FIRM_MAX_OPEN_TRADES = 7     # Max 7 concurrent trades
 
 # Optional fixed-point trailing stop (pips/points). If >0, overrides ATR-based trail.
 AE_TRAIL_SL_PIPS = float(os.getenv("AE_TRAIL_SL_PIPS", "0"))
@@ -264,63 +255,26 @@ def log_trade(symbol: str, action: str, price: float, sl: float, tp: float, quan
 
 
 
+
+
+
 def get_h4_bias(symbol: str) -> str:
-    """
-    Get the true structural market bias from the H4 timeframe.
-    H4 EMA50 above H4 EMA200 = institutional BULLISH trend.
-    H4 EMA50 below H4 EMA200 = institutional BEARISH trend.
-    This prevents taking counter-trend trades on lower timeframes.
-    """
-    rates_h4 = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H4, 0, 210)
-    if rates_h4 is None or len(rates_h4) < 200:
+    """H4 EMA50/200 bias — the single most important trend filter."""
+    rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H4, 0, 210)
+    if rates is None or len(rates) < 200:
         return "NEUTRAL"
-    df_h4 = pd.DataFrame(rates_h4)
-    df_h4['ema50'] = calculate_ema(df_h4, 50)
+    df_h4 = pd.DataFrame(rates)
+    df_h4['ema50']  = calculate_ema(df_h4, 50)
     df_h4['ema200'] = calculate_ema(df_h4, 200)
-    last_h4 = df_h4.iloc[-1]
-    if last_h4['ema50'] > last_h4['ema200']:
+    last = df_h4.iloc[-1]
+    if last['ema50'] > last['ema200']:
         return "BULLISH"
-    elif last_h4['ema50'] < last_h4['ema200']:
+    elif last['ema50'] < last['ema200']:
         return "BEARISH"
     return "NEUTRAL"
 
-
-def get_asian_range(symbol: str):
-    """
-    Get the Asian session high and low (02:00 - 08:00 UTC).
-    Used as a high-probability liquidity pool filter for Forex.
-    Returns (asian_high, asian_low) or (None, None) if unavailable.
-    """
-    from datetime import timezone
-    now_utc = datetime.now(timezone.utc)
-    # Get M30 candles for the last 48 hours (enough to always capture an Asian session)
-    rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M30, 0, 100)
-    if rates is None or len(rates) < 16:
-        return None, None
-    df_a = pd.DataFrame(rates)
-    df_a['time'] = pd.to_datetime(df_a['time'], unit='s', utc=True)
-    # Find the most recent Asian session (02:00 - 08:00 UTC today or yesterday)
-    for days_back in [0, 1]:
-        target_date = (now_utc - pd.Timedelta(days=days_back)).date()
-        session = df_a[
-            (df_a['time'].dt.date == target_date) &
-            (df_a['time'].dt.hour >= 2) &
-            (df_a['time'].dt.hour < 8)
-        ]
-        if len(session) >= 4:
-            return session['high'].max(), session['low'].min()
-    return None, None
-
 def analyze_liquidity_reversion_df(df: pd.DataFrame, symbol: str | None = None):
-    """
-    Upgraded Liquidity Sweep Strategy.
-    Improvements:
-    1. H4 structural bias — only trade WITH the dominant trend.
-    2. Volume filter — rejection candle must have above-average institutional volume.
-    3. Asian Range filter — prioritise sweeps that also take out the Asian session range.
-    4. Institutional SL — placed just beyond the wick low/high, not 3.5 ATR away.
-    5. Removed dangerous BB/RSI fallback entries.
-    """
+    """Liquidity sweep mean-reversion entry logic."""
     if df is None or len(df) < 70:
         return "NEUTRAL", 0.0, 0.0, 0.0, "Insufficient data"
 
@@ -328,502 +282,244 @@ def analyze_liquidity_reversion_df(df: pd.DataFrame, symbol: str | None = None):
     df = calculate_bollinger_bands(df)
     df = calculate_rsi(df)
     df = calculate_atr(df)
+    df['ema8'] = calculate_ema(df, 8)
     df['ema21'] = calculate_ema(df, 21)
 
-    last = df.iloc[-1]   # Live candle — entry price, ATR
-    prev = df.iloc[-2]   # Last CLOSED candle — all geometry
-
-    prior_swing = df.iloc[-50:-5] if len(df) >= 55 else df.iloc[:-5]
+    last = df.iloc[-1]    # Live (forming) candle — used only for current price/EMA/ATR
+    prev = df.iloc[-2]    # Last CLOSED candle — used for all structural pattern geometry
+    prior_swing = df.iloc[-50:-10] if len(df) >= 60 else df.iloc[:-10]
     if len(prior_swing) < 20:
         return "NEUTRAL", 0.0, 0.0, 0.0, "Not enough swing history"
 
-    swing_low  = prior_swing['low'].min()
+    swing_low = prior_swing['low'].min()
     swing_high = prior_swing['high'].max()
-
-    last_atr   = last['atr']
-    last_close = last['close']
-    last_rsi   = last['rsi']
+    bb_mid = last['bb_mid']
+    bb_lower = last['bb_lower']
+    bb_upper = last['bb_upper']
+    last_atr = last['atr']
+    last_ema8 = last['ema8']
     last_ema21 = last['ema21']
-    bb_mid     = last['bb_mid']
 
-    # --- Closed candle geometry ---
+    # Entry price: use current live price for fills
+    last_close = last['close']
+    last_rsi = last['rsi']
+
+    # --- All candlestick geometry uses the PREVIOUS CLOSED candle ---
     prev_close = prev['close']
     prev_open  = prev['open']
     prev_high  = prev['high']
     prev_low   = prev['low']
     prev_rsi   = prev['rsi']
-    prev_vol   = prev['tick_volume']
 
     body_size  = abs(prev_close - prev_open)
     lower_wick = min(prev_close, prev_open) - prev_low
     upper_wick = prev_high - max(prev_close, prev_open)
 
-    # --- UPGRADE 1: H4 Structural Bias ---
+    # Correct direction: prev candle swept low AND closed bullish = bullish rejection confirmed
+    bullish_rejection = prev_close > prev_open   # prev candle closed bullish
+    bearish_rejection = prev_close < prev_open   # prev candle closed bearish
+
+    sweep_buy = (
+        prev_low < swing_low                        # prev candle swept below swing low
+        and prev_close > swing_low                  # and CLOSED back above it
+    )
+    sweep_sell = (
+        prev_high > swing_high                      # prev candle swept above swing high
+        and prev_close < swing_high                  # and CLOSED back below it
+    )
+
+    ema_buy_ok = last_ema8 <= last_ema21
+    ema_sell_ok = last_ema8 >= last_ema21
+
+    # H4 bias — only trade with the dominant trend
     h4_bias = "NEUTRAL"
     if symbol:
         h4_bias = get_h4_bias(symbol)
-    bias_ok_buy  = h4_bias in ["BULLISH", "NEUTRAL"]
-    bias_ok_sell = h4_bias in ["BEARISH", "NEUTRAL"]
+    h4_buy_ok  = h4_bias in ["BULLISH", "NEUTRAL"]
+    h4_sell_ok = h4_bias in ["BEARISH", "NEUTRAL"]
 
-    # --- UPGRADE 2: Volume Filter ---
-    avg_vol = df['tick_volume'].iloc[-21:-1].mean() if len(df) >= 21 else df['tick_volume'].mean()
-    volume_confirmed = prev_vol >= 1.2 * avg_vol  # Rejection candle had institutional participation
+    # Volume — rejection candle must show institutional participation
+    prev_vol = prev['tick_volume'] if 'tick_volume' in prev.index else 0
+    avg_vol  = df['tick_volume'].iloc[-21:-1].mean() if len(df) >= 21 else df['tick_volume'].mean()
+    vol_ok   = prev_vol >= 1.1 * avg_vol
 
-    # --- UPGRADE 3: Asian Range Confluence ---
-    asian_high, asian_low = None, None
-    asian_sweep_buy  = False
-    asian_sweep_sell = False
-    if symbol:
-        asian_high, asian_low = get_asian_range(symbol)
-        if asian_high and asian_low:
-            asian_sweep_buy  = prev_low < asian_low   # Swept below Asian low
-            asian_sweep_sell = prev_high > asian_high  # Swept above Asian high
-
-    # Core sweep conditions (closed candle only)
-    bullish_rejection = prev_close > prev_open
-    bearish_rejection = prev_close < prev_open
-
-    sweep_buy = (
-        prev_low < swing_low - (0.15 * last_atr)
-        and prev_close > swing_low
-        and bullish_rejection
-        and prev_rsi <= 45
-        and lower_wick > body_size
-        and lower_wick > (0.4 * last_atr)
-        and volume_confirmed
-        and bias_ok_buy
-    )
-    sweep_sell = (
-        prev_high > swing_high + (0.15 * last_atr)
-        and prev_close < swing_high
-        and bearish_rejection
-        and prev_rsi >= 55
-        and upper_wick > body_size
-        and upper_wick > (0.4 * last_atr)
-        and volume_confirmed
-        and bias_ok_sell
-    )
-
-    # Boost R:R requirement if no Asian range confluence
-    rr_threshold = 2.0 if (asian_sweep_buy or asian_sweep_sell) else 2.5
+    h1_buy_ok = True
+    h1_sell_ok = True
+    h1_status = "H1 unchecked"
+    if symbol is not None:
+        h1_rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, 0, 30)
+        if h1_rates is not None and len(h1_rates) >= 20:
+            df_h1 = pd.DataFrame(h1_rates)
+            df_h1['sma20'] = df_h1['close'].rolling(window=20).mean()
+            df_h1 = calculate_rsi(df_h1)
+            last_h1_close = df_h1['close'].iloc[-1]
+            last_h1_sma20 = df_h1['sma20'].iloc[-1]
+            last_h1_rsi = df_h1['rsi'].iloc[-1]
+            if last_h1_close < last_h1_sma20 and last_h1_rsi < 45:
+                h1_buy_ok = False
+                h1_status = f"H1 bear continuation ({last_h1_rsi:.1f})"
+            elif last_h1_close > last_h1_sma20 and last_h1_rsi > 55:
+                h1_sell_ok = False
+                h1_status = f"H1 bull continuation ({last_h1_rsi:.1f})"
+            else:
+                h1_status = f"H1 friendly ({last_h1_rsi:.1f})"
 
     action = "NEUTRAL"
     sl = 0.0
     tp = 0.0
     entry_price = last_close
-    details = f"H4:{h4_bias} | RSI:{last_rsi:.1f} | Vol:{'OK' if volume_confirmed else 'LOW'} | Asian:{'HIT' if (asian_sweep_buy or asian_sweep_sell) else 'MISS'}"
+    details = f"RSI {last_rsi:.1f} | EMA8/21 {last_ema8:.5f}/{last_ema21:.5f} | H1 {h1_status}"
 
-    if sweep_buy:
-        # SL placed 1.0 ATR below the wick low — enough room beyond spread noise
-        sl = prev_low - (1.0 * last_atr)
+    # Fallback: extreme BB/RSI conditions on the CLOSED candle only
+    buy_pullback = prev_close <= bb_lower and prev_rsi <= 30
+    sell_pullback = prev_close >= bb_upper and prev_rsi >= 70
+    basic_buy = buy_pullback and last_ema8 <= last_ema21
+    basic_sell = sell_pullback and last_ema8 >= last_ema21
+    rr_threshold = 2.0
+
+    if sweep_buy and ema_buy_ok and h1_buy_ok:
+        sl = prev_low - (2.0 * last_atr)   # Below wick low + 2 ATR — smaller lots, wider breath
+        tp = max(bb_mid, last_close + max(2.5 * (last_close - sl), 0.6 * (swing_high - last_close)))
+        sl, tp = assess_risk("BUY", sl, tp, entry_price, last_atr, risk_level="neutral")
+        risk = entry_price - sl
+        reward = tp - entry_price
+        if risk > 0 and reward > 0 and (reward / risk) >= rr_threshold:
+            action = "BUY"
+            details = f"Liquidity sweep BUY. Sweep low {swing_low:.5f}. RSI {last_rsi:.1f}. H1 {h1_status}. R:R {reward/risk:.2f}"
+        else:
+            details = f"BUY sweep rejected by R:R ({reward/risk:.2f})."
+
+    elif basic_buy and h1_buy_ok:
+        sl = prev_low - (2.0 * last_atr)   # Below wick low + 2 ATR — smaller lots, wider breath
         tp = last_close + max(2.5 * (last_close - sl), bb_mid - last_close, 0.6 * (swing_high - last_close))
         sl, tp = assess_risk("BUY", sl, tp, entry_price, last_atr, risk_level="neutral")
         risk = entry_price - sl
         reward = tp - entry_price
         if risk > 0 and reward > 0 and (reward / risk) >= rr_threshold:
             action = "BUY"
-            asian_note = " + Asian range" if asian_sweep_buy else ""
-            details = f"Liq Sweep BUY{asian_note}. H4:{h4_bias}. SL below wick {prev_low:.5f}. RSI:{prev_rsi:.1f}. Vol:OK. R:R {reward/risk:.2f}"
+            details = f"Aggressive BUY. Close {last_close:.5f} below BB lower {bb_lower:.5f} or RSI {last_rsi:.1f}. H1 {h1_status}. R:R {reward/risk:.2f}"
         else:
-            details = f"BUY sweep valid but R:R insufficient ({reward/risk:.2f} < {rr_threshold})."
+            details = f"Aggressive BUY rejected by R:R ({reward/risk:.2f})."
 
-    elif sweep_sell:
-        # SL placed 1.0 ATR above the wick high — enough room beyond spread noise
-        sl = prev_high + (1.0 * last_atr)
-        tp = last_close - max(2.5 * (sl - last_close), last_close - bb_mid, 0.6 * (last_close - swing_low))
+    elif sweep_sell and ema_sell_ok and h1_sell_ok:
+        sl = prev_high + (2.0 * last_atr)  # Above wick high + 2 ATR — smaller lots, wider breath
+        tp = min(bb_mid, last_close - max(2.5 * (sl - last_close), 0.6 * (last_close - swing_low)))
         sl, tp = assess_risk("SELL", sl, tp, entry_price, last_atr, risk_level="neutral")
         risk = sl - entry_price
         reward = entry_price - tp
         if risk > 0 and reward > 0 and (reward / risk) >= rr_threshold:
             action = "SELL"
-            asian_note = " + Asian range" if asian_sweep_sell else ""
-            details = f"Liq Sweep SELL{asian_note}. H4:{h4_bias}. SL above wick {prev_high:.5f}. RSI:{prev_rsi:.1f}. Vol:OK. R:R {reward/risk:.2f}"
+            details = f"Liquidity sweep SELL. Sweep high {swing_high:.5f}. RSI {last_rsi:.1f}. H1 {h1_status}. R:R {reward/risk:.2f}"
         else:
-            details = f"SELL sweep valid but R:R insufficient ({reward/risk:.2f} < {rr_threshold})."
+            details = f"SELL sweep rejected by R:R ({reward/risk:.2f})."
+
+    elif basic_sell and h1_sell_ok:
+        sl = prev_high + (3.5 * last_atr)
+        tp = last_close - max(2.5 * last_atr, last_close - bb_mid, 0.6 * (last_close - swing_low))
+        sl, tp = assess_risk("SELL", sl, tp, entry_price, last_atr, risk_level="neutral")
+        risk = sl - entry_price
+        reward = entry_price - tp
+        if risk > 0 and reward > 0 and (reward / risk) >= rr_threshold:
+            action = "SELL"
+            details = f"Aggressive SELL. Close {last_close:.5f} above BB upper {bb_upper:.5f} or RSI {last_rsi:.1f}. H1 {h1_status}. R:R {reward/risk:.2f}"
+        else:
+            details = f"Aggressive SELL rejected by R:R ({reward/risk:.2f})."
+
+    else:
+        details = f"No sweep setup. RSI {last_rsi:.1f}. EMA8/21 {last_ema8:.5f}/{last_ema21:.5f}."
 
     return action, sl, tp, entry_price, details
 
 
 def analyze_core_system_df(df: pd.DataFrame, symbol: str):
-    """
-    Upgraded Core System: PDH/PDL Liquidity Sweep + Wick Rejection.
-    Improvements:
-    1. H4 bias replaces M15 EMA50/200 — no more counter-trend trades.
-    2. Volume filter — wick rejection must have institutional volume behind it.
-    3. Institutional SL — placed just beyond the wick extreme, not 3.5 ATR away.
-    4. Also checks Previous Week High/Low as secondary confluence.
-    """
-    if len(df) < 50:
-        return "NEUTRAL", 0.0, 0.0, 0.0, "Insufficient data"
+    if len(df) < 200:
+        return "NEUTRAL", 0.0, 0.0, 0.0, "Insufficient data for EMA200"
         
     df = df.copy()
+    df['ema50'] = calculate_ema(df, 50)
+    df['ema200'] = calculate_ema(df, 200)
     df = calculate_atr(df)
-    df = calculate_rsi(df)
     last = df.iloc[-1]
-    prev = df.iloc[-2]   # Last CLOSED candle for all geometry
+    
+    bias = "BULLISH" if last['ema50'] > last['ema200'] else "BEARISH"
+    
+    pdh, pdl = 0.0, float('inf')
+    rates_d1 = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_D1, 1, 2)
+    if rates_d1 is not None and len(rates_d1) > 0:
+        yesterday = rates_d1[0]
+        pdh = yesterday['high']
+        pdl = yesterday['low']
+        
+    recent = df.iloc[-15:]
+    sweep_high = recent['high'].max()
+    sweep_low = recent['low'].min()
+    
+    # Structural patterns must be evaluated on the previously CLOSED candle (prev)
+    prev = df.iloc[-2]
+    prev_close = prev['close']
+    prev_open = prev['open']
+    prev_high = prev['high']
+    prev_low = prev['low']
     
     last_close = last['close']
-    last_atr   = last['atr']
-
-    # --- UPGRADE 1: H4 Structural Bias ---
-    h4_bias = get_h4_bias(symbol)
-    if h4_bias == "NEUTRAL":
-        return "NEUTRAL", 0.0, 0.0, 0.0, "H4 bias is NEUTRAL — no clear institutional trend"
-
-    # --- Previous Day High/Low ---
-    pdh, pdl = 0.0, float('inf')
-    rates_d1 = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_D1, 1, 3)
-    if rates_d1 is not None and len(rates_d1) >= 1:
-        pdh = rates_d1[0]['high']
-        pdl = rates_d1[0]['low']
-
-    # --- Previous Week High/Low (secondary confluence) ---
-    pwh, pwl = 0.0, float('inf')
-    rates_w1 = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_W1, 1, 2)
-    if rates_w1 is not None and len(rates_w1) >= 1:
-        pwh = rates_w1[0]['high']
-        pwl = rates_w1[0]['low']
-
-    # Most recent swing across last 20 candles
-    recent = df.iloc[-20:]
-    sweep_high = recent['high'].max()
-    sweep_low  = recent['low'].min()
-
-    # --- Closed candle geometry ---
-    prev_close = prev['close']
-    prev_open  = prev['open']
-    prev_high  = prev['high']
-    prev_low   = prev['low']
-    prev_vol   = prev['tick_volume']
-
-    body_size  = abs(prev_close - prev_open)
+    last_atr = last['atr']
+    
+    body_size = abs(prev_close - prev_open)
     lower_wick = min(prev_close, prev_open) - prev_low
     upper_wick = prev_high - max(prev_close, prev_open)
+    
+    # H4 bias check — only trade WITH the dominant trend
+    h4_bias = get_h4_bias(symbol)
 
-    # --- UPGRADE 2: Volume Filter ---
-    avg_vol = df['tick_volume'].iloc[-21:-1].mean() if len(df) >= 21 else df['tick_volume'].mean()
-    volume_confirmed = prev_vol >= 1.2 * avg_vol
+    # Volume check — rejection candle must have above-average institutional volume
+    prev_vol = prev['tick_volume'] if 'tick_volume' in prev.index else 0
+    avg_vol  = df['tick_volume'].iloc[-21:-1].mean() if len(df) >= 21 else df['tick_volume'].mean()
+    vol_ok   = prev_vol >= 1.1 * avg_vol  # 1.1x average — relaxed but meaningful
 
-    # Bearish: price swept PDH (or PWH) and closed back below with a clear upper wick
-    if h4_bias == "BEARISH" and pdh > 0:
-        pdhits_pdh = sweep_high >= pdh
-        hits_pwh   = pwh > 0 and sweep_high >= pwh
-        level_hit  = pdhits_pdh or hits_pwh
-        level_name = "PDH" if pdhits_pdh else "PWH"
-        level_val  = pdh if pdhits_pdh else pwh
+    if sweep_high >= pdh and pdh > 0:
+        # Just check closed candle closed back below the swept high
+        if prev_close < sweep_high:
+            sl = prev_high + (2.0 * last_atr)   # Above wick high + 2 ATR — breathing room
+            tp = last_close - 2.5 * (sl - last_close)
+            sl, tp = assess_risk("SELL", sl, tp, last_close, last_atr, "neutral")
+            return "SELL", sl, tp, last_close, f"Core: PDH Sweep SELL. R:R 2.5"
 
-        if level_hit:
-            wick_valid = (
-                prev_close < sweep_high
-                and prev_close < prev_open        # bearish closed candle
-                and upper_wick > body_size
-                and upper_wick > (0.4 * last_atr)
-                and volume_confirmed
-            )
-            if wick_valid:
-                # SL placed 1.0 ATR above wick high — room beyond spread
-                sl = prev_high + (1.0 * last_atr)
-                tp = last_close - 2.5 * (sl - last_close)
-                sl, tp = assess_risk("SELL", sl, tp, last_close, last_atr, "neutral")
-                risk = sl - last_close
-                reward = last_close - tp
-                if risk > 0 and reward > 0 and (reward / risk) >= 2.0:
-                    note = f"{level_name}={level_val:.5f}"
-                    return "SELL", sl, tp, last_close, f"Core: {note} Sweep. Bearish wick. H4:BEARISH. Vol:OK. UW={upper_wick:.5f}. R:R {reward/risk:.2f}"
-
-    # Bullish: price swept PDL (or PWL) and closed back above with a clear lower wick
-    if h4_bias == "BULLISH" and pdl < float('inf'):
-        hits_pdl = sweep_low <= pdl
-        hits_pwl  = pwl < float('inf') and sweep_low <= pwl
-        level_hit  = hits_pdl or hits_pwl
-        level_name = "PDL" if hits_pdl else "PWL"
-        level_val  = pdl if hits_pdl else pwl
-
-        if level_hit:
-            wick_valid = (
-                prev_close > sweep_low
-                and prev_close > prev_open        # bullish closed candle
-                and lower_wick > body_size
-                and lower_wick > (0.4 * last_atr)
-                and volume_confirmed
-            )
-            if wick_valid:
-                # SL placed 1.0 ATR below wick low — room beyond spread
-                sl = prev_low - (1.0 * last_atr)
-                tp = last_close + 2.5 * (last_close - sl)
-                sl, tp = assess_risk("BUY", sl, tp, last_close, last_atr, "neutral")
-                risk = last_close - sl
-                reward = tp - last_close
-                if risk > 0 and reward > 0 and (reward / risk) >= 2.0:
-                    note = f"{level_name}={level_val:.5f}"
-                    return "BUY", sl, tp, last_close, f"Core: {note} Sweep. Bullish wick. H4:BULLISH. Vol:OK. LW={lower_wick:.5f}. R:R {reward/risk:.2f}"
+    if sweep_low <= pdl and pdl < float('inf'):
+        # Just check closed candle closed back above the swept low
+        if prev_close > sweep_low:
+            sl = prev_low - (2.0 * last_atr)    # Below wick low + 2 ATR — breathing room
+            tp = last_close + 2.5 * (last_close - sl)
+            sl, tp = assess_risk("BUY", sl, tp, last_close, last_atr, "neutral")
+            return "BUY", sl, tp, last_close, f"Core: PDL Sweep BUY. R:R 2.5"
             
-    return "NEUTRAL", 0.0, 0.0, 0.0, f"No core setup. H4:{h4_bias}, PDH:{pdh:.5f}, PDL:{pdl:.5f}"
+    return "NEUTRAL", 0.0, 0.0, 0.0, f"No core setup. Bias: {bias}, PDH: {pdh:.5f}, PDL: {pdl:.5f}"
 
 def analyze_breakout_df(df: pd.DataFrame, symbol: str):
-    """
-    Order Block Detection Strategy — replaces naive BB breakout.
-    
-    A Bullish Order Block is the LAST bearish (red) candle before a significant
-    bullish impulse move. Institutions leave buy orders in this zone.
-    When price returns to the Order Block, institutions absorb it and price reverses.
-    
-    A Bearish Order Block is the LAST bullish (green) candle before a significant
-    bearish impulse move. When price returns, institutions sell again.
-    
-    Improvements over old Breakout:
-    1. H4 bias required — only trade OBs in the direction of the higher trend.
-    2. Institutional SL — placed beyond the Order Block body, not at BB mid.
-    3. Volume confirmation on the impulse move that created the OB.
-    4. R:R minimum 2.5 for OB entries (slightly stricter — OBs are high probability).
-    """
+    """Volatility expansion breakout strategy."""
     if len(df) < 50:
         return "NEUTRAL", 0.0, 0.0, 0.0, "Insufficient data"
-
     df = df.copy()
+    df = calculate_bollinger_bands(df)
     df = calculate_atr(df)
-    df = calculate_rsi(df)
-
-    last     = df.iloc[-1]
-    last_close = last['close']
-    last_atr   = last['atr']
-    last_rsi   = last['rsi']
-
-    # H4 bias is mandatory for Order Block entries
-    h4_bias = get_h4_bias(symbol)
-    if h4_bias == "NEUTRAL":
-        return "NEUTRAL", 0.0, 0.0, 0.0, "H4 NEUTRAL — OB strategy requires clear trend"
-
-    # Scan the last 30 closed candles to find the most recent valid Order Block
-    # We skip the last 5 candles as they form the "return to OB" phase
-    scan_zone = df.iloc[-35:-5]
-    if len(scan_zone) < 15:
-        return "NEUTRAL", 0.0, 0.0, 0.0, "Not enough history for OB scan"
-
-    avg_vol = df['tick_volume'].iloc[-30:-1].mean()
-
-    # --- Bullish Order Block (H4 BULLISH only) ---
-    if h4_bias == "BULLISH":
-        # Find the last bearish candle before a bullish impulse (3+ green candles up)
-        best_ob = None
-        for i in range(len(scan_zone) - 4, 0, -1):
-            candle = scan_zone.iloc[i]
-            if candle['close'] >= candle['open']:
-                continue  # not bearish, skip
-            # Check if the next 3 candles are a bullish impulse
-            next_3 = scan_zone.iloc[i+1:i+4]
-            if len(next_3) < 3:
-                continue
-            all_bullish = all(next_3['close'] > next_3['open'])
-            impulse_size = next_3['close'].iloc[-1] - candle['low']
-            if all_bullish and impulse_size > (2.0 * last_atr):
-                # Valid bullish OB found — record it
-                # Volume on the impulse candles should be above average
-                impulse_vol = next_3['tick_volume'].mean()
-                if impulse_vol >= 1.1 * avg_vol:
-                    best_ob = candle
-                    break  # Use the most recent valid OB
-
-        if best_ob is not None:
-            ob_high = best_ob['high']
-            ob_low  = best_ob['low']
-            ob_mid  = (ob_high + ob_low) / 2
-            # Price must currently be returning INTO the OB zone
-            if ob_low <= last_close <= ob_high and last_rsi <= 50:
-                sl = ob_low - (1.0 * last_atr)
-                tp = last_close + 3.0 * (last_close - sl)
-                sl, tp = assess_risk("BUY", sl, tp, last_close, last_atr, "neutral")
-                risk = last_close - sl
-                reward = tp - last_close
-                if risk > 0 and reward > 0 and (reward / risk) >= 2.5:
-                    return "BUY", sl, tp, last_close, f"Bullish OB entry [{ob_low:.5f}-{ob_high:.5f}]. H4:BULLISH. RSI:{last_rsi:.1f}. R:R {reward/risk:.2f}"
-
-    # --- Bearish Order Block (H4 BEARISH only) ---
-    if h4_bias == "BEARISH":
-        best_ob = None
-        for i in range(len(scan_zone) - 4, 0, -1):
-            candle = scan_zone.iloc[i]
-            if candle['close'] <= candle['open']:
-                continue  # not bullish, skip
-            next_3 = scan_zone.iloc[i+1:i+4]
-            if len(next_3) < 3:
-                continue
-            all_bearish = all(next_3['close'] < next_3['open'])
-            impulse_size = candle['high'] - next_3['close'].iloc[-1]
-            if all_bearish and impulse_size > (2.0 * last_atr):
-                impulse_vol = next_3['tick_volume'].mean()
-                if impulse_vol >= 1.1 * avg_vol:
-                    best_ob = candle
-                    break
-
-        if best_ob is not None:
-            ob_high = best_ob['high']
-            ob_low  = best_ob['low']
-            if ob_low <= last_close <= ob_high and last_rsi >= 50:
-                sl = ob_high + (1.0 * last_atr)
-                tp = last_close - 3.0 * (sl - last_close)
-                sl, tp = assess_risk("SELL", sl, tp, last_close, last_atr, "neutral")
-                risk = sl - last_close
-                reward = last_close - tp
-                if risk > 0 and reward > 0 and (reward / risk) >= 2.5:
-                    return "SELL", sl, tp, last_close, f"Bearish OB entry [{ob_low:.5f}-{ob_high:.5f}]. H4:BEARISH. RSI:{last_rsi:.1f}. R:R {reward/risk:.2f}"
-
-    return "NEUTRAL", 0.0, 0.0, 0.0, f"No OB setup. H4:{h4_bias}. Close:{last_close:.5f}"
-
-
-def analyze_gold_system_df(df: pd.DataFrame, symbol: str):
-    """
-    Gold-Specific Trading Strategy (XAUUSDm).
-    Gold moves differently from Forex and indices. Key characteristics:
-    - Gold is highly sensitive to USD strength (inverse relationship)
-    - Gold respects round numbers ($100 increments) as psychological levels
-    - Gold makes sharp liquidity sweeps during London open (07:00-09:00 UTC)
-      and NY open (13:00-14:30 UTC) before reversing
-    - Gold trends strongly — mean-reversion works best only at extremes
-
-    Entry logic:
-    1. H4 bias for trend direction (same as other strategies)
-    2. Previous Day High/Low sweep + wick rejection on closed candle
-    3. Round number confluence — price must be near a $100 or $50 round level
-    4. RSI divergence check — price makes new extreme but RSI is improving
-    5. Institutional SL just beyond the wick extreme
-    6. Minimum R:R of 2.5 (Gold has wide spreads, needs higher reward)
-    """
-    if len(df) < 50:
-        return "NEUTRAL", 0.0, 0.0, 0.0, "Insufficient data for Gold System"
-
-    df = df.copy()
-    df = calculate_atr(df)
-    df = calculate_rsi(df)
-    df['ema21'] = calculate_ema(df, 21)
-    df['ema50'] = calculate_ema(df, 50)
-
     last = df.iloc[-1]
-    prev = df.iloc[-2]  # Closed candle for geometry
-
+    prev = df.iloc[-2]
+    
     last_close = last['close']
-    last_atr   = last['atr']
-    last_rsi   = last['rsi']
-    last_ema21 = last['ema21']
-    last_ema50 = last['ema50']
-
-    # H4 Bias
-    h4_bias = get_h4_bias(symbol)
-    if h4_bias == "NEUTRAL":
-        return "NEUTRAL", 0.0, 0.0, 0.0, "Gold: H4 NEUTRAL — waiting for clear trend"
-
-    # Previous Day High/Low
-    pdh, pdl = 0.0, float('inf')
-    rates_d1 = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_D1, 1, 3)
-    if rates_d1 is not None and len(rates_d1) >= 1:
-        pdh = rates_d1[0]['high']
-        pdl = rates_d1[0]['low']
-    if pdh == 0.0 or pdl == float('inf'):
-        return "NEUTRAL", 0.0, 0.0, 0.0, "Gold: Cannot read Daily levels"
-
-    # Previous Week High/Low for confluence
-    pwh, pwl = 0.0, float('inf')
-    rates_w1 = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_W1, 1, 2)
-    if rates_w1 is not None and len(rates_w1) >= 1:
-        pwh = rates_w1[0]['high']
-        pwl = rates_w1[0]['low']
-
-    # Closed candle geometry
-    prev_close = prev['close']
-    prev_open  = prev['open']
-    prev_high  = prev['high']
-    prev_low   = prev['low']
-    prev_rsi   = prev['rsi']
-    prev_vol   = prev['tick_volume']
-
-    body_size  = abs(prev_close - prev_open)
-    lower_wick = min(prev_close, prev_open) - prev_low
-    upper_wick = prev_high - max(prev_close, prev_open)
-
-    # Volume filter
-    avg_vol = df['tick_volume'].iloc[-21:-1].mean() if len(df) >= 21 else df['tick_volume'].mean()
-    volume_ok = prev_vol >= 1.2 * avg_vol
-
-    # Round number confluence — Gold respects $50 and $100 levels
-    # Check if the PDH/PDL is near a $50 round number (e.g. 2300, 2350, 2400)
-    def near_round_level(price, tolerance=8.0):
-        """Returns True if price is within tolerance of a $50 increment."""
-        nearest_50 = round(price / 50) * 50
-        return abs(price - nearest_50) <= tolerance
-
-    # Recent sweep high/low across last 20 candles
-    recent = df.iloc[-20:]
-    sweep_high = recent['high'].max()
-    sweep_low  = recent['low'].min()
-
-    # --- RSI Divergence check (simplified) ---
-    # For BUY: price swept lower than PDL, but RSI is not making new lows (improving)
-    rsi_diverge_buy  = prev_rsi < 40 and prev_rsi > df['rsi'].iloc[-10:-2].min()
-    rsi_diverge_sell = prev_rsi > 60 and prev_rsi < df['rsi'].iloc[-10:-2].max()
-
-    action = "NEUTRAL"
-    sl = 0.0
-    tp = 0.0
-    round_note = ""
-
-    # --- SELL Setup: H4 Bearish, PDH swept, bearish wick rejection ---
-    if h4_bias == "BEARISH" and pdh > 0:
-        pdh_swept = sweep_high >= pdh - (0.1 * last_atr)  # slight tolerance for Gold
-        pwh_swept = pwh > 0 and sweep_high >= pwh - (0.1 * last_atr)
-
-        if pdh_swept or pwh_swept:
-            level_val  = pdh if pdh_swept else pwh
-            level_name = "PDH" if pdh_swept else "PWH"
-            round_ok   = near_round_level(level_val)
-            round_note = f" Round ${round(level_val/50)*50:.0f}" if round_ok else ""
-
-            wick_valid = (
-                prev_close < prev_open           # bearish closed candle
-                and prev_close < sweep_high       # closed back below swept high
-                and upper_wick > body_size
-                and upper_wick > (0.5 * last_atr) # Gold needs bigger wick (wider spread)
-                and volume_ok
-            )
-            if wick_valid:
-                sl = prev_high + (1.0 * last_atr)  # 1 ATR above wick for Gold spread
-                tp = last_close - 2.5 * (sl - last_close)
-                sl, tp = assess_risk("SELL", sl, tp, last_close, last_atr, "neutral")
-                risk = sl - last_close
-                reward = last_close - tp
-                if risk > 0 and reward > 0 and (reward / risk) >= 2.5:
-                    div_note = " [RSI Div]" if rsi_diverge_sell else ""
-                    return "SELL", sl, tp, last_close, f"Gold SELL: {level_name}{round_note}{div_note}. H4:BEARISH. Vol:OK. UW={upper_wick:.2f}. R:R {reward/risk:.2f}"
-
-    # --- BUY Setup: H4 Bullish, PDL swept, bullish wick rejection ---
-    if h4_bias == "BULLISH" and pdl < float('inf'):
-        pdl_swept = sweep_low <= pdl + (0.1 * last_atr)
-        pwl_swept = pwl < float('inf') and sweep_low <= pwl + (0.1 * last_atr)
-
-        if pdl_swept or pwl_swept:
-            level_val  = pdl if pdl_swept else pwl
-            level_name = "PDL" if pdl_swept else "PWL"
-            round_ok   = near_round_level(level_val)
-            round_note = f" Round ${round(level_val/50)*50:.0f}" if round_ok else ""
-
-            wick_valid = (
-                prev_close > prev_open           # bullish closed candle
-                and prev_close > sweep_low        # closed back above swept low
-                and lower_wick > body_size
-                and lower_wick > (0.5 * last_atr)
-                and volume_ok
-            )
-            if wick_valid:
-                sl = prev_low - (1.0 * last_atr)
-                tp = last_close + 2.5 * (last_close - sl)
-                sl, tp = assess_risk("BUY", sl, tp, last_close, last_atr, "neutral")
-                risk = last_close - sl
-                reward = tp - last_close
-                if risk > 0 and reward > 0 and (reward / risk) >= 2.5:
-                    div_note = " [RSI Div]" if rsi_diverge_buy else ""
-                    return "BUY", sl, tp, last_close, f"Gold BUY: {level_name}{round_note}{div_note}. H4:BULLISH. Vol:OK. LW={lower_wick:.2f}. R:R {reward/risk:.2f}"
-
-    return "NEUTRAL", 0.0, 0.0, 0.0, f"Gold: No setup. H4:{h4_bias}, PDH:{pdh:.2f}, PDL:{pdl:.2f}, Close:{last_close:.2f}"
-
+    last_atr = last['atr']
+    
+    if last_close > last['bb_upper'] and prev['close'] <= prev['bb_upper']:
+        sl = last['bb_mid'] - (0.5 * last_atr)
+        tp = last_close + 2.0 * (last_close - sl)
+        sl, tp = assess_risk("BUY", sl, tp, last_close, last_atr, "neutral")
+        return "BUY", sl, tp, last_close, f"Breakout BUY. Close above BB_upper."
+        
+    if last_close < last['bb_lower'] and prev['close'] >= prev['bb_lower']:
+        sl = last['bb_mid'] + (0.5 * last_atr)
+        tp = last_close - 2.0 * (sl - last_close)
+        sl, tp = assess_risk("SELL", sl, tp, last_close, last_atr, "neutral")
+        return "SELL", sl, tp, last_close, f"Breakout SELL. Close below BB_lower."
+        
+    return "NEUTRAL", 0.0, 0.0, 0.0, "No breakout."
 
 def analyze_strategies(symbol: str):
     config = ASSET_CONFIG.get(symbol, {"strategies": ["liquidity_sweep"], "timeframes": [MAIN_TIMEFRAME]})
@@ -845,8 +541,6 @@ def analyze_strategies(symbol: str):
                     res = analyze_core_system_df(df, symbol)
                 elif strategy == "liquidity_sweep":
                     res = analyze_liquidity_reversion_df(df, symbol)
-                elif strategy == "gold_system":
-                    res = analyze_gold_system_df(df, symbol)
                 elif strategy in ["breakout", "breakout_retest"]:
                     res = analyze_breakout_df(df, symbol)
                 elif strategy in ["trend_continuation", "trend_pullback"]:
@@ -1130,9 +824,39 @@ def run_alphaedge(execute_orders: bool = False, approved_symbols: set[str] | Non
             continue
             
         # Max Concurrent Risk Prop Firm Limit
-        if PROP_FIRM_MODE and len(active_trades) >= PROP_FIRM_MAX_OPEN_TRADES:
-            logger.info(f"Skipping {symbol}: Max Open Trades Limit ({PROP_FIRM_MAX_OPEN_TRADES}) reached. Protecting account equity.")
+        # Get fresh open positions count from mt5 directly
+        fresh_positions = mt5.positions_get()
+        fresh_count = len(fresh_positions) if fresh_positions else 0
+        if PROP_FIRM_MODE and fresh_count >= PROP_FIRM_MAX_OPEN_TRADES:
+            logger.info(f"Skipping {symbol}: Max Open Trades Limit ({PROP_FIRM_MAX_OPEN_TRADES}) reached (Active: {fresh_count}). Protecting account equity.")
             continue
+
+        # Prevent chasing stale setups (stale entries that pull back and hit SL)
+        # Check current live price. If price has moved > 0.5 * ATR from the trigger close, skip.
+        tick = mt5.symbol_info_tick(symbol)
+        if tick:
+            current_price = tick.bid if action == "SELL" else tick.ask
+            price_drift = abs(current_price - entry_price)
+            
+            # Fetch ATR for drift threshold calculation
+            symbol_info = mt5.symbol_info(symbol)
+            rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M15, 0, 20)
+            if rates is not None and len(rates) > 0:
+                # Quick ATR calculation using global pd/np imports
+                temp_df = pd.DataFrame(rates)
+                high_low = temp_df['high'] - temp_df['low']
+                high_close = np.abs(temp_df['high'] - temp_df['close'].shift())
+                low_close = np.abs(temp_df['low'] - temp_df['close'].shift())
+                ranges = pd.concat([high_low, high_close, low_close], axis=1)
+                true_range = np.max(ranges, axis=1)
+                atr = true_range.rolling(14).mean().iloc[-1]
+            else:
+                atr = 0.005 * entry_price
+                
+            max_drift = 0.5 * atr if atr and not np.isnan(atr) else 0.005 * entry_price
+            if price_drift > max_drift:
+                logger.info(f"Skipping {symbol}: Stale Entry. Price drifted {price_drift:.5f} > max allowed {max_drift:.5f} from trigger price ({entry_price:.5f}).")
+                continue
             
         # Prevent duplicate trades: skip if THIS specific strategy already has a trade open on this symbol
         if (symbol, strategy_name) in active_trades:
