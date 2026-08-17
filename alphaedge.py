@@ -103,9 +103,9 @@ AE_ATR_SL_MULTIPLIER = float(os.getenv("AE_ATR_SL_MULTIPLIER", "1.0"))
 AE_TRAILING_ENABLE = os.getenv("AE_TRAILING_ENABLE", "1") == "1"
 AE_TRAIL_PROFIT_ATR = float(os.getenv("AE_TRAIL_PROFIT_ATR", "1.0"))
 AE_TRAIL_SL_MULT = float(os.getenv("AE_TRAIL_SL_MULT", "0.5"))
-PROP_FIRM_MODE = os.getenv("PROP_FIRM_MODE", "0") == "1"
-PROP_FIRM_DAILY_DD_LIMIT = float(os.getenv("PROP_FIRM_DAILY_DD_LIMIT", "-3.0"))
-PROP_FIRM_MAX_OPEN_TRADES = int(os.getenv("PROP_FIRM_MAX_OPEN_TRADES", "4"))
+PROP_FIRM_MODE = True  # Always ON for Prop Firm Challenge account
+PROP_FIRM_DAILY_DD_LIMIT = -3.0   # 3% daily loss limit
+PROP_FIRM_MAX_OPEN_TRADES = 4     # Max 4 concurrent trades
 
 # Optional fixed-point trailing stop (pips/points). If >0, overrides ATR-based trail.
 AE_TRAIL_SL_PIPS = float(os.getenv("AE_TRAIL_SL_PIPS", "0"))
@@ -251,8 +251,8 @@ def analyze_liquidity_reversion_df(df: pd.DataFrame, symbol: str | None = None):
     df['ema8'] = calculate_ema(df, 8)
     df['ema21'] = calculate_ema(df, 21)
 
-    last = df.iloc[-1]
-    prev = df.iloc[-2]
+    last = df.iloc[-1]    # Live (forming) candle — used only for current price/EMA/ATR
+    prev = df.iloc[-2]    # Last CLOSED candle — used for all structural pattern geometry
     prior_swing = df.iloc[-50:-10] if len(df) >= 60 else df.iloc[:-10]
     if len(prior_swing) < 20:
         return "NEUTRAL", 0.0, 0.0, 0.0, "Not enough swing history"
@@ -263,36 +263,43 @@ def analyze_liquidity_reversion_df(df: pd.DataFrame, symbol: str | None = None):
     bb_lower = last['bb_lower']
     bb_upper = last['bb_upper']
     last_atr = last['atr']
-    last_close = last['close']
-    last_open = last['open']
-    last_high = last['high']
-    last_low = last['low']
-    last_rsi = last['rsi']
     last_ema8 = last['ema8']
     last_ema21 = last['ema21']
 
-    bullish_rejection = last_close > last_open and prev['close'] < prev['open']
-    bearish_rejection = last_close < last_open and prev['close'] > prev['open']
+    # Entry price: use current live price for fills
+    last_close = last['close']
+    last_rsi = last['rsi']
 
-    body_size = abs(last_close - last_open)
-    lower_wick = min(last_close, last_open) - last_low
-    upper_wick = last_high - max(last_close, last_open)
+    # --- All candlestick geometry uses the PREVIOUS CLOSED candle ---
+    prev_close = prev['close']
+    prev_open  = prev['open']
+    prev_high  = prev['high']
+    prev_low   = prev['low']
+    prev_rsi   = prev['rsi']
+
+    body_size  = abs(prev_close - prev_open)
+    lower_wick = min(prev_close, prev_open) - prev_low
+    upper_wick = prev_high - max(prev_close, prev_open)
+
+    # Correct direction: prev candle swept low AND closed bullish = bullish rejection confirmed
+    bullish_rejection = prev_close > prev_open   # prev candle closed bullish
+    bearish_rejection = prev_close < prev_open   # prev candle closed bearish
 
     sweep_buy = (
-        last_low < swing_low - (0.18 * last_atr)
-        and last_close > swing_low
-        and bullish_rejection
-        and last_rsi <= 40
-        and lower_wick > body_size
-        and lower_wick > (0.4 * last_atr)
+        prev_low < swing_low - (0.18 * last_atr)   # prev candle swept below swing low
+        and prev_close > swing_low                  # but CLOSED back above it (rejection confirmed)
+        and bullish_rejection                       # prev candle was a bullish candle
+        and prev_rsi <= 45                          # oversold on closed candle
+        and lower_wick > body_size                  # wick larger than body
+        and lower_wick > (0.4 * last_atr)           # wick is statistically significant
     )
     sweep_sell = (
-        last_high > swing_high + (0.18 * last_atr)
-        and last_close < swing_high
-        and bearish_rejection
-        and last_rsi >= 60
-        and upper_wick > body_size
-        and upper_wick > (0.4 * last_atr)
+        prev_high > swing_high + (0.18 * last_atr)  # prev candle swept above swing high
+        and prev_close < swing_high                  # but CLOSED back below it (rejection confirmed)
+        and bearish_rejection                        # prev candle was a bearish candle
+        and prev_rsi >= 55                           # overbought on closed candle
+        and upper_wick > body_size                   # wick larger than body
+        and upper_wick > (0.4 * last_atr)            # wick is statistically significant
     )
 
     ema_buy_ok = last_ema8 <= last_ema21
@@ -325,15 +332,15 @@ def analyze_liquidity_reversion_df(df: pd.DataFrame, symbol: str | None = None):
     entry_price = last_close
     details = f"RSI {last_rsi:.1f} | EMA8/21 {last_ema8:.5f}/{last_ema21:.5f} | H1 {h1_status}"
 
-    # Aggressive live trading fallback: open only on truly extreme Bollinger/RSI conditions with trend alignment
-    buy_pullback = last_close <= bb_lower and last_rsi <= 30
-    sell_pullback = last_close >= bb_upper and last_rsi >= 70
+    # Fallback: extreme BB/RSI conditions on the CLOSED candle only
+    buy_pullback = prev_close <= bb_lower and prev_rsi <= 30
+    sell_pullback = prev_close >= bb_upper and prev_rsi >= 70
     basic_buy = buy_pullback and last_ema8 <= last_ema21
     basic_sell = sell_pullback and last_ema8 >= last_ema21
     rr_threshold = 2.0
 
     if sweep_buy and ema_buy_ok and h1_buy_ok:
-        sl = min(last_low, swing_low) - (3.5 * last_atr)
+        sl = min(prev_low, swing_low) - (3.5 * last_atr)
         tp = max(bb_mid, last_close + max(2.5 * last_atr, 0.6 * (swing_high - last_close)))
         sl, tp = assess_risk("BUY", sl, tp, entry_price, last_atr, risk_level="neutral")
         risk = entry_price - sl
@@ -345,7 +352,7 @@ def analyze_liquidity_reversion_df(df: pd.DataFrame, symbol: str | None = None):
             details = f"BUY sweep rejected by R:R ({reward/risk:.2f})."
 
     elif basic_buy and h1_buy_ok:
-        sl = last_low - (3.5 * last_atr)
+        sl = prev_low - (3.5 * last_atr)
         tp = last_close + max(2.5 * last_atr, bb_mid - last_close, 0.6 * (swing_high - last_close))
         sl, tp = assess_risk("BUY", sl, tp, entry_price, last_atr, risk_level="neutral")
         risk = entry_price - sl
@@ -357,7 +364,7 @@ def analyze_liquidity_reversion_df(df: pd.DataFrame, symbol: str | None = None):
             details = f"Aggressive BUY rejected by R:R ({reward/risk:.2f})."
 
     elif sweep_sell and ema_sell_ok and h1_sell_ok:
-        sl = max(last_high, swing_high) + (3.5 * last_atr)
+        sl = max(prev_high, swing_high) + (3.5 * last_atr)
         tp = min(bb_mid, last_close - max(2.5 * last_atr, 0.6 * (last_close - swing_low)))
         sl, tp = assess_risk("SELL", sl, tp, entry_price, last_atr, risk_level="neutral")
         risk = sl - entry_price
@@ -369,7 +376,7 @@ def analyze_liquidity_reversion_df(df: pd.DataFrame, symbol: str | None = None):
             details = f"SELL sweep rejected by R:R ({reward/risk:.2f})."
 
     elif basic_sell and h1_sell_ok:
-        sl = last_high + (3.5 * last_atr)
+        sl = prev_high + (3.5 * last_atr)
         tp = last_close - max(2.5 * last_atr, last_close - bb_mid, 0.6 * (last_close - swing_low))
         sl, tp = assess_risk("SELL", sl, tp, entry_price, last_atr, risk_level="neutral")
         risk = sl - entry_price
@@ -635,11 +642,48 @@ def run_alphaedge(execute_orders: bool = False, approved_symbols: set[str] | Non
     is_weekend = current_day in [5, 6]
     friday_block = current_day == 4 and current_hour >= 21
     
+    def liquidate_all_positions(reason: str):
+        """Close all open positions immediately. Used for Friday weekend block and drawdown kill."""
+        positions = mt5.positions_get()
+        if not positions:
+            logger.info(f"[{reason}] No open positions to close.")
+            return
+        closed = 0
+        for pos in positions:
+            tick = mt5.symbol_info_tick(pos.symbol)
+            if not tick:
+                continue
+            close_type = mt5.ORDER_TYPE_SELL if pos.type == mt5.ORDER_TYPE_BUY else mt5.ORDER_TYPE_BUY
+            close_price = tick.bid if pos.type == mt5.ORDER_TYPE_BUY else tick.ask
+            request = {
+                "action": mt5.TRADE_ACTION_DEAL,
+                "symbol": pos.symbol,
+                "volume": pos.volume,
+                "type": close_type,
+                "position": pos.ticket,
+                "price": close_price,
+                "deviation": 30,
+                "magic": pos.magic,
+                "comment": f"Auto-Close: {reason}",
+                "type_time": mt5.ORDER_TIME_GTC,
+                "type_filling": mt5.ORDER_FILLING_IOC,
+            }
+            result = mt5.order_send(request)
+            if result and result.retcode == mt5.TRADE_RETCODE_DONE:
+                logger.info(f"[{reason}] Closed {pos.symbol} ticket {pos.ticket}")
+                closed += 1
+            else:
+                logger.error(f"[{reason}] Failed to close {pos.symbol}: {getattr(result, 'comment', mt5.last_error())}")
+        if closed > 0:
+            send_telegram_alert(f"🚨 <b>[{reason}]</b>\nClosed {closed} open position(s) to protect Prop Firm account.")
+
     if PROP_FIRM_MODE and (prop_firm_locked or friday_block):
         if prop_firm_locked:
             logger.info("-> 🚨 Prop Firm Daily Drawdown Kill Switch Active. Scanning disabled.")
+            liquidate_all_positions("Drawdown Liquidation")
         elif friday_block:
-            logger.info("-> 🚫 Friday Weekend Block Active (Post 21:00 UTC). Scanning disabled.")
+            logger.info("-> 🚫 Friday Weekend Block Active (Post 21:00 UTC). Liquidating all positions.")
+            liquidate_all_positions("Weekend Liquidation")
         client.disconnect()
         return []
     
