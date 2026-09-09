@@ -68,7 +68,7 @@ MODE = os.getenv("AE_MODE", "M1_SCALPING")  # default to M1 scalping
 AE_LOT_MULTIPLIER = float(os.getenv("AE_LOT_MULTIPLIER", "1.0"))
 AE_MAX_WORKERS = int(os.getenv("AE_MAX_WORKERS", "10"))
 AE_RR_MIN = float(os.getenv("AE_RR_MIN", "1.1"))
-AE_MAX_CONCURRENT_TRADES = int(os.getenv("AE_MAX_CONCURRENT_TRADES", "1"))
+AE_MAX_CONCURRENT_TRADES = int(os.getenv("AE_MAX_CONCURRENT_TRADES", "2"))
 AE_PULLBACK_ATR_FRACTION = 0.5
 AE_ATR_SL_MULTIPLIER = 1.0
 AE_TRAILING_ENABLE = False
@@ -1643,10 +1643,10 @@ def run_alphaedge(execute_orders: bool = False, approved_symbols: set[str] | Non
                 logger.info(f"Skipping {symbol}: Stale Entry. Price drifted {price_drift:.5f} > max allowed {max_drift:.5f} from trigger price ({entry_price:.5f}).")
                 continue
             
-        # Enforce max 1 open position per symbol for macro engine
+        # Enforce max 2 open positions per symbol for macro engine
         symbol_positions = [p for p in (mt5.positions_get(symbol=symbol) or []) if getattr(p, 'magic', 0) == 1001]
-        if len(symbol_positions) >= 1:
-            logger.info(f"Skipping {symbol}: already has {len(symbol_positions)} open macro positions (Max 1 allowed).")
+        if len(symbol_positions) >= 2:
+            logger.info(f"Skipping {symbol}: already has {len(symbol_positions)} open macro positions (Max 2 allowed).")
             continue
 
         volume = 0.01  # Fixed 0.01 micro lot per order
@@ -1661,8 +1661,9 @@ def run_alphaedge(execute_orders: bool = False, approved_symbols: set[str] | Non
         
         try:
             opened_count = 0
-            for i in range(1, 2):
-
+            tp2 = price + 1.5 * (tp - price) if action == "BUY" else price - 1.5 * (price - tp)
+            for i in range(1, 3):
+                order_tp = tp if i == 1 else tp2
                 request = {
                     "action": mt5.TRADE_ACTION_DEAL,
                     "symbol": symbol,
@@ -1670,7 +1671,7 @@ def run_alphaedge(execute_orders: bool = False, approved_symbols: set[str] | Non
                     "type": order_type,
                     "price": price,
                     "sl": round(sl, 5),
-                    "tp": round(tp, 5),
+                    "tp": round(order_tp, 5),
                     "deviation": 20,
                     "magic": 1001,
                     "comment": f"{strategy_name}_TP{i}",
@@ -1696,7 +1697,7 @@ def run_alphaedge(execute_orders: bool = False, approved_symbols: set[str] | Non
                 rr_calc = (reward_dist / risk_dist) if risk_dist > 0 else 1.5
                 tot_vol = round(volume * opened_count, 2)
 
-                logger.info(f"Successfully opened position: {action} on {symbol} (Entry: {price:.5f}, Lot: {volume}, SL: {sl:.5f}, TP: {tp:.5f})")
+                logger.info(f"Successfully opened {opened_count} positions: {action} on {symbol} (Entry: {price:.5f}, Lot: {volume}, SL: {sl:.5f}, TP1: {tp:.5f}, TP2: {tp2:.5f})")
                 
                 msg = (
                     f"🚀 <b>[AlphaEdge Position Opened]</b>\n\n"
@@ -1704,9 +1705,9 @@ def run_alphaedge(execute_orders: bool = False, approved_symbols: set[str] | Non
                     f"• <b>Direction:</b> {action_emoji}\n"
                     f"• <b>Entry Price:</b> <code>{price:.5f}</code>\n"
                     f"• <b>Stop Loss:</b> <code>{sl:.5f}</code>\n"
-                    f"• <b>Take Profit:</b> <code>{tp:.5f}</code>\n"
+                    f"• <b>Take Profit:</b> <code>{tp:.5f}</code> (TP1) | <code>{tp2:.5f}</code> (TP2)\n"
                     f"• <b>Risk:Reward:</b> 1 : {rr_calc:.2f}\n"
-                    f"• <b>Position Size:</b> {volume} Lots (1 Single Order)\n"
+                    f"• <b>Position Size:</b> {tot_vol} Lots ({opened_count}x {volume} Orders)\n"
                     f"• <b>Session:</b> 🌐 24/5 All-Day & Overnight Mode\n"
                     f"• <b>Strategy:</b> {strategy_name}\n\n"
                     f"📌 <b>Setup Context:</b>\n{details}"
