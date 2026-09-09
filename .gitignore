@@ -3,4 +3,8 @@
 .system_generated/tasks/
 .system_generated/terminals/
 .tempmediaStorage/
-browser/\n*.log
+browser/
+*.log
+.env
+__pycache__/
+

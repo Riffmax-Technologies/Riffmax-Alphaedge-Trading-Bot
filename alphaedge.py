@@ -3,7 +3,7 @@ import sys
 import time
 import concurrent.futures
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 import pandas as pd
 import numpy as np
 import sys, os
@@ -13,7 +13,7 @@ from metatrader_client import MT5Client
 from metatrader_client.order.send_order import send_order
 from metatrader_client.types import TradeRequestActions, OrderType
 import MetaTrader5 as mt5
-from prop_firm_config import PropFirmEngine
+from telegram_commands import poll_telegram_commands, BOT_PAUSED
 
 # Set up logging to both console and file
 logging.basicConfig(
@@ -49,52 +49,37 @@ MT5_CONFIG = {
     "server": os.environ["MT5_SERVER"],
 }
 
-PROP_FIRM_STARTING_BALANCE = 15000.0  # Default — overridden by .env
-if "PROP_FIRM_STARTING_BALANCE" in os.environ:
-    PROP_FIRM_STARTING_BALANCE = float(os.environ["PROP_FIRM_STARTING_BALANCE"])
-
 ASSET_CONFIG = {
-    # Gold
-    "XAUUSDz": {"strategies": ["core_system", "liquidity_sweep", "breakout"], "timeframes": [mt5.TIMEFRAME_M5, mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
-    
-    # Major Indices
-    "USTECz": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["NY"]},
-    "US30z": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["NY"]},
-    
-    # Forex Majors
-    "EURUSDz": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
-    "GBPUSDz": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
-    "USDJPYz": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
-    "AUDUSDz": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
-    "USDCADz": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
-    "USDCHFz": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
-    
-    # Forex Crosses (High Liquidity)
-    "EURJPYz": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
-    "GBPJPYz": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
-    "EURGBPz": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]},
-    "AUDJPYz": {"strategies": ["core_system", "liquidity_sweep"], "timeframes": [mt5.TIMEFRAME_M15, mt5.TIMEFRAME_M30], "sessions": ["London", "NY"]}
+    # Focused Gold Scalper Mode
+    "XAUUSDm": {"strategies": ["ut_liquidity"], "timeframes": [mt5.TIMEFRAME_M1], "sessions": ["24/7"]},
 }
 SYMBOLS = list(ASSET_CONFIG.keys())
-MAX_DAILY_LOSS_USD = 50.0
-DAILY_PROFIT_TARGET_USD = 500.0
+
+
+
+MAX_DAILY_LOSS_USD = 15.0       # Soft daily warning limit, no hard block
+DAILY_PROFIT_TARGET_USD = 50.0  # Daily profit target ($50 for $50 account - 100% growth milestone)
 PULLBACK_ATR_FRACTION = 0.5
-PENDING_ORDER_EXPIRY_SECONDS = 7200
+
+PENDING_ORDER_EXPIRY_SECONDS = 3600
 
 # Runtime configuration (override with .env)
-MODE = os.getenv("AE_MODE", "M30_STRUCTURAL")  # or 'M5_FAST'
+MODE = os.getenv("AE_MODE", "M1_SCALPING")  # default to M1 scalping
 AE_LOT_MULTIPLIER = float(os.getenv("AE_LOT_MULTIPLIER", "1.0"))
 AE_MAX_WORKERS = int(os.getenv("AE_MAX_WORKERS", "10"))
-AE_RR_MIN = float(os.getenv("AE_RR_MIN", "2.0"))
-AE_MAX_CONCURRENT_TRADES = int(os.getenv("AE_MAX_CONCURRENT_TRADES", "20"))
-AE_PULLBACK_ATR_FRACTION = float(os.getenv("AE_PULLBACK_ATR_FRACTION", "0.5"))
-AE_ATR_SL_MULTIPLIER = float(os.getenv("AE_ATR_SL_MULTIPLIER", "1.0"))
-AE_TRAILING_ENABLE = os.getenv("AE_TRAILING_ENABLE", "1") == "1"
-AE_TRAIL_PROFIT_ATR = float(os.getenv("AE_TRAIL_PROFIT_ATR", "1.0"))
-AE_TRAIL_SL_MULT = float(os.getenv("AE_TRAIL_SL_MULT", "0.5"))
-PROP_FIRM_MODE = True  # Always ON for Prop Firm Challenge account
-PROP_FIRM_DAILY_DD_LIMIT = -3.0   # 3% daily loss limit
-PROP_FIRM_MAX_OPEN_TRADES = 7     # Max 7 concurrent trades
+AE_RR_MIN = float(os.getenv("AE_RR_MIN", "1.1"))
+AE_MAX_CONCURRENT_TRADES = int(os.getenv("AE_MAX_CONCURRENT_TRADES", "1"))
+AE_PULLBACK_ATR_FRACTION = 0.5
+AE_ATR_SL_MULTIPLIER = 1.0
+AE_TRAILING_ENABLE = False
+AE_TRAIL_PROFIT_ATR = 1.0
+AE_TRAIL_SL_MULT = 0.5
+
+# Gold Scalping Layer — set to False to disable without editing code
+ENABLE_SCALPING = os.getenv("AE_SCALPING_ENABLED", "true").lower() == "true"
+
+
+
 
 # Optional fixed-point trailing stop (pips/points). If >0, overrides ATR-based trail.
 AE_TRAIL_SL_PIPS = float(os.getenv("AE_TRAIL_SL_PIPS", "0"))
@@ -131,25 +116,165 @@ from trading_bot_skills.risk import assess_risk
 from trading_bot_skills.token_stub import get_tradingagents_token
 from trading_bot_skills.trade_config import TELEGRAM_ENABLED, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID
 
+# ── Silence noisy third-party loggers so the terminal stays clean ──────────
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("telegram").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+
+_last_telegram_update_id = 0
+
+def process_telegram_commands():
+    """Polls Telegram getUpdates API for incoming commands (/status, /pnl, /help, /stop_scanner, /start_scanner) and responds instantly in plain English."""
+    global _last_telegram_update_id
+    token = os.getenv("TELEGRAM_TOKEN", "8617130364:AAHiEg1W9A-L5f7XkqVzgV6mTotb7TSiJV0")
+    if not token:
+        return
+    import urllib.request, json, MetaTrader5 as mt5
+    from pathlib import Path
+    url = f"https://api.telegram.org/bot{token}/getUpdates?offset={_last_telegram_update_id + 1}&timeout=1"
+    try:
+        req = urllib.request.Request(url)
+        with urllib.request.urlopen(req, timeout=3) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            if not data.get("ok"):
+                return
+            results = data.get("result", [])
+            for item in results:
+                _last_telegram_update_id = max(_last_telegram_update_id, item.get("update_id", 0))
+                msg = item.get("message", {})
+                text = msg.get("text", "").strip()
+                chat_id = msg.get("chat", {}).get("id")
+                if not text or not chat_id:
+                    continue
+                
+                cmd = text.split()[0].lower()
+                if cmd in ["/status", "/state"]:
+                    acc = mt5.account_info() if mt5.terminal_info() else None
+                    bal_str = f"${acc.balance:.2f}" if acc else "N/A"
+                    eq_str = f"${acc.equity:.2f}" if acc else "N/A"
+                    pos = mt5.positions_get() if acc else None
+                    scalp_pos = [p for p in pos if p.magic == 20250831] if pos else []
+                    hedge_pos = [p for p in pos if p.magic != 20250831] if pos else []
+                    
+                    status_reply = (
+                        "<b>🟢 AlphaEdge Bot Status Report</b>\n\n"
+                        f"• <b>Market:</b> Gold (XAUUSD)\n"
+                        f"• <b>Balance:</b> {bal_str}\n"
+                        f"• <b>Equity:</b> {eq_str}\n"
+                        f"• <b>Active Scalps:</b> {len(scalp_pos)}/3 trades (0.01 lot size)\n"
+                        f"• <b>Manual Hedge:</b> {len(hedge_pos)} positions active\n"
+                        f"• <b>Scan Speed:</b> 5-Second Real-Time\n"
+                        f"• <b>Protections:</b> 24/7 Trading | RSI Retest | Price Action Wicks | Auto-TP1 Lock"
+                    )
+                    send_telegram_alert(status_reply)
+
+                elif cmd in ["/pnl", "/balance"]:
+                    acc = mt5.account_info() if mt5.terminal_info() else None
+                    bal = acc.balance if acc else 0
+                    eq = acc.equity if acc else 0
+                    pnl = eq - bal
+                    pnl_reply = (
+                        "<b>📊 Account Balance & PnL Summary</b>\n\n"
+                        f"• <b>Account Balance:</b> ${bal:.2f}\n"
+                        f"• <b>Account Equity:</b> ${eq:.2f}\n"
+                        f"• <b>Floating PnL:</b> ${pnl:+.2f}\n"
+                    )
+                    send_telegram_alert(pnl_reply)
+
+                elif cmd in ["/help", "/start"]:
+                    help_reply = (
+                        "<b>🤖 AlphaEdge Gold Scalper Telegram Commands</b>\n\n"
+                        "• /status — View live bot health, balance, and open position count\n"
+                        "• /pnl — View account balance, equity, and floating PnL\n"
+                        "• /stop_scanner — Pause the scalping scanner\n"
+                        "• /start_scanner — Resume the scalping scanner\n"
+                        "• /help — Display command menu"
+                    )
+                    send_telegram_alert(help_reply)
+
+                elif cmd == "/stop_scanner":
+                    Path("bot_state.txt").write_text("STOPPED")
+                    send_telegram_alert("🛑 <b>Scalper Paused</b>\nScanner is now paused. Send /start_scanner to resume.")
+
+                elif cmd == "/start_scanner":
+                    Path("bot_state.txt").write_text("RUNNING")
+                    send_telegram_alert("🟢 <b>Scalper Resumed</b>\nScanner is actively monitoring Gold for setups.")
+
+    except Exception as err:
+        logger.debug(f"Telegram command check error: {err}")
+
+
+def _start_telegram_command_listener():
+    """Starts a non-blocking background daemon thread to handle Telegram commands with zero lag on trading."""
+    import threading, time
+    def _worker():
+        while True:
+            try:
+                process_telegram_commands()
+            except Exception as e:
+                pass
+            time.sleep(2)
+    t = threading.Thread(target=_worker, daemon=True, name="TelegramListener")
+    t.start()
+    logger.info("Telegram background command listener initialized.")
+
+
+def is_trading_session_active() -> bool:
+    """
+    All-Day & Overnight 24/5 Trading Mode:
+    Runs continuously throughout Asian, Frankfurt, London, and NY sessions.
+    Only pauses over the weekend when the market is closed (Friday 21:00 UTC to Sunday 22:00 UTC).
+    """
+    from datetime import datetime, timezone
+    now_utc = datetime.now(timezone.utc)
+    weekday = now_utc.weekday()
+    hour = now_utc.hour
+    if weekday == 4 and hour >= 21:
+        return False
+    if weekday == 5:
+        return False
+    if weekday == 6 and hour < 22:
+        return False
+    return True
+
+
+
+
+
+
+
+
+
 def send_telegram_alert(message: str):
-    if not TELEGRAM_ENABLED:
+    token = os.getenv("TELEGRAM_TOKEN", "8617130364:AAHiEg1W9A-L5f7XkqVzgV6mTotb7TSiJV0")
+    chat_id = os.getenv("TELEGRAM_CHAT_ID", "915238743")
+    if not token or not chat_id:
+        logger.warning("Telegram token or chat_id not configured. Alert skipped.")
         return
     import urllib.request
     import urllib.parse
     import json
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
     payload = {
-        "chat_id": TELEGRAM_CHAT_ID,
+        "chat_id": chat_id,
         "text": message,
         "parse_mode": "HTML"
     }
     try:
         data = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=5) as response:
-            response.read()
+        with urllib.request.urlopen(req, timeout=10) as response:
+            logger.info("Telegram notification sent successfully.")
     except Exception as e:
-        logger.error(f"Failed to send Telegram alert: {e}")
+        try:
+            payload.pop("parse_mode", None)
+            data = json.dumps(payload).encode("utf-8")
+            req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=10) as response:
+                logger.info("Telegram notification sent successfully (plain text fallback).")
+        except Exception as e2:
+            logger.error(f"Failed to send Telegram alert: {e2}")
+
 
 def get_lot_size(symbol: str, sl_price: float = 0.0, entry_price: float = 0.0) -> float:
     """
@@ -174,8 +299,8 @@ def get_lot_size(symbol: str, sl_price: float = 0.0, entry_price: float = 0.0) -
     if not account:
         return 0.0
 
-    balance = account.balance
-    risk_usd = 50.0  # Fixed $50 risk per trade regardless of balance
+    balance = account.balance if account.balance > 0 else 100.0
+    risk_usd = max(3.0, balance * 0.03)  # Risk exactly 3% of balance, minimum $3.00
 
     price_distance = abs(entry_price - sl_price)
     if price_distance == 0:
@@ -204,12 +329,9 @@ def get_lot_size(symbol: str, sl_price: float = 0.0, entry_price: float = 0.0) -
     # -------------------------------------------------------
     # VIABILITY CHECK: If the broker minimum lot forces us to
     # risk more than 1.5x our intended risk, skip the trade.
-    # This prevents over-risking on assets like Gold and BTC
-    # where a wide ATR-based SL + minimum 0.01 lot can mean
-    # the actual loss far exceeds the $30 target.
     # -------------------------------------------------------
     actual_risk_at_min = vol_min * loss_per_one_lot
-    max_acceptable_risk = risk_usd * 1.5   # Allow up to $45 max (1.5x $30)
+    max_acceptable_risk = risk_usd * 1.5   # Allow up to 1.5x of the 3% risk
 
     if optimal_volume < vol_min and actual_risk_at_min > max_acceptable_risk:
         logger.info(
@@ -272,6 +394,225 @@ def get_h4_bias(symbol: str) -> str:
     elif last['ema50'] < last['ema200']:
         return "BEARISH"
     return "NEUTRAL"
+
+def find_supply_demand_zones(df: pd.DataFrame, lookback: int = 100):
+    """
+    Detect institutional Supply & Demand zones.
+    A zone is marked when price makes an impulsive move > 1.8x ATR
+    from a base/consolidation candle — the origin of the move.
+    """
+    zones = []
+    for i in range(len(df) - 5, max(len(df) - lookback, 2), -1):
+        c_prev2 = df.iloc[i - 2]
+        c_curr = df.iloc[i]
+        atr_val = c_curr.get('atr', 0)
+        if atr_val <= 0:
+            continue
+        move = c_curr['close'] - c_prev2['open']
+        if abs(move) / atr_val > 1.8:
+            if move > 0:
+                zones.append({
+                    "type": "DEMAND",
+                    "low": c_prev2['low'],
+                    "high": max(c_prev2['close'], c_prev2['open']),
+                    "index": i
+                })
+            else:
+                zones.append({
+                    "type": "SUPPLY",
+                    "high": c_prev2['high'],
+                    "low": min(c_prev2['close'], c_prev2['open']),
+                    "index": i
+                })
+    return zones
+
+
+def find_order_blocks(df: pd.DataFrame, lookback: int = 80):
+    """
+    Detect institutional Order Blocks (OB).
+    - Bullish OB: Last down-candle before strong bullish displacement (>1.5 ATR).
+    - Bearish OB: Last up-candle before strong bearish displacement (>1.5 ATR).
+    """
+    obs = []
+    if len(df) < 10:
+        return obs
+    atr = df['atr'].values if 'atr' in df.columns else np.zeros(len(df))
+    close = df['close'].values
+    open_ = df['open'].values
+    high = df['high'].values
+    low = df['low'].values
+    n = len(df)
+    for i in range(max(2, n - lookback), n - 2):
+        a = atr[i]
+        if a <= 0 or np.isnan(a):
+            continue
+        # Bullish OB
+        if close[i] < open_[i]:
+            impulse = close[i+2] - open_[i+1]
+            if impulse > 1.5 * a and close[i+2] > high[i]:
+                obs.append({'type': 'BULLISH_OB', 'high': high[i], 'low': low[i], 'index': i})
+        # Bearish OB
+        elif close[i] > open_[i]:
+            impulse = open_[i+1] - close[i+2]
+            if impulse > 1.5 * a and close[i+2] < low[i]:
+                obs.append({'type': 'BEARISH_OB', 'high': high[i], 'low': low[i], 'index': i})
+    return obs
+
+
+def calculate_poc(df_cons: pd.DataFrame, bins: int = 15) -> float:
+    """
+    Compute the Volume Profile Point of Control (POC) for a consolidation range.
+    Divides price range into discrete volume bins and returns the price of the highest volume node.
+    """
+    if len(df_cons) == 0:
+        return 0.0
+    low = df_cons['low'].min()
+    high = df_cons['high'].max()
+    if high <= low:
+        return float((high + low) / 2.0)
+    bin_edges = np.linspace(low, high, bins + 1)
+    bin_volumes = np.zeros(bins)
+    for _, row in df_cons.iterrows():
+        c_mid = (row['high'] + row['low']) / 2.0
+        vol = row.get('tick_volume', 1)
+        b_idx = int(np.clip((c_mid - low) / (high - low) * (bins - 1), 0, bins - 1))
+        bin_volumes[b_idx] += vol
+    poc_idx = int(np.argmax(bin_volumes))
+    poc_price = (bin_edges[poc_idx] + bin_edges[poc_idx + 1]) / 2.0
+    return float(poc_price)
+
+
+def analyze_institutional_daytrade_df(df: pd.DataFrame, symbol: str):
+    """
+    HIGH WIN RATE Institutional Day Trading Strategy -- M15 Timeframe.
+    Tested Model 1: 1:1.0 TP Target with 1.2x ATR Wick-Protected Stop Loss.
+
+    5 Mandatory Confluences:
+      1. H4 EMA Trend  -- strict BULLISH for buys, strict BEARISH for sells (NEUTRAL = no trade).
+      2. M15 EMA Trend -- EMA8 > EMA21 for buys, EMA8 < EMA21 for sells.
+      3. Fibonacci 50%  -- price in DISCOUNT (<50% daily range) for buys, PREMIUM (>50%) for sells.
+      4. RSI Momentum  -- RSI < 52 for buys, RSI > 48 for sells.
+      5. Zone + Candle -- body >= 40% touching/inside institutional S&D zone (0.25 ATR prox).
+
+    SL  = 1.2 ATR beyond zone boundary (maximum wick protection).
+    TP  = 1.0 x Risk (1:1.0 R:R) -- fast session fills targeting 65%+ win rate.
+    """
+    if len(df) < 150:
+        return "NEUTRAL", 0.0, 0.0, 0.0, "Insufficient data"
+
+    df = df.copy()
+    df = calculate_atr(df)
+
+    last = df.iloc[-1]
+    prev = df.iloc[-2]   # Last CLOSED candle -- all pattern logic uses this
+
+    last_close = last["close"]
+    last_atr   = last["atr"]
+    if last_atr <= 0:
+        return "NEUTRAL", 0.0, 0.0, 0.0, "ATR is zero -- no volatility data"
+
+    # 1. H4 TREND BIAS (strict: NEUTRAL = no trade)
+    h4_bias = get_h4_bias(symbol) if symbol else "NEUTRAL"
+
+    # 2. S&D ZONES
+    zones = find_supply_demand_zones(df, lookback=100)
+
+    # 3. FIBONACCI 50% DAILY RANGE
+    daily_window = df.iloc[-80:-1]
+    daily_high   = daily_window["high"].max()
+    daily_low    = daily_window["low"].min()
+    daily_range  = daily_high - daily_low
+    if daily_range <= 0:
+        return "NEUTRAL", 0.0, 0.0, 0.0, "Flat daily range -- no Fib context"
+    fib_50 = daily_low + 0.50 * daily_range
+
+    # 4. RSI MOMENTUM FILTER
+    df = calculate_rsi(df)
+    last_rsi    = float(df["rsi"].iloc[-1]) if "rsi" in df.columns else 50.0
+    rsi_buy_ok  = last_rsi < 55   # Wider RSI → more BUY setups caught
+    rsi_sell_ok = last_rsi > 45   # Wider RSI → more SELL setups caught
+
+    # 5. M15 LOCAL TREND (EMA8 vs EMA21)
+    df["ema8"]  = calculate_ema(df, 8)
+    df["ema21"] = calculate_ema(df, 21)
+    ema8        = float(df["ema8"].iloc[-1])
+    ema21       = float(df["ema21"].iloc[-1])
+    m15_bullish = ema8 > ema21
+    m15_bearish = ema8 < ema21
+
+    # CANDLE ANALYSIS on the last CLOSED candle
+    prev_open  = prev["open"]
+    prev_close = prev["close"]
+    prev_high  = prev["high"]
+    prev_low   = prev["low"]
+    candle_range = prev_high - prev_low
+    if candle_range <= 0:
+        return "NEUTRAL", 0.0, 0.0, 0.0, "Invalid candle range"
+
+    is_green = prev_close > prev_open
+    is_red   = prev_close < prev_open
+    body_pct = abs(prev_close - prev_open) / candle_range
+
+    # >=40% body confirmation
+    buy_candle_ok  = is_green and body_pct >= 0.40
+    sell_candle_ok = is_red   and body_pct >= 0.40
+
+    # Zone proximity: 0.30 ATR — wider catch radius for more trade opportunities
+    zone_prox = 0.30 * last_atr
+
+    # BUY SETUP -- all 5 confluences must be TRUE
+    if (h4_bias == "BULLISH"
+            and m15_bullish
+            and last_close < fib_50
+            and rsi_buy_ok
+            and buy_candle_ok):
+        for z in zones:
+            if z["type"] == "DEMAND":
+                if (prev_low <= z["high"] + zone_prox
+                        and prev_close > z["low"] - zone_prox):
+                    sl   = min(prev_low, z["low"]) - 1.2 * last_atr
+                    risk = last_close - sl
+                    if risk > 0:
+                        tp = last_close + 1.0 * risk
+                        sl, tp = assess_risk("BUY", sl, tp, last_close, last_atr, "neutral")
+                        rr = (tp - last_close) / (last_close - sl) if (last_close - sl) > 0 else 0
+                        detail = (
+                            f"HIGH-WIN-RATE BUY | Demand [{z['low']:.5f}-{z['high']:.5f}] | "
+                            f"Fib50={fib_50:.5f} | RSI={last_rsi:.0f} | H4=BULL | M15=BULL | "
+                            f"Body={body_pct*100:.0f}% | SL=1.2xATR | R:R 1:{rr:.2f}"
+                        )
+                        return "BUY", sl, tp, last_close, detail
+
+    # SELL SETUP -- all 5 confluences must be TRUE
+    if (h4_bias == "BEARISH"
+            and m15_bearish
+            and last_close > fib_50
+            and rsi_sell_ok
+            and sell_candle_ok):
+        for z in zones:
+            if z["type"] == "SUPPLY":
+                if (prev_high >= z["low"] - zone_prox
+                        and prev_close < z["high"] + zone_prox):
+                    sl   = max(prev_high, z["high"]) + 1.2 * last_atr
+                    risk = sl - last_close
+                    if risk > 0:
+                        tp = last_close - 1.0 * risk
+                        sl, tp = assess_risk("SELL", sl, tp, last_close, last_atr, "neutral")
+                        rr = (last_close - tp) / (sl - last_close) if (sl - last_close) > 0 else 0
+                        detail = (
+                            f"HIGH-WIN-RATE SELL | Supply [{z['low']:.5f}-{z['high']:.5f}] | "
+                            f"Fib50={fib_50:.5f} | RSI={last_rsi:.0f} | H4=BEAR | M15=BEAR | "
+                            f"Body={body_pct*100:.0f}% | SL=1.2xATR | R:R 1:{rr:.2f}"
+                        )
+                        return "SELL", sl, tp, last_close, detail
+
+    m15_label = "BULL" if m15_bullish else "BEAR"
+    return (
+        "NEUTRAL", 0.0, 0.0, 0.0,
+        f"No setup | Fib50={fib_50:.5f} | Close={last_close:.5f} | RSI={last_rsi:.0f} | "
+        f"H4={h4_bias} | M15={m15_label} | Green={is_green} Red={is_red} Body={body_pct*100:.0f}%"
+    )
+
 
 def analyze_liquidity_reversion_df(df: pd.DataFrame, symbol: str | None = None):
     """Liquidity sweep mean-reversion entry logic."""
@@ -431,95 +772,531 @@ def analyze_liquidity_reversion_df(df: pd.DataFrame, symbol: str | None = None):
     return action, sl, tp, entry_price, details
 
 
-def analyze_core_system_df(df: pd.DataFrame, symbol: str):
-    if len(df) < 200:
-        return "NEUTRAL", 0.0, 0.0, 0.0, "Insufficient data for EMA200"
+def analyze_amd_poc_pullback_df(df: pd.DataFrame, symbol: str):
+    """
+    AMD (Accumulation, Manipulation, Distribution) + Point of Control (POC) Pullback Sequence:
+    1. Identify Consolidation (Accumulation range).
+    2. Mark the Volume Profile POC (Point of Control).
+    3. Locate Manipulation (Judas swing / Liquidity sweep).
+    4. Locate Distribution (Impulsive displacement away from manipulation).
+    5. Wait for price to pull back to retest the POC (NO chasing entries).
+    """
+    if len(df) < 60:
+        return "NEUTRAL", 0.0, 0.0, 0.0, "Insufficient data for AMD POC"
         
     df = df.copy()
+    df = calculate_atr(df)
+    df = calculate_rsi(df)
+    df['ema8'] = calculate_ema(df, 8)
+    df['ema21'] = calculate_ema(df, 21)
+    
+    last = df.iloc[-1]
+    prev = df.iloc[-2]
+    last_close = last['close']
+    last_atr = last['atr']
+    if last_atr <= 0:
+        return "NEUTRAL", 0.0, 0.0, 0.0, "ATR is zero"
+
+    # 1. Identify Prior Consolidation (Accumulation Phase: bars -40 to -12)
+    cons = df.iloc[-40:-12]
+    c_high = cons['high'].max()
+    c_low = cons['low'].min()
+    c_range = c_high - c_low
+    if c_range <= 0:
+        return "NEUTRAL", 0.0, 0.0, 0.0, "Flat consolidation"
+
+    # 2. Mark Point of Control (POC) using Volume Profile
+    poc = calculate_poc(cons)
+
+    # 3. Locate Manipulation & 4. Distribution in the recent leg (bars -12 to -2)
+    mid_leg = df.iloc[-12:-2]
+    leg_min = mid_leg['low'].min()
+    leg_max = mid_leg['high'].max()
+
+    # 5. Check Pullback to POC (No Chasing)
+    # Gold has wider ATR — use a looser proximity threshold so more retests are caught
+    poc_prox = 0.55 * last_atr if symbol == "XAUUSDz" else 0.35 * last_atr
+    near_poc = (abs(last_close - poc) <= poc_prox) or (prev['low'] <= poc + poc_prox and prev['high'] >= poc - poc_prox)
+
+    # Dominant H4 Trend Context
+    h4_bias = get_h4_bias(symbol) if symbol else "NEUTRAL"
+    h4_buy_ok = h4_bias in ["BULLISH", "NEUTRAL"]
+    h4_sell_ok = h4_bias in ["BEARISH", "NEUTRAL"]
+
+    # --- BULLISH AMD SEQUENCE ---
+    # Manipulation swept below c_low, Distribution pushed up above c_high, now pulling back to retest POC
+    if leg_min < c_low and leg_max > c_high and near_poc and h4_buy_ok and last_close >= poc - poc_prox:
+        sl = leg_min - 1.2 * last_atr
+        risk = last_close - sl
+        if risk > 0:
+            tp = max(leg_max, last_close + 1.8 * risk)
+            sl, tp = assess_risk("BUY", sl, tp, last_close, last_atr, "neutral")
+            rr = (tp - last_close) / (last_close - sl) if (last_close - sl) > 0 else 1.8
+            return "BUY", sl, tp, last_close, (
+                f"AMD POC Pullback BUY | Consolidation [{c_low:.5f}-{c_high:.5f}] | "
+                f"POC={poc:.5f} (Retested) | ManipLow={leg_min:.5f} | H4={h4_bias} | R:R 1:{rr:.2f}"
+            )
+
+    # --- BEARISH AMD SEQUENCE ---
+    # Manipulation swept above c_high, Distribution pushed down below c_low, now pulling back to retest POC
+    if leg_max > c_high and leg_min < c_low and near_poc and h4_sell_ok and last_close <= poc + poc_prox:
+        sl = leg_max + 1.2 * last_atr
+        risk = sl - last_close
+        if risk > 0:
+            tp = min(leg_min, last_close - 1.8 * risk)
+            sl, tp = assess_risk("SELL", sl, tp, last_close, last_atr, "neutral")
+            rr = (last_close - tp) / (sl - last_close) if (sl - last_close) > 0 else 1.8
+            return "SELL", sl, tp, last_close, (
+                f"AMD POC Pullback SELL | Consolidation [{c_low:.5f}-{c_high:.5f}] | "
+                f"POC={poc:.5f} (Retested) | ManipHigh={leg_max:.5f} | H4={h4_bias} | R:R 1:{rr:.2f}"
+            )
+
+    return "NEUTRAL", 0.0, 0.0, 0.0, f"No AMD setup | POC={poc:.5f} | Consolidation=[{c_low:.5f}-{c_high:.5f}]"
+
+
+def analyze_core_system_df(df: pd.DataFrame, symbol: str):
+    """
+    Core System Strategy:
+    1. Order Block (OB) & Supply/Demand (S&D) mitigation in Fibonacci Golden Pocket (Discount/Premium).
+    2. Previous Day High/Low (PDH/PDL) Liquidity Sweep Mean Reversion.
+    3. H4 dominant trend filter.
+    """
+    if len(df) < 100:
+        return "NEUTRAL", 0.0, 0.0, 0.0, "Insufficient data for Core System"
+        
+    df = df.copy()
+    df = calculate_atr(df)
+    df = calculate_rsi(df)
+    df['ema8'] = calculate_ema(df, 8)
+    df['ema21'] = calculate_ema(df, 21)
     df['ema50'] = calculate_ema(df, 50)
     df['ema200'] = calculate_ema(df, 200)
-    df = calculate_atr(df)
+
     last = df.iloc[-1]
+    prev = df.iloc[-2]   # Last closed candle for structural validation
     
-    bias = "BULLISH" if last['ema50'] > last['ema200'] else "BEARISH"
-    
+    last_close = last['close']
+    last_atr = last['atr']
+    if last_atr <= 0:
+        return "NEUTRAL", 0.0, 0.0, 0.0, "ATR is zero"
+
+    prev_open = prev['open']
+    prev_close = prev['close']
+    prev_high = prev['high']
+    prev_low = prev['low']
+    candle_range = prev_high - prev_low
+    if candle_range <= 0:
+        return "NEUTRAL", 0.0, 0.0, 0.0, "Flat candle"
+
+    body_pct = abs(prev_close - prev_open) / candle_range
+    is_green = prev_close > prev_open
+    is_red = prev_close < prev_open
+
+    # 1. H4 Trend Bias
+    h4_bias = get_h4_bias(symbol) if symbol else "NEUTRAL"
+    h4_buy_ok = h4_bias in ["BULLISH", "NEUTRAL"]
+    h4_sell_ok = h4_bias in ["BEARISH", "NEUTRAL"]
+
+    # 2. Fibonacci 50% - 61.8% Golden Pocket Context
+    daily_window = df.iloc[-80:-1]
+    swing_high = daily_window['high'].max()
+    swing_low = daily_window['low'].min()
+    daily_range = swing_high - swing_low
+    fib_50 = swing_low + 0.50 * daily_range if daily_range > 0 else last_close
+
+    # 3. Order Blocks & Supply/Demand Detection
+    # Gold-specific: wider zone proximity (0.45 ATR) and lower body_pct threshold (0.25)
+    # so more valid OB/SD touches are caught on Gold's naturally wide-ranging candles
+    is_gold = (symbol == "XAUUSDz")
+    order_blocks = find_order_blocks(df, lookback=80)
+    sd_zones = find_supply_demand_zones(df, lookback=80)
+    zone_prox = 0.45 * last_atr if is_gold else 0.30 * last_atr
+    min_body_pct = 0.25 if is_gold else 0.35
+
+    # --- SETUP A: Bullish Order Block / Demand in Discount (< 50% Fib) ---
+    if h4_buy_ok and last_close <= fib_50 and is_green and body_pct >= min_body_pct:
+        # Check Bullish Order Blocks
+        for ob in reversed(order_blocks):
+            if ob['type'] == 'BULLISH_OB':
+                if prev_low <= ob['high'] + zone_prox and prev_close >= ob['low'] - zone_prox:
+                    sl = min(prev_low, ob['low']) - 1.2 * last_atr
+                    risk = last_close - sl
+                    if risk > 0:
+                        tp = last_close + 1.5 * risk
+                        sl, tp = assess_risk("BUY", sl, tp, last_close, last_atr, "neutral")
+                        rr = (tp - last_close) / (last_close - sl) if (last_close - sl) > 0 else 1.5
+                        return "BUY", sl, tp, last_close, (
+                            f"Core OB BUY | Bullish OB [{ob['low']:.5f}-{ob['high']:.5f}] | "
+                            f"Fib50={fib_50:.5f} (Discount) | H4={h4_bias} | R:R 1:{rr:.2f}"
+                        )
+        # Check Demand Zones
+        for z in reversed(sd_zones):
+            if z['type'] == 'DEMAND':
+                if prev_low <= z['high'] + zone_prox and prev_close >= z['low'] - zone_prox:
+                    sl = min(prev_low, z['low']) - 1.2 * last_atr
+                    risk = last_close - sl
+                    if risk > 0:
+                        tp = last_close + 1.5 * risk
+                        sl, tp = assess_risk("BUY", sl, tp, last_close, last_atr, "neutral")
+                        rr = (tp - last_close) / (last_close - sl) if (last_close - sl) > 0 else 1.5
+                        return "BUY", sl, tp, last_close, (
+                            f"Core Demand BUY | Demand [{z['low']:.5f}-{z['high']:.5f}] | "
+                            f"Fib50={fib_50:.5f} (Discount) | H4={h4_bias} | R:R 1:{rr:.2f}"
+                        )
+
+    # --- SETUP B: Bearish Order Block / Supply in Premium (> 50% Fib) ---
+    if h4_sell_ok and last_close >= fib_50 and is_red and body_pct >= min_body_pct:
+        # Check Bearish Order Blocks
+        for ob in reversed(order_blocks):
+            if ob['type'] == 'BEARISH_OB':
+                if prev_high >= ob['low'] - zone_prox and prev_close <= ob['high'] + zone_prox:
+                    sl = max(prev_high, ob['high']) + 1.2 * last_atr
+                    risk = sl - last_close
+                    if risk > 0:
+                        tp = last_close - 1.5 * risk
+                        sl, tp = assess_risk("SELL", sl, tp, last_close, last_atr, "neutral")
+                        rr = (last_close - tp) / (sl - last_close) if (sl - last_close) > 0 else 1.5
+                        return "SELL", sl, tp, last_close, (
+                            f"Core OB SELL | Bearish OB [{ob['low']:.5f}-{ob['high']:.5f}] | "
+                            f"Fib50={fib_50:.5f} (Premium) | H4={h4_bias} | R:R 1:{rr:.2f}"
+                        )
+        # Check Supply Zones
+        for z in reversed(sd_zones):
+            if z['type'] == 'SUPPLY':
+                if prev_high >= z['low'] - zone_prox and prev_close <= z['high'] + zone_prox:
+                    sl = max(prev_high, z['high']) + 1.2 * last_atr
+                    risk = sl - last_close
+                    if risk > 0:
+                        tp = last_close - 1.5 * risk
+                        sl, tp = assess_risk("SELL", sl, tp, last_close, last_atr, "neutral")
+                        rr = (last_close - tp) / (sl - last_close) if (sl - last_close) > 0 else 1.5
+                        return "SELL", sl, tp, last_close, (
+                            f"Core Supply SELL | Supply [{z['low']:.5f}-{z['high']:.5f}] | "
+                            f"Fib50={fib_50:.5f} (Premium) | H4={h4_bias} | R:R 1:{rr:.2f}"
+                        )
+
+    # --- SETUP C: Previous Day High/Low (PDH/PDL) Sweep Mean Reversion ---
     pdh, pdl = 0.0, float('inf')
     rates_d1 = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_D1, 1, 2)
     if rates_d1 is not None and len(rates_d1) > 0:
         yesterday = rates_d1[0]
         pdh = yesterday['high']
         pdl = yesterday['low']
-        
-    recent = df.iloc[-15:]
-    sweep_high = recent['high'].max()
-    sweep_low = recent['low'].min()
-    
-    # Structural patterns must be evaluated on the previously CLOSED candle (prev)
-    prev = df.iloc[-2]
-    prev_close = prev['close']
-    prev_open = prev['open']
-    prev_high = prev['high']
-    prev_low = prev['low']
-    
-    last_close = last['close']
-    last_atr = last['atr']
-    
-    body_size = abs(prev_close - prev_open)
-    lower_wick = min(prev_close, prev_open) - prev_low
-    upper_wick = prev_high - max(prev_close, prev_open)
-    
-    # H4 bias check — only trade WITH the dominant trend
-    h4_bias = get_h4_bias(symbol)
 
-    # Volume check — rejection candle must have above-average institutional volume
-    prev_vol = prev['tick_volume'] if 'tick_volume' in prev.index else 0
-    avg_vol  = df['tick_volume'].iloc[-21:-1].mean() if len(df) >= 21 else df['tick_volume'].mean()
-    vol_ok   = prev_vol >= 1.1 * avg_vol  # 1.1x average — relaxed but meaningful
+    recent_15 = df.iloc[-15:]
+    sweep_high = recent_15['high'].max()
+    sweep_low = recent_15['low'].min()
 
-    if sweep_high >= pdh and pdh > 0:
-        # Just check closed candle closed back below the swept high
-        if prev_close < sweep_high:
-            sl = prev_high + (2.0 * last_atr)   # Above wick high + 2 ATR — breathing room
-            tp = last_close - 2.5 * (sl - last_close)
-            sl, tp = assess_risk("SELL", sl, tp, last_close, last_atr, "neutral")
-            return "SELL", sl, tp, last_close, f"Core: PDH Sweep SELL. R:R 2.5"
+    if sweep_high >= pdh and pdh > 0 and h4_sell_ok:
+        if prev_close < pdh and is_red:
+            sl = max(prev_high, sweep_high) + 1.2 * last_atr
+            risk = sl - last_close
+            if risk > 0:
+                tp = last_close - 1.5 * risk
+                sl, tp = assess_risk("SELL", sl, tp, last_close, last_atr, "neutral")
+                return "SELL", sl, tp, last_close, f"Core: PDH Liquidity Sweep Mean Reversion SELL (PDH {pdh:.5f})"
 
-    if sweep_low <= pdl and pdl < float('inf'):
-        # Just check closed candle closed back above the swept low
-        if prev_close > sweep_low:
-            sl = prev_low - (2.0 * last_atr)    # Below wick low + 2 ATR — breathing room
-            tp = last_close + 2.5 * (last_close - sl)
-            sl, tp = assess_risk("BUY", sl, tp, last_close, last_atr, "neutral")
-            return "BUY", sl, tp, last_close, f"Core: PDL Sweep BUY. R:R 2.5"
-            
-    return "NEUTRAL", 0.0, 0.0, 0.0, f"No core setup. Bias: {bias}, PDH: {pdh:.5f}, PDL: {pdl:.5f}"
+    if sweep_low <= pdl and pdl < float('inf') and h4_buy_ok:
+        if prev_close > pdl and is_green:
+            sl = min(prev_low, sweep_low) - 1.2 * last_atr
+            risk = last_close - sl
+            if risk > 0:
+                tp = last_close + 1.5 * risk
+                sl, tp = assess_risk("BUY", sl, tp, last_close, last_atr, "neutral")
+                return "BUY", sl, tp, last_close, f"Core: PDL Liquidity Sweep Mean Reversion BUY (PDL {pdl:.5f})"
+
+    return "NEUTRAL", 0.0, 0.0, 0.0, f"No core setup | Fib50={fib_50:.5f} | H4={h4_bias}"
+
+
+def analyze_ut_liquidity_df(symbol, df, tick):
+    """
+    TradingAgents Multi-Agent Consensus & Adversarial Risk Gate Engine v2.0
+    (Inspired by TauricResearch/TradingAgents Architecture)
+
+    1. Session Gate: Only trade London (07:00-12:00 UTC) + NY (12:00-20:00 UTC)
+    2. Macro & Sentiment Agent (Max 35 pts): H1 200/50 EMA + H1 UT Stop
+    3. Technical Analyst Agent (Max 40 pts): M1 UT Bot Crossover (ATR 7, Key 2.0)
+    4. Mid-Frame Confirmation (Max 5 pts bonus): M5 EMA8/21 alignment
+    5. Adversarial Debater Agent (Max 15 pts): Wick Rejection Stress-Test
+    6. Risk Manager Gate (Max 10 pts + Full Veto): Spread Sanity + Score >= 75/100
+    """
+    try:
+        import pandas as pd
+        import numpy as np
+        from datetime import datetime, timezone
+
+        conviction_score = 0
+        reasons = []
+
+        # =========================================================================
+        # 0. SESSION GATE — 24/5 All-Day & Overnight Mode
+        #    Only block during weekend market close (Fri 21:00 UTC - Sun 22:00 UTC)
+        # =========================================================================
+        if not is_trading_session_active():
+            return None  # Weekend Gate VETO: Market is closed for the weekend
+
+        # =========================================================================
+        # 1. MACRO & SENTIMENT AGENT (H1 Trend Structure)
+        # =========================================================================
+        h1_rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, 0, 250)
+        if h1_rates is None or len(h1_rates) < 100:
+            return None
+        df_h1 = pd.DataFrame(h1_rates)
+        df_h1['ema200'] = df_h1['close'].ewm(span=200, adjust=False).mean()
+        df_h1['ema50'] = df_h1['close'].ewm(span=50, adjust=False).mean()
+
+        df_h1['prev_close'] = df_h1['close'].shift(1)
+        df_h1['tr'] = df_h1[['high', 'low', 'prev_close']].apply(
+            lambda r: max(r['high'] - r['low'], abs(r['high'] - r['prev_close']), abs(r['low'] - r['prev_close'])), axis=1)
+        df_h1['atr_7'] = df_h1['tr'].rolling(window=7).mean()
+
+        h1_closes = df_h1['close'].values
+        h1_atrs = df_h1['atr_7'].values
+        h1_stops = np.zeros(len(h1_closes))
+        for i in range(1, len(h1_closes)):
+            if np.isnan(h1_atrs[i]): continue
+            nLoss = 2.0 * h1_atrs[i]
+            ps = h1_stops[i-1]
+            pc = h1_closes[i-1]
+            cc = h1_closes[i]
+            if cc > ps and pc > ps: h1_stops[i] = max(ps, cc - nLoss)
+            elif cc < ps and pc < ps: h1_stops[i] = min(ps, cc + nLoss)
+            elif cc > ps: h1_stops[i] = cc - nLoss
+            else: h1_stops[i] = cc + nLoss
+
+        last_h1_close = h1_closes[-1]
+        last_h1_ema50 = df_h1['ema50'].iloc[-1]
+        last_h1_ema200 = df_h1['ema200'].iloc[-1]
+        last_h1_stop = h1_stops[-1]
+
+        h1_bias = "NEUTRAL"
+        if last_h1_close > last_h1_ema50 and last_h1_close > last_h1_stop:
+            h1_bias = "BULLISH"
+            conviction_score += 25
+            reasons.append("H1 Bullish (+25)")
+            if last_h1_close > last_h1_ema200:
+                conviction_score += 10
+                reasons.append("Above 200 EMA (+10)")
+        elif last_h1_close < last_h1_ema50 and last_h1_close < last_h1_stop:
+            h1_bias = "BEARISH"
+            conviction_score += 25
+            reasons.append("H1 Bearish (+25)")
+            if last_h1_close < last_h1_ema200:
+                conviction_score += 10
+                reasons.append("Below 200 EMA (+10)")
+
+        if h1_bias == "NEUTRAL":
+            return None  # Macro Analyst VETO: Market is indecisive
+
+        # =========================================================================
+        # 2. TECHNICAL ANALYST AGENT (M1 Precision Execution)
+        # =========================================================================
+        m1_rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M1, 0, 150)
+        if m1_rates is None or len(m1_rates) < 20:
+            return None
+        df_m1 = pd.DataFrame(m1_rates)
+
+        df_m1['prev_close'] = df_m1['close'].shift(1)
+        df_m1['tr'] = df_m1[['high', 'low', 'prev_close']].apply(
+            lambda r: max(r['high'] - r['low'], abs(r['high'] - r['prev_close']), abs(r['low'] - r['prev_close'])), axis=1)
+        df_m1['atr_10'] = df_m1['tr'].ewm(alpha=1.0/10, adjust=False).mean()
+
+        m1_closes = df_m1['close'].values
+        m1_atrs = df_m1['atr_10'].values
+        m1_stops = np.zeros(len(m1_closes))
+        for i in range(1, len(m1_closes)):
+            if np.isnan(m1_atrs[i]): continue
+            nLoss = 3.0 * m1_atrs[i]
+            ps = m1_stops[i-1]
+            pc = m1_closes[i-1]
+            cc = m1_closes[i]
+            if cc > ps and pc > ps: m1_stops[i] = max(ps, cc - nLoss)
+            elif cc < ps and pc < ps: m1_stops[i] = min(ps, cc + nLoss)
+            elif cc > ps: m1_stops[i] = cc - nLoss
+            else: m1_stops[i] = cc + nLoss
+
+        i = len(m1_closes) - 1
+        curr_close = m1_closes[i]
+        prev_close = m1_closes[i - 1]
+        prev_stop = m1_stops[i - 1]
+        curr_stop = m1_stops[i]
+        curr_atr = m1_atrs[i]
+
+        if np.isnan(curr_atr) or curr_atr == 0:
+            return None
+
+        cross_up = prev_close <= prev_stop and curr_close > curr_stop
+        cross_dn = prev_close >= prev_stop and curr_close < curr_stop
+
+        strong_buy = cross_up and curr_close > curr_stop
+        strong_sell = cross_dn and curr_close < curr_stop
+
+        buy_buffer = strong_buy and curr_close > curr_stop
+        sell_buffer = strong_sell and curr_close < curr_stop
+
+        proposed_action = None
+        if buy_buffer and h1_bias == "BULLISH":
+            proposed_action = "BUY"
+            conviction_score += 40
+            reasons.append("M1 UT Cross UP (+40)")
+        elif sell_buffer and h1_bias == "BEARISH":
+            proposed_action = "SELL"
+            conviction_score += 40
+            reasons.append("M1 UT Cross DOWN (+40)")
+        else:
+            return None
+
+        # =========================================================================
+        # 2b. MID-FRAME CONFIRMATION AGENT (+5 bonus — M5 EMA8/21 alignment)
+        #     Tightens signal quality by ensuring M5 trend agrees with M1 cross
+        # =========================================================================
+        try:
+            m5_rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M5, 0, 50)
+            if m5_rates is not None and len(m5_rates) >= 22:
+                df_m5 = pd.DataFrame(m5_rates)
+                df_m5['ema8'] = df_m5['close'].ewm(span=8, adjust=False).mean()
+                df_m5['ema21'] = df_m5['close'].ewm(span=21, adjust=False).mean()
+                m5_ema8 = df_m5['ema8'].iloc[-1]
+                m5_ema21 = df_m5['ema21'].iloc[-1]
+                if proposed_action == "BUY" and m5_ema8 > m5_ema21:
+                    conviction_score += 5
+                    reasons.append("M5 EMA Aligned (+5)")
+                elif proposed_action == "SELL" and m5_ema8 < m5_ema21:
+                    conviction_score += 5
+                    reasons.append("M5 EMA Aligned (+5)")
+        except Exception:
+            pass  # Non-critical: skip if M5 fetch fails
+
+        # =========================================================================
+        # 3. ADVERSARIAL DEBATER AGENT (Stress-Test & Wick Rejection)
+        # =========================================================================
+        curr_open = df_m1['open'].iloc[-1]
+        curr_high = df_m1['high'].iloc[-1]
+        curr_low = df_m1['low'].iloc[-1]
+        candle_range = max(curr_high - curr_low, 0.00001)
+
+        if proposed_action == "BUY":
+            upper_wick = curr_high - max(curr_open, curr_close)
+            if upper_wick / candle_range > 0.45:
+                # Bear researcher wins debate: severe top wick rejection
+                return None
+            conviction_score += 15
+            reasons.append("Debate: Clean Bullish Expansion (+15)")
+
+        elif proposed_action == "SELL":
+            lower_wick = min(curr_open, curr_close) - curr_low
+            if lower_wick / candle_range > 0.45:
+                # Bull researcher wins debate: severe bottom wick absorption
+                return None
+            conviction_score += 15
+            reasons.append("Debate: Clean Bearish Expansion (+15)")
+
+        # =========================================================================
+        # 4. RISK MANAGER GATE (Spread Sanity & Final Score Execution)
+        # =========================================================================
+        symbol_info = mt5.symbol_info(symbol)
+        spread_val = (symbol_info.spread * symbol_info.point) if symbol_info else 0.0
+
+        if spread_val > (0.45 * curr_atr):
+            # Risk Manager VETO: Spread is too wide compared to M1 ATR
+            logger.warning(f"[Risk Gate] {symbol} {proposed_action} VETOED: Spread {spread_val:.5f} exceeds 45% of M1 ATR {curr_atr:.5f}")
+            return None
+
+        conviction_score += 10
+        reasons.append("Risk Gate Approved (+10)")
+
+        # Final Conviction Threshold Check (Requires >= 75/100)
+        if conviction_score < 75:
+            return None
+
+        # Calculate Execution Parameters
+        sl_dist = 2.5 * curr_atr
+        tp_dist = 4.0 * curr_atr
+
+        if proposed_action == "BUY":
+            sl = curr_close - sl_dist
+            tp = curr_close + tp_dist
+            return {
+                'action': 'BUY',
+                'sl': sl,
+                'tp': tp,
+                'reason': f'TradingAgents BUY (Score: {conviction_score}/100) | {", ".join(reasons)} | ATR {curr_atr:.2f}'
+            }
+        elif proposed_action == "SELL":
+            sl = curr_close + sl_dist
+            tp = curr_close - tp_dist
+            return {
+                'action': 'SELL',
+                'sl': sl,
+                'tp': tp,
+                'reason': f'TradingAgents SELL (Score: {conviction_score}/100) | {", ".join(reasons)} | ATR {curr_atr:.2f}'
+            }
+
+        return None
+
+    except Exception as e:
+        logger.error(f'Error in TradingAgents engine for {symbol}: {e}')
+        return None
+
 
 def analyze_breakout_df(df: pd.DataFrame, symbol: str):
-    """Volatility expansion breakout strategy."""
+    """
+    Volatility Expansion & Structural Breakout Strategy:
+    1. Clean close outside Bollinger Bands or 20-bar consolidation range.
+    2. Aligned with dominant H4 trend.
+    3. Strong directional candle body (>40%).
+    """
     if len(df) < 50:
-        return "NEUTRAL", 0.0, 0.0, 0.0, "Insufficient data"
+        return "NEUTRAL", 0.0, 0.0, 0.0, "Insufficient data for Breakout"
     df = df.copy()
     df = calculate_bollinger_bands(df)
     df = calculate_atr(df)
+    df['ema8'] = calculate_ema(df, 8)
+    df['ema21'] = calculate_ema(df, 21)
+    
     last = df.iloc[-1]
     prev = df.iloc[-2]
     
     last_close = last['close']
     last_atr = last['atr']
-    
-    if last_close > last['bb_upper'] and prev['close'] <= prev['bb_upper']:
+    if last_atr <= 0:
+        return "NEUTRAL", 0.0, 0.0, 0.0, "ATR is zero"
+
+    prev_open = prev['open']
+    prev_close = prev['close']
+    prev_high = prev['high']
+    prev_low = prev['low']
+    candle_range = prev_high - prev_low
+    if candle_range <= 0:
+        return "NEUTRAL", 0.0, 0.0, 0.0, "Flat candle"
+
+    body_pct = abs(prev_close - prev_open) / candle_range
+    is_green = prev_close > prev_open
+    is_red = prev_close < prev_open
+
+    h4_bias = get_h4_bias(symbol) if symbol else "NEUTRAL"
+    h4_buy_ok = h4_bias in ["BULLISH", "NEUTRAL"]
+    h4_sell_ok = h4_bias in ["BEARISH", "NEUTRAL"]
+
+    # Bullish Breakout
+    if last_close > last['bb_upper'] and prev_close <= prev['bb_upper'] and h4_buy_ok and is_green and body_pct >= 0.40:
         sl = last['bb_mid'] - (0.5 * last_atr)
-        tp = last_close + 2.0 * (last_close - sl)
-        sl, tp = assess_risk("BUY", sl, tp, last_close, last_atr, "neutral")
-        return "BUY", sl, tp, last_close, f"Breakout BUY. Close above BB_upper."
+        risk = last_close - sl
+        if risk > 0:
+            tp = last_close + 2.0 * risk
+            sl, tp = assess_risk("BUY", sl, tp, last_close, last_atr, "neutral")
+            return "BUY", sl, tp, last_close, f"Breakout BUY | Upper BB Expansion | H4={h4_bias} | Body={body_pct*100:.0f}% | R:R 1:2.0"
         
-    if last_close < last['bb_lower'] and prev['close'] >= prev['bb_lower']:
+    # Bearish Breakout
+    if last_close < last['bb_lower'] and prev_close >= prev['bb_lower'] and h4_sell_ok and is_red and body_pct >= 0.40:
         sl = last['bb_mid'] + (0.5 * last_atr)
-        tp = last_close - 2.0 * (sl - last_close)
-        sl, tp = assess_risk("SELL", sl, tp, last_close, last_atr, "neutral")
-        return "SELL", sl, tp, last_close, f"Breakout SELL. Close below BB_lower."
+        risk = sl - last_close
+        if risk > 0:
+            tp = last_close - 2.0 * risk
+            sl, tp = assess_risk("SELL", sl, tp, last_close, last_atr, "neutral")
+            return "SELL", sl, tp, last_close, f"Breakout SELL | Lower BB Expansion | H4={h4_bias} | Body={body_pct*100:.0f}% | R:R 1:2.0"
         
-    return "NEUTRAL", 0.0, 0.0, 0.0, "No breakout."
+    return "NEUTRAL", 0.0, 0.0, 0.0, f"No breakout | H4={h4_bias}"
 
 def analyze_strategies(symbol: str):
     config = ASSET_CONFIG.get(symbol, {"strategies": ["liquidity_sweep"], "timeframes": [MAIN_TIMEFRAME]})
@@ -537,12 +1314,34 @@ def analyze_strategies(symbol: str):
             df = pd.DataFrame(rates)
             
             for strategy in strategies:
-                if strategy == "core_system":
-                    res = analyze_core_system_df(df, symbol)
-                elif strategy == "liquidity_sweep":
-                    res = analyze_liquidity_reversion_df(df, symbol)
+                if strategy in ["amd_poc", "amd_poc_pullback"]:
+                    res = analyze_amd_poc_pullback_df(df, symbol)
+                elif strategy == "institutional_daytrade":
+                    res = analyze_institutional_daytrade_df(df, symbol)
+                elif strategy == "core_system":
+                    # ARCHIVED — not active (kept for reference only)
+                    res = ("NEUTRAL", 0.0, 0.0, 0.0, "Core OB archived")
+                elif strategy in ["liquidity_sweep", "amd_poc_pullback", "amd_poc"]:
+                    # ARCHIVED — not active (kept for reference only)
+                    res = ("NEUTRAL", 0.0, 0.0, 0.0, "AMD/Sweep archived")
+                elif strategy == "ut_liquidity":
+                    tick = mt5.symbol_info_tick(symbol)
+                    ut_res = analyze_ut_liquidity_df(symbol, df, tick)
+                    if ut_res and ut_res.get("action") in ["BUY", "SELL"]:
+                        res = (
+                            ut_res["action"],
+                            ut_res["sl"],
+                            ut_res["tp"],
+                            mt5.symbol_info_tick(symbol).ask if ut_res["action"] == "BUY" else mt5.symbol_info_tick(symbol).bid,
+                            ut_res.get("reason", "UT Liquidity Signal")
+                        )
+                    else:
+                        res = ("NEUTRAL", 0.0, 0.0, 0.0, "UT: No setup yet")
+                elif strategy == "scalp_1.1":
+                    res = analyze_scalp_11_df(df, symbol) if hasattr(__builtins__, '__dict__') else ("NEUTRAL", 0.0, 0.0, 0.0, "Scalp disabled")
                 elif strategy in ["breakout", "breakout_retest"]:
-                    res = analyze_breakout_df(df, symbol)
+                    # ARCHIVED — not active
+                    res = ("NEUTRAL", 0.0, 0.0, 0.0, "Breakout archived")
                 elif strategy in ["trend_continuation", "trend_pullback"]:
                     res = analyze_trend_pullback_df(df, symbol)
                 elif strategy == "opening_range":
@@ -569,11 +1368,7 @@ def run_alphaedge(execute_orders: bool = False, approved_symbols: set[str] | Non
         logger.error(f"MT5 connection failed: {e}")
         raise RuntimeError(f"MT5 connection failed: {e}")
         
-    prop_engine = None
-    if PROP_FIRM_MODE:
-        prop_engine = PropFirmEngine(starting_balance=PROP_FIRM_STARTING_BALANCE, current_phase=1)
-        
-    # 1. Calculate Daily Profit (For Logging Only - No Limits)
+    # 1. Calculate Daily Profit (For Logging Only - Real Account Mode)
     now = datetime.now()
     today_start = datetime(now.year, now.month, now.day, 0, 0, 0)
     deals = mt5.history_deals_get(today_start, now)
@@ -586,21 +1381,7 @@ def run_alphaedge(execute_orders: bool = False, approved_symbols: set[str] | Non
         if not exits_today.empty:
             daily_profit = exits_today['profit'].sum() + exits_today['commission'].sum() + exits_today['swap'].sum()
             
-    # Prop Firm Daily DD Check
-    account = mt5.account_info()
-    prop_firm_locked = False
-    if PROP_FIRM_MODE and account:
-        floating_profit = sum(p.profit for p in (mt5.positions_get() or []) if getattr(p, 'comment', '') in bot_tags)
-        total_daily_pnl = daily_profit + floating_profit
-        start_balance = account.balance - daily_profit
-        dd_percent = (total_daily_pnl / start_balance) * 100 if start_balance > 0 else 0.0
-        logger.info(f"[Prop Firm] Current Daily Net P&L: ${total_daily_pnl:+.2f} ({dd_percent:+.2f}%) | Limit: {PROP_FIRM_DAILY_DD_LIMIT}%")
-        
-        if dd_percent <= PROP_FIRM_DAILY_DD_LIMIT:
-            logger.warning(f"🚨 PROP FIRM LOCKDOWN: Daily Drawdown ({dd_percent:.2f}%) hit the kill switch limit ({PROP_FIRM_DAILY_DD_LIMIT}%). Bot is suspending new trades until tomorrow.")
-            prop_firm_locked = True
-    else:
-        logger.info(f"Current Daily Net P&L: ${daily_profit:+.2f} (Trading Uncapped)")
+    logger.info(f"Current Daily Net P&L: ${daily_profit:+.2f} (Real Account Live Mode)")
 
     # 2. Manage Breakeven for Active Positions
     open_positions = mt5.positions_get()
@@ -682,81 +1463,85 @@ def run_alphaedge(execute_orders: bool = False, approved_symbols: set[str] | Non
                     except Exception as e:
                         logger.error(f"Trailing SL adjustment failure for {symbol}: {e}")
 
-    current_day = datetime.utcnow().weekday()
-    current_hour = datetime.utcnow().hour
-    
-    is_weekend = current_day in [5, 6]
-    friday_block = current_day == 4 and current_hour >= 21
-    
-    def liquidate_all_positions(reason: str):
-        """Close all open positions immediately. Used for Friday weekend block and drawdown kill."""
-        positions = mt5.positions_get()
-        if not positions:
-            logger.info(f"[{reason}] No open positions to close.")
-            return
-        closed = 0
-        for pos in positions:
-            tick = mt5.symbol_info_tick(pos.symbol)
-            if not tick:
-                continue
-            close_type = mt5.ORDER_TYPE_SELL if pos.type == mt5.ORDER_TYPE_BUY else mt5.ORDER_TYPE_BUY
-            close_price = tick.bid if pos.type == mt5.ORDER_TYPE_BUY else tick.ask
-            request = {
-                "action": mt5.TRADE_ACTION_DEAL,
-                "symbol": pos.symbol,
-                "volume": pos.volume,
-                "type": close_type,
-                "position": pos.ticket,
-                "price": close_price,
-                "deviation": 30,
-                "magic": pos.magic,
-                "comment": f"Auto-Close: {reason}",
-                "type_time": mt5.ORDER_TIME_GTC,
-                "type_filling": mt5.ORDER_FILLING_IOC,
-            }
-            result = mt5.order_send(request)
-            if result and result.retcode == mt5.TRADE_RETCODE_DONE:
-                logger.info(f"[{reason}] Closed {pos.symbol} ticket {pos.ticket}")
-                closed += 1
-            else:
-                logger.error(f"[{reason}] Failed to close {pos.symbol}: {getattr(result, 'comment', mt5.last_error())}")
-        if closed > 0:
-            send_telegram_alert(f"🚨 <b>[{reason}]</b>\nClosed {closed} open position(s) to protect Prop Firm account.")
+    # Force-select valid Gold symbols present on current MT5 server
+    session_symbols = [sym for sym in ASSET_CONFIG.keys() if mt5.symbol_info(sym) is not None]
+    for sym in session_symbols:
+        mt5.symbol_select(sym, True)
 
-    if PROP_FIRM_MODE and (prop_firm_locked or friday_block):
-        if prop_firm_locked:
-            logger.info("-> 🚨 Prop Firm Daily Drawdown Kill Switch Active. Scanning disabled.")
-            liquidate_all_positions("Drawdown Liquidation")
-        elif friday_block:
-            logger.info("-> 🚫 Friday Weekend Block Active (Post 21:00 UTC). Liquidating all positions.")
-            liquidate_all_positions("Weekend Liquidation")
+    
+    # Disable weekend logic: Force active weekday scanning for all assets at all times
+    is_weekend = False
+    
+    # -------------------------------------------------------------
+    # PHASE 0: 24/5 ALL-DAY & OVERNIGHT MODE (WEEKEND MARKET CLOSE GATE)
+    # -------------------------------------------------------------
+    if not is_trading_session_active():
+        logger.info("-> [Weekend Gate] Market is closed for the weekend. Scanning will resume Sunday 22:00 UTC.")
         client.disconnect()
         return []
-    
-    current_hour = datetime.utcnow().hour
-    active_sessions = ["24/7"]
-    if 7 <= current_hour < 16:
-        active_sessions.append("London")
-    if 13 <= current_hour < 22:
-        active_sessions.append("NY")
-        
-    session_symbols = []
-    for sym, config in ASSET_CONFIG.items():
-        if any(s in active_sessions for s in config.get("sessions", [])):
-            session_symbols.append(sym)
-    
-    if is_weekend:
-        # Scan only major crypto symbols on weekends
-        active_symbols = [s.name for s in mt5.symbols_get() if s.visible and s.name in session_symbols and ("BTC" in s.name or "ETH" in s.name)]
-        logger.info(f"[Weekend Mode] Scanning Crypto only: {active_symbols}")
-    else:
-        # Scan symbols that are in our custom SYMBOLS list AND currently in an active session
-        active_symbols = [s.name for s in mt5.symbols_get() if s.visible and s.name in session_symbols]
-        logger.info(f"[Weekday Mode] Active Sessions: {active_sessions}. Scanning symbols: {active_symbols}")
 
-    logger.info("=== -> AlphaEdge Liquidity Sweep / Mean Reversion Scan (M30 Timeframe) ===")
-    logger.info("| Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Analysis Details |")
-    logger.info("| :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
+
+
+
+    # -------------------------------------------------------------
+    # PHASE 1: NEWS FILTER (MACRO-AWARENESS)
+    # Automatically filter out assets with imminent high-impact news
+
+    # -------------------------------------------------------------
+    from news_filter import NewsFilter
+    nf = NewsFilter()
+    active_symbols = []
+    for sym in session_symbols:
+        safe, reason = nf.is_safe_to_trade(sym)
+        if not safe:
+            logger.info(f"🚫 [NEWS FILTER] Skipping {sym}: {reason}")
+            continue
+        active_symbols.append(sym)
+        
+    logger.info(f"[24/7 Mode] Scanning {len(active_symbols)} macro-safe symbols: {active_symbols}")
+
+    # -------------------------------------------------------
+    # DXY SENTIMENT CHECK (Dollar Index Directional Bias)
+    # -------------------------------------------------------
+    dxy_bias = "NEUTRAL"
+    dxy_info = ""
+    try:
+        dxy_symbol = None
+        for dxy_name in ["DXYm", "DXYz", "USDX", "DXY", "DOLLAR_INDX", "USDIndex"]:
+            info = mt5.symbol_info(dxy_name)
+
+            if info is not None:
+                mt5.symbol_select(dxy_name, True)
+                dxy_symbol = dxy_name
+                break
+        if dxy_symbol:
+            dxy_rates = mt5.copy_rates_from_pos(dxy_symbol, mt5.TIMEFRAME_H1, 0, 20)
+            if dxy_rates is not None and len(dxy_rates) >= 10:
+                dxy_df = pd.DataFrame(dxy_rates)
+                dxy_df['ema_fast'] = dxy_df['close'].ewm(span=5).mean()
+                dxy_df['ema_slow'] = dxy_df['close'].ewm(span=14).mean()
+                fast = dxy_df['ema_fast'].iloc[-1]
+                slow = dxy_df['ema_slow'].iloc[-1]
+                dxy_price = dxy_df['close'].iloc[-1]
+                prev_close = dxy_df['close'].iloc[-2]
+                if fast > slow and dxy_price > prev_close:
+                    dxy_bias = "STRONG_USD"
+                    dxy_info = f"DXY {dxy_price:.3f} RISING (Bearish for Gold/GBP, Bullish for Shorts)"
+                elif fast < slow and dxy_price < prev_close:
+                    dxy_bias = "WEAK_USD"
+                    dxy_info = f"DXY {dxy_price:.3f} FALLING (Bullish for Gold/GBP, Bullish for Longs)"
+                else:
+                    dxy_bias = "NEUTRAL"
+                    dxy_info = f"DXY {dxy_price:.3f} Ranging (No strong bias)"
+                logger.info(f"[DXY Sentiment] {dxy_info}")
+        else:
+            logger.info("[DXY Sentiment] DXY not found in MT5 market watch - add USDX or DXY to see dollar bias.")
+    except Exception as e:
+        logger.warning(f"[DXY Sentiment] Could not read DXY: {e}")
+
+    logger.info("=== -> Multi-Timeframe Scan (H1 Macro Trend + M1 Precision UT Scalp) ===")
+    logger.info("| Symbol | Setup | Price | Stop Loss | Take Profit | R:R | Strategy | Analysis Details |")
+    logger.info("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
     
     scan_results = {}
     
@@ -799,14 +1584,14 @@ def run_alphaedge(execute_orders: bool = False, approved_symbols: set[str] | Non
         triggers.append((symbol, action, sl, tp, entry_price, result["details"], strategy))
 
     if not triggers:
-        logger.info("-> No liquidity sweep setups confirmed for entry. Waiting for price to trigger mean-reversion extremes.")
+        logger.info("-> No UT setups confirmed. Waiting for ATR trailing stop crossover.")
         client.disconnect()
         return []
 
     if not execute_orders:
-        logger.info("=== -> Approval Required: no orders submitted ===")
+        logger.info("=== -> Macro Scan Complete (Scan-Only Mode) ===")
         for symbol, action, sl, tp, entry_price, details, strategy in triggers:
-            logger.info(f"PENDING | {symbol} | {action} | Entry {entry_price:.5f} | SL {sl:.5f} | TP {tp:.5f} | Strategy: {strategy}")
+            logger.info(f"SCAN ONLY | {symbol} | {action} | Entry {entry_price:.5f} | SL {sl:.5f} | TP {tp:.5f} | Strategy: {strategy}")
         client.disconnect()
         return triggers
 
@@ -823,12 +1608,12 @@ def run_alphaedge(execute_orders: bool = False, approved_symbols: set[str] | Non
             logger.info(f"Skipping {symbol}: not in the approved symbol list.")
             continue
             
-        # Max Concurrent Risk Prop Firm Limit
-        # Get fresh open positions count from mt5 directly
+        # Max Concurrent Macro Positions Limit
         fresh_positions = mt5.positions_get()
-        fresh_count = len(fresh_positions) if fresh_positions else 0
-        if PROP_FIRM_MODE and fresh_count >= PROP_FIRM_MAX_OPEN_TRADES:
-            logger.info(f"Skipping {symbol}: Max Open Trades Limit ({PROP_FIRM_MAX_OPEN_TRADES}) reached (Active: {fresh_count}). Protecting account equity.")
+        macro_positions = [p for p in fresh_positions if getattr(p, 'magic', 0) == 1001] if fresh_positions else []
+        fresh_count = len(macro_positions)
+        if fresh_count >= AE_MAX_CONCURRENT_TRADES:
+            logger.info(f"Skipping {symbol}: Max Concurrent Macro Trades Limit ({AE_MAX_CONCURRENT_TRADES}) reached (Active Macro: {fresh_count}).")
             continue
 
         # Prevent chasing stale setups (stale entries that pull back and hit SL)
@@ -858,52 +1643,357 @@ def run_alphaedge(execute_orders: bool = False, approved_symbols: set[str] | Non
                 logger.info(f"Skipping {symbol}: Stale Entry. Price drifted {price_drift:.5f} > max allowed {max_drift:.5f} from trigger price ({entry_price:.5f}).")
                 continue
             
-        # Prevent duplicate trades: skip if THIS specific strategy already has a trade open on this symbol
-        if (symbol, strategy_name) in active_trades:
-            logger.info(f"Skipping {symbol}: {strategy_name} trade already active on this symbol.")
+        # Enforce max 1 open position per symbol for macro engine
+        symbol_positions = [p for p in (mt5.positions_get(symbol=symbol) or []) if getattr(p, 'magic', 0) == 1001]
+        if len(symbol_positions) >= 1:
+            logger.info(f"Skipping {symbol}: already has {len(symbol_positions)} open macro positions (Max 1 allowed).")
             continue
-            
-        volume = get_lot_size(symbol, sl, entry_price)
-        if volume == 0.0:
-            logger.info(f"Skipping {symbol}: lot size calculation returned 0 (min lot would over-risk the account).")
-            continue
+
+        volume = 0.01  # Fixed 0.01 micro lot per order
         order_type = mt5.ORDER_TYPE_BUY if action == "BUY" else mt5.ORDER_TYPE_SELL
+        
+        # Pre-fetch tick price once to avoid connection latency delay between orders
+        tick = mt5.symbol_info_tick(symbol)
+        if tick is None:
+            logger.error(f"Cannot get tick for {symbol}, skipping execution.")
+            continue
+        price = tick.ask if order_type == mt5.ORDER_TYPE_BUY else tick.bid
+        
         try:
-            # Get current market price for the order
-            tick = mt5.symbol_info_tick(symbol)
-            if tick is None:
-                logger.error(f"Cannot get tick for {symbol}, skipping.")
-                continue
-            price = tick.ask if order_type == mt5.ORDER_TYPE_BUY else tick.bid
-            request = {
-                "action": mt5.TRADE_ACTION_DEAL,
-                "symbol": symbol,
-                "volume": volume,
-                "type": order_type,
-                "price": price,
-                "sl": round(sl, 5),
-                "tp": round(tp, 5),
-                "deviation": 20,
-                "comment": strategy_name,
-                "type_filling": mt5.ORDER_FILLING_FOK,
-                "type_time": mt5.ORDER_TIME_GTC,
-            }
-            result = mt5.order_send(request)
-            if result and result.retcode == mt5.TRADE_RETCODE_DONE:
-                ticket = result.order
-                logger.info(f"Successfully opened {action} market trade on {symbol} (Ticket: {ticket}, SL: {sl:.5f}, TP: {tp:.5f})")
-                msg = f"🚀 <b>[AlphaEdge Market Trade Opened]</b>\nStrategy: {strategy_name}\nSymbol: {symbol}\nAction: {action}\nConfirmation: {details}\nLot Size: {volume}\nSL: {sl:.5f}\nTP: {tp:.5f}"
+            opened_count = 0
+            for i in range(1, 2):
+
+                request = {
+                    "action": mt5.TRADE_ACTION_DEAL,
+                    "symbol": symbol,
+                    "volume": volume,
+                    "type": order_type,
+                    "price": price,
+                    "sl": round(sl, 5),
+                    "tp": round(tp, 5),
+                    "deviation": 20,
+                    "magic": 1001,
+                    "comment": f"{strategy_name}_TP{i}",
+                    "type_filling": mt5.ORDER_FILLING_FOK,
+                    "type_time": mt5.ORDER_TIME_GTC,
+                }
+                result = mt5.order_send(request)
+                if result and result.retcode == mt5.TRADE_RETCODE_DONE:
+                    opened_count += 1
+                else:
+                    # Fallback to IOC filling if FOK rejected
+                    request["type_filling"] = mt5.ORDER_FILLING_IOC
+                    result_ioc = mt5.order_send(request)
+                    if result_ioc and result_ioc.retcode == mt5.TRADE_RETCODE_DONE:
+                        opened_count += 1
+                    else:
+                        logger.error(f"Failed order {i} for {symbol}: {getattr(result, 'comment', mt5.last_error())}")
+
+            if opened_count > 0:
+                action_emoji = "🟢 BUY" if action == "BUY" else "🔴 SELL"
+                risk_dist = abs(price - sl)
+                reward_dist = abs(tp - price)
+                rr_calc = (reward_dist / risk_dist) if risk_dist > 0 else 1.5
+                tot_vol = round(volume * opened_count, 2)
+
+                logger.info(f"Successfully opened position: {action} on {symbol} (Entry: {price:.5f}, Lot: {volume}, SL: {sl:.5f}, TP: {tp:.5f})")
+                
+                msg = (
+                    f"🚀 <b>[AlphaEdge Position Opened]</b>\n\n"
+                    f"• <b>Asset:</b> {symbol}\n"
+                    f"• <b>Direction:</b> {action_emoji}\n"
+                    f"• <b>Entry Price:</b> <code>{price:.5f}</code>\n"
+                    f"• <b>Stop Loss:</b> <code>{sl:.5f}</code>\n"
+                    f"• <b>Take Profit:</b> <code>{tp:.5f}</code>\n"
+                    f"• <b>Risk:Reward:</b> 1 : {rr_calc:.2f}\n"
+                    f"• <b>Position Size:</b> {volume} Lots (1 Single Order)\n"
+                    f"• <b>Session:</b> 🌐 24/5 All-Day & Overnight Mode\n"
+                    f"• <b>Strategy:</b> {strategy_name}\n\n"
+                    f"📌 <b>Setup Context:</b>\n{details}"
+                )
                 send_telegram_alert(msg)
+
                 try:
-                    log_trade(symbol, action, entry_price, sl, tp, volume, strategy_name)
+                    log_trade(symbol, action, price, sl, tp, tot_vol, f"{strategy_name}")
                 except Exception as log_err:
                     logger.error(f"Failed to log trade for {symbol}: {log_err}")
-            else:
-                logger.error(f"Failed to place {action} market order on {symbol}: {getattr(result, 'comment', mt5.last_error())}")
+
         except Exception as e:
             logger.error(f"Order send error on {symbol}: {e}")
+
             
     client.disconnect()
 
+
+def process_tv_signals():
+    import os
+    signal_file = "tv_signals.txt"
+    if not os.path.exists(signal_file):
+        return
+        
+    try:
+        with open(signal_file, "r") as f:
+            lines = f.readlines()
+            
+        with open(signal_file, "w") as f:
+            pass
+            
+        if not lines:
+            return
+            
+        for line in lines:
+            line = line.strip()
+            if not line: continue
+            parts = line.split(",")
+            if len(parts) >= 3:
+                symbol = parts[0].strip()
+                action = parts[1].strip().upper()
+                price_str = parts[2].strip()
+                
+                logger.info("Processing TV Webhook: " + action + " for " + symbol)
+                
+                from news_filter import NewsFilter
+                nf = NewsFilter()
+                safe, reason = nf.is_safe_to_trade(symbol)
+                if not safe:
+                    logger.warning("Ignored TV Webhook for " + symbol + " due to News: " + reason)
+                    continue
+                    
+                rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M15, 0, 15)
+                if rates is None or len(rates) == 0:
+                    continue
+                import pandas as pd, numpy as np
+                temp_df = pd.DataFrame(rates)
+                tr = np.maximum(temp_df["high"] - temp_df["low"], 
+                     np.maximum(abs(temp_df["high"] - temp_df["close"].shift()), 
+                                abs(temp_df["low"] - temp_df["close"].shift())))
+                atr = tr.rolling(14).mean().iloc[-1]
+                if np.isnan(atr) or atr <= 0:
+                    atr = 0.005 * float(price_str)
+                    
+                tick = mt5.symbol_info_tick(symbol)
+                if not tick: continue
+                
+                current_price = tick.ask if action == "BUY" else tick.bid
+                
+                if action == "BUY":
+                    sl = current_price - (1.5 * atr)
+                    tp = current_price + (3.0 * atr)
+                else:
+                    sl = current_price + (1.5 * atr)
+                    tp = current_price - (3.0 * atr)
+                    
+                vol = get_lot_size(symbol, sl, current_price)
+                if vol <= 0: continue
+                
+                order_type = mt5.ORDER_TYPE_BUY if action == "BUY" else mt5.ORDER_TYPE_SELL
+                request = {
+                    "action": mt5.TRADE_ACTION_DEAL,
+                    "symbol": symbol,
+                    "volume": vol,
+                    "type": order_type,
+                    "price": current_price,
+                    "sl": round(sl, 5),
+                    "tp": round(tp, 5),
+                    "deviation": 20,
+                    "comment": "TV_Webhook",
+                    "type_filling": mt5.ORDER_FILLING_FOK,
+                    "type_time": mt5.ORDER_TIME_GTC,
+                }
+                res = mt5.order_send(request)
+                if res and res.retcode == mt5.TRADE_RETCODE_DONE:
+                    logger.info("TV SUCCESS: " + action + " " + symbol)
+                    msg = "🚀 [TradingView Webhook Executed]\nAsset: " + symbol + "\nDirection: " + action
+                    send_telegram_alert(msg)
+                else:
+                    logger.error("TV Failed: " + str(getattr(res, "comment", mt5.last_error())))
+                    
+    except Exception as e:
+        logger.error("Error processing TV signals: " + str(e))
+
 if __name__ == "__main__":
-    run_alphaedge()
+
+    logger.info("=" * 65)
+    logger.info("  ALPHAEDGE — GOLD SCALPING ENGINE v2.2")
+    logger.info("  Asset: XAUUSDz (Gold) — FOCUSED SINGLE-ASSET MODE")
+    logger.info("  Regime Filter: ADX + BB-Width + Choppiness (No Consolidation)")
+    logger.info("  Scalper: UT-MA + M5 EMA + Swing SL + 3-Trade TP Cascade")
+    logger.info("  Cascade: TP1->Breakeven | TP2->TP1 Lock | TP3->Runner")
+    logger.info("=" * 65)
+
+    # 1. Send Online Startup Notification to Telegram
+    startup_msg = (
+        "<b>🟢 AlphaEdge Gold Scalper Bot is Active!</b>\n\n"
+        "<b>Market:</b> Gold (XAUUSD)\n"
+        "<b>Account Balance Target:</b> $100\n"
+        "<b>Trade Size:</b> 0.01 Lots (Ultra-Safe Micro Risk)\n\n"
+
+        "<b>How It Protects Your Account:</b>\n"
+        "• <b>Consolidation Shield:</b> Refuses to trade during sideways or choppy markets.\n"
+        "• <b>Trend Alignment:</b> Only trades in the direction of strong gold momentum.\n"
+        "• <b>Hedge Protection:</b> Completely isolates scalping trades from your open hedge.\n"
+        "• <b>Profit Lock System:</b> Automatically moves stop-loss to breakeven as targets are hit.\n\n"
+        "<b>Status:</b> Scanning Gold market every 60 seconds for high-probability setups."
+    )
+    send_telegram_alert(startup_msg)
+
+
+
+
+    # 1.5 Auto-Learning Self-Correction Pass
+    try:
+        from ai_learning import AutoLearner
+        logger.info("Running AI Auto-Learning Self-Correction (Last 48 Hours)...")
+        learner = AutoLearner()
+        learner.analyze_history_and_adapt()
+    except Exception as e:
+        logger.error(f"Auto-Learning failed: {e}")
+
+    # 2. Continuous Autonomous Scan Loop
+    from desktop_trade_report import refresh_report
+    from performance_report import generate_performance_report
+    from datetime import timedelta
+    from pathlib import Path
+    from news_filter import NewsFilter
+
+    last_daily_report_date = None
+    last_weekly_report_date = None
+    _session_open_alert_sent = False
+    nf = NewsFilter()
+
+    _start_telegram_command_listener()
+
+    try:
+        while True:
+            cycle_start = datetime.now()
+            print("\n" + "-" * 65)
+
+
+            logger.info(f"Scanning {len(ASSET_CONFIG)} assets at {cycle_start.strftime('%Y-%m-%d %H:%M:%S')}...")
+
+            # Check pause state from Telegram /stop_scanner
+            state_file = Path("bot_state.txt")
+            if state_file.exists() and state_file.read_text().strip().upper() == "STOPPED":
+                logger.info("Scanner is PAUSED via Telegram (/start_scanner to resume). Skipping scan.")
+            elif not is_trading_session_active():
+                logger.info("[Weekend Gate] Market is closed for the weekend. Bot will resume Sunday 22:00 UTC.")
+
+
+
+
+            else:
+                try:
+                    run_alphaedge(execute_orders=True)
+                except Exception as e:
+                    logger.error(f"Error during scan cycle: {e}")
+                    send_telegram_alert(f"<b>AlphaEdge Scan Error</b>\n{e}")
+
+
+
+
+                # ── Gold Scalping Layer (runs every cycle after main bot) ──
+                if ENABLE_SCALPING:
+                    try:
+                        from scalping_gold import run_scalping_cycle
+                        run_scalping_cycle()
+                    except Exception as scalp_err:
+                        import traceback
+                        logger.error(f"[Scalp] Cycle error:\n{traceback.format_exc()}")
+
+
+            # ── End-of-Day Pre-Close Gold Market Analysis (20:45 UTC) ──────────────
+            # Gold market closes at 21:00 UTC. We fire at 20:45 UTC to give a
+            # full daily performance & market analysis before the close.
+            now = datetime.now()
+            today_date = now.date()
+            if now.hour == 20 and 44 <= now.minute <= 49:
+                eod_key = today_date.strftime("EOD_%Y-%m-%d")
+                if not getattr(process_telegram_commands, "_eod_sent", None) or process_telegram_commands._eod_sent != eod_key:
+                    process_telegram_commands._eod_sent = eod_key
+                    try:
+                        acc = mt5.account_info()
+                        bal  = acc.balance if acc else 0.0
+                        eq   = acc.equity  if acc else 0.0
+                        pnl  = eq - bal
+
+                        # Count today's scalp history
+                        from_ts = int(datetime(now.year, now.month, now.day).timestamp())
+                        deals = mt5.history_deals_get(from_ts, int(now.timestamp()))
+                        scalp_deals = [d for d in deals if d.magic == 20250831] if deals else []
+                        total_trades = len(scalp_deals)
+                        wins  = len([d for d in scalp_deals if d.profit > 0])
+                        loss  = len([d for d in scalp_deals if d.profit < 0])
+                        win_rate = round((wins / total_trades) * 100, 1) if total_trades > 0 else 0.0
+                        day_pnl  = sum(d.profit for d in scalp_deals)
+
+                        # Current gold price
+                        tick = mt5.symbol_info_tick("XAUUSDm")
+                        gold_price = tick.bid if tick else 0.0
+
+                        # Build the daily analysis message
+                        eod_msg = (
+                            "<b>📊 AlphaEdge Daily Gold Market Report</b>\n"
+                            "<b>End of Day — Pre-Close Analysis</b>\n\n"
+                            f"• <b>Gold Price (Close):</b> ${gold_price:.2f}\n"
+                            f"• <b>Account Balance:</b> ${bal:.2f}\n"
+                            f"• <b>Account Equity:</b> ${eq:.2f}\n"
+                            f"• <b>Floating PnL:</b> ${pnl:+.2f}\n\n"
+                            f"<b>Today's Scalp Performance:</b>\n"
+                            f"• <b>Total Scalp Trades:</b> {total_trades}\n"
+                            f"• <b>Wins:</b> {wins}  |  <b>Losses:</b> {loss}\n"
+                            f"• <b>Win Rate:</b> {win_rate}%\n"
+                            f"• <b>Today's Realized PnL:</b> ${day_pnl:+.2f}\n\n"
+                            f"<b>Market Session Summary:</b>\n"
+                            f"• Asian Session: Completed\n"
+                            f"• London Session: Completed\n"
+                            f"• NY Session: Closing in 15 minutes\n\n"
+                            f"<b>Bot Status:</b> 🟢 Active | Lot Size: 0.01 (Micro) | Single Order TP1 Lock"
+                        )
+                        send_telegram_alert(eod_msg)
+                        logger.info("[Scalp] End-of-Day daily analysis sent to Telegram.")
+                    except Exception as eod_err:
+                        logger.error(f"[Scalp] EOD report error: {eod_err}")
+
+            # Daily & Weekly Reporting (Runs at 23:50 UTC)
+            if now.hour == 23 and now.minute >= 50:
+                if last_daily_report_date != today_date:
+                    try:
+                        start_time = datetime(now.year, now.month, now.day)
+                        end_time = start_time + timedelta(days=1)
+                        daily_msg = generate_performance_report(start_time, end_time, "Daily")
+                        send_telegram_alert(daily_msg)
+                        last_daily_report_date = today_date
+                    except Exception as e:
+                        logger.error(f"Failed to send daily report: {e}")
+
+                if now.weekday() == 4 and last_weekly_report_date != today_date:
+                    try:
+                        start_time = datetime(now.year, now.month, now.day) - timedelta(days=4)
+                        end_time = datetime(now.year, now.month, now.day) + timedelta(days=1)
+                        weekly_msg = generate_performance_report(start_time, end_time, "Weekly")
+                        send_telegram_alert(weekly_msg)
+                        last_weekly_report_date = today_date
+                    except Exception as e:
+                        logger.error(f"Failed to send weekly report: {e}")
+
+            # Remainder sleep to complete ultra-fast 5-second cycle
+            cycle_end = datetime.now()
+            elapsed = (cycle_end - cycle_start).total_seconds()
+            sleep_time = max(0, 5.0 - elapsed)
+            time.sleep(sleep_time)
+
+
+    except KeyboardInterrupt:
+        logger.info("AlphaEdge stopped manually by user.")
+        try:
+            send_telegram_alert("🛑 <b>[AlphaEdge Bot Offline]</b>\nScanner was manually shut down.")
+        except Exception:
+            pass
+    except Exception as fatal_error:
+        error_msg = f"🚨 <b>CRITICAL BOT FAILURE</b> 🚨\nError: {fatal_error}"
+        logger.critical(error_msg)
+        try:
+            send_telegram_alert(error_msg)
+        except Exception:
+            pass
+        raise
