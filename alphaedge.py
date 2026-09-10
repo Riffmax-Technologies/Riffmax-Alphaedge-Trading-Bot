@@ -1818,7 +1818,7 @@ if __name__ == "__main__":
     logger.info("  ALPHAEDGE — M15 SWING & NEWS CATALYST ENGINE v3.0")
     logger.info("  Assets: XAUUSDm (Gold) & DE30m (DAX) — M15 TIMEFRAME")
     logger.info("  Strategy: HPotter UT Bot (Key=1.0, ATR=10)")
-    logger.info("  Gold: 0.01 lot | Take Profit: $8.00 USD (Let trade run to full target)")
+    logger.info("  Gold: 0.01 lot | Take Profit: $10.00 USD (Let trade run to full target)")
     logger.info("  DAX:  0.07 lot | Take Profit: 30 pts (Let trade run to full target)")
     logger.info("  Guidance: ForexFactory Real-Time Macro News Engine (USD & EUR)")
     logger.info("=" * 65)
@@ -1830,7 +1830,7 @@ if __name__ == "__main__":
         "<b>Timeframe:</b> 15-Minute (M15) Chart\n"
         "<b>Strategy:</b> UT Bot (Key=1.0, ATR=10)\n\n"
         "<b>Profit & Risk Targets:</b>\n"
-        "• <b>Gold (XAUUSDm):</b> Strict $8.00 Take Profit | 0.01 Lot\n"
+        "• <b>Gold (XAUUSDm):</b> Strict $10.00 Take Profit | 0.01 Lot\n"
         "• <b>DAX (DE30m):</b> Strict 30 Pts Take Profit | 0.07 Lot\n\n"
         "<b>Execution Mode:</b>\n"
         "• Trades wait out the move to reach full target (no frequent micro-scalping).\n"

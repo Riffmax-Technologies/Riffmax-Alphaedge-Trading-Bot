@@ -1,13 +1,13 @@
 {
-    "gold_tp_dollars": 8.0,
+    "gold_tp_dollars": 10.0,
     "gold_tp_catalyst_dollars": 16.0,
     "gold_be_trigger_dollars": 5.0,
     "dax_tp_pts": 30.0,
     "dax_tp_catalyst_pts": 60.0,
     "dax_be_trigger_pts": 18.0,
     "regime": "DEFENSIVE_PROTECTION",
-    "win_rate": 30.0,
-    "total_trades": 280,
-    "net_pnl": -112.75,
-    "last_updated": "2026-09-10 16:21:21"
+    "win_rate": 30.2,
+    "total_trades": 281,
+    "net_pnl": -104.67,
+    "last_updated": "2026-09-10 17:30:05"
 }

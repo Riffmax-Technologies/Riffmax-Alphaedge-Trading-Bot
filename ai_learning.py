@@ -61,7 +61,7 @@ class AutoLearner:
             except Exception as e:
                 logger.error(f"Error loading {self.config_path}: {e}")
         return {
-            "gold_tp_dollars": 8.0,
+            "gold_tp_dollars": 10.0,
             "gold_tp_catalyst_dollars": 16.0,
             "gold_be_trigger_dollars": 6.0,
             "dax_tp_pts": 30.0,
@@ -99,7 +99,7 @@ class AutoLearner:
         deals = mt5.history_deals_get(date_from, date_to)
 
         # Baseline Defaults
-        gold_tp = 8.0
+        gold_tp = 10.0
         gold_tp_catalyst = 16.0
         gold_be = 6.0
         dax_tp = 30.0
@@ -149,9 +149,9 @@ class AutoLearner:
         # ── Dynamic Adaptation Decisions based on Market Performance ──
         if total_trades >= 5:
             if win_rate >= 50.0 and net_pnl > 0:
-                # Strong swing follow-through: Maintain $8 target, expand catalyst to $18
+                # Strong swing follow-through: Maintain $10 target, expand catalyst to $18
                 regime = "HIGH_CONVICTION_SWING"
-                gold_tp = 8.0
+                gold_tp = 10.0
                 gold_tp_catalyst = 18.0
                 gold_be = 6.0
                 dax_tp = 35.0
@@ -160,7 +160,7 @@ class AutoLearner:
             elif win_rate < 40.0:
                 # Ranging or high friction: Tighten BE trigger slightly to protect capital earlier
                 regime = "DEFENSIVE_PROTECTION"
-                gold_tp = 8.0
+                gold_tp = 10.0
                 gold_tp_catalyst = 16.0
                 gold_be = 5.0  # Move BE to $5 to prevent giving back gains during choppy sessions
                 dax_tp = 30.0
@@ -168,7 +168,7 @@ class AutoLearner:
                 dax_be = 18.0
             else:
                 regime = "BALANCED_SWING"
-                gold_tp = 8.0
+                gold_tp = 10.0
                 gold_tp_catalyst = 16.0
                 gold_be = 6.0
                 dax_tp = 30.0

@@ -46,7 +46,7 @@ ASSET_CONFIGS = {
         "lot": 0.01,
         "key_mult": 1.0,
         "atr_period": 10,
-        "tp_dollars": 8.0,            # Strict $8.00 Take Profit Target
+        "tp_dollars": 10.0,           # Strict $10.00 Take Profit Target
         "tp_catalyst_dollars": 16.0,   # Expanded $16.00 Target during News Impulse
         "be_trigger_dollars": 6.0,     # Protects at $6.00 gain (75% to target) to let trade reach $8.00 cleanly
         "sl_atr_mult": 1.2,
