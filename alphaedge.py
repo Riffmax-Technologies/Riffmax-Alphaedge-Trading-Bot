@@ -1818,8 +1818,8 @@ if __name__ == "__main__":
     logger.info("  ALPHAEDGE — M15 SWING & NEWS CATALYST ENGINE v3.0")
     logger.info("  Assets: XAUUSDm (Gold) & DE30m (DAX) — M15 TIMEFRAME")
     logger.info("  Strategy: HPotter UT Bot (Key=1.0, ATR=10)")
-    logger.info("  Gold: 0.01 lot | TP $8.00 ($16.00 Catalyst) | BE Lock $5.00")
-    logger.info("  DAX:  0.07 lot | TP 30 pts (60 pts Catalyst) | BE Lock 20 pts")
+    logger.info("  Gold: 0.01 lot | Take Profit: $8.00 USD (Let trade run to full target)")
+    logger.info("  DAX:  0.07 lot | Take Profit: 30 pts (Let trade run to full target)")
     logger.info("  Guidance: ForexFactory Real-Time Macro News Engine (USD & EUR)")
     logger.info("=" * 65)
 
@@ -1830,12 +1830,13 @@ if __name__ == "__main__":
         "<b>Timeframe:</b> 15-Minute (M15) Chart\n"
         "<b>Strategy:</b> UT Bot (Key=1.0, ATR=10)\n\n"
         "<b>Profit & Risk Targets:</b>\n"
-        "• <b>Gold (XAUUSDm):</b> $8.00 TP | $5.00 Break-Even Lock | 0.01 Lot\n"
-        "• <b>DAX (DE30m):</b> 30 Pts TP | 20 Pts Break-Even Lock | 0.07 Lot\n\n"
-        "<b>News Catalyst Guidance:</b>\n"
-        "• <b>Pre-News Freeze:</b> Protects open trades & locks BE 5m before release.\n"
-        "• <b>Catalyst Impulse:</b> Automatically expands TP up to $16+ during news runs.\n\n"
-        "<b>Status:</b> Autonomous M15 engine active. Ready to trade."
+        "• <b>Gold (XAUUSDm):</b> Strict $8.00 Take Profit | 0.01 Lot\n"
+        "• <b>DAX (DE30m):</b> Strict 30 Pts Take Profit | 0.07 Lot\n\n"
+        "<b>Execution Mode:</b>\n"
+        "• Trades wait out the move to reach full target (no frequent micro-scalping).\n"
+        "• Session: London & New York (07:00 to 21:00 UTC).\n"
+        "• News Guidance: Pre-news protection & expanded targets during macro momentum.\n\n"
+        "<b>Status:</b> Engine ready."
     )
     send_telegram_alert(startup_msg)
 
