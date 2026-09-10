@@ -10,12 +10,13 @@ Mathematical Replication of TradingView HPotter UT Bot (Version 6):
       SELL: ta.crossover(stop, close) and close < stop and close < close[1]
   - Execution Timeframe: 15-Minute (M15)
   - Target & Risk:
-      1. Gold (XAUUSDm): 0.01 lot | TP = $8.00 ($16.00 Catalyst) | Break-Even Lock = $5.00
-      2. DAX (DE30m):   0.07 lot | TP = 30 pts (60 pts Catalyst) | Break-Even Lock = 20 pts
+      1. Gold (XAUUSDm): 0.01 lot | Strict TP = $8.00 ($16.00 Catalyst) | Break-Even Lock = $6.00
+      2. DAX (DE30m):   0.07 lot | Strict TP = 30 pts (60 pts Catalyst) | Break-Even Lock = 20 pts
   - Dynamic Break-Even Shield: Shifts SL to Entry + Spread when BE trigger is reached.
   - News Catalyst Guidance: ForexFactory High-Impact USD & EUR live integration.
-  - Sessions: London Open (07:00 - 11:00 UTC) & New York Open (13:30 - 17:00 UTC).
+  - Sessions: Active 07:00 UTC to 21:00 UTC (London Open through New York Close).
   - Instant Reversal: Closes opposite trade instantly upon verified M15 signal flip.
+  - Dedicated Trade Logging: Logs every trade to 'm15_trade_analysis.csv' starting from upgrade.
 """
 
 import os
@@ -28,6 +29,13 @@ import MetaTrader5 as mt5
 import numpy as np
 import pandas as pd
 from news_catalyst_engine import NewsCatalystEngine
+from m15_trade_analysis_logger import (
+    log_trade_opened,
+    update_trade_be,
+    log_trade_closed,
+    sync_closed_trades_from_history,
+    get_performance_summary
+)
 
 logger = logging.getLogger("AlphaEdge.M15Swing")
 
@@ -209,6 +217,7 @@ def manage_open_positions(symbol, cfg, catalyst_state):
                 new_sl = entry_price + (20 * point) if pos_type == "BUY" else entry_price - (20 * point)
                 modify_sl(ticket, symbol, new_sl, current_tp)
                 ACTIVE_BE_TRACKED[ticket] = True
+                update_trade_be(ticket) # Record in dedicated trade analysis log
                 msg = (
                     f"🛡️ <b>[Break-Even Protected]</b>\n"
                     f"Asset: <b>{symbol}</b> (#{ticket})\n"
@@ -223,6 +232,7 @@ def manage_open_positions(symbol, cfg, catalyst_state):
             new_sl = entry_price + (10 * point) if pos_type == "BUY" else entry_price - (10 * point)
             modify_sl(ticket, symbol, new_sl, current_tp)
             ACTIVE_BE_TRACKED[ticket] = True
+            update_trade_be(ticket)
             msg = (
                 f"⚠️ <b>[Pre-News Protection]</b>\n"
                 f"Asset: <b>{symbol}</b> (#{ticket})\n"
@@ -246,7 +256,7 @@ def modify_sl(ticket, symbol, new_sl, tp):
         logger.warning(f"Failed to modify SL #{ticket}: {res.comment}")
 
 
-def execute_order(symbol, order_type, lot, sl, tp, catalyst_desc="Standard"):
+def execute_order(symbol, order_type, lot, sl, tp, catalyst_desc="Standard", news_name="None", ut_stop=0.0, atr=0.0):
     tick = mt5.symbol_info_tick(symbol)
     price = tick.ask if order_type == "BUY" else tick.bid
     o_type = mt5.ORDER_TYPE_BUY if order_type == "BUY" else mt5.ORDER_TYPE_SELL
@@ -268,6 +278,20 @@ def execute_order(symbol, order_type, lot, sl, tp, catalyst_desc="Standard"):
     res = mt5.order_send(req)
     if res.retcode == mt5.TRADE_RETCODE_DONE:
         logger.info(f"[{symbol}] {order_type} EXECUTED! Ticket: #{res.order} | Price: {price:.2f} | SL: {sl:.2f} | TP: {tp:.2f}")
+        # Log to dedicated trade analysis CSV starting from upgrade
+        log_trade_opened(
+            ticket=res.order,
+            symbol=symbol,
+            direction=order_type,
+            lot=lot,
+            open_price=price,
+            sl=sl,
+            tp=tp,
+            target_metric=catalyst_desc,
+            news_catalyst=news_name,
+            ut_stop=ut_stop,
+            atr=atr
+        )
         msg = (
             f"🚀 <b>[AlphaEdge M15 Trade Executed]</b>\n"
             f"Asset: <b>{symbol}</b>\n"
@@ -288,6 +312,8 @@ def close_opposite_positions(symbol, target_dir):
     positions = mt5.positions_get(symbol=symbol)
     if not positions:
         return
+    info = mt5.symbol_info(symbol)
+    contract = info.trade_contract_size if info else 100.0
     for pos in positions:
         pos_dir = "BUY" if pos.type == mt5.ORDER_TYPE_BUY else "SELL"
         if pos_dir != target_dir:
@@ -308,6 +334,9 @@ def close_opposite_positions(symbol, target_dir):
                 "type_filling": mt5.ORDER_FILLING_IOC,
             }
             res = mt5.order_send(req)
+            pts = (c_price - pos.price_open) if pos_dir == "BUY" else (pos.price_open - c_price)
+            pnl_usd = pts * contract * pos.volume
+            log_trade_closed(pos.ticket, c_price, pnl_usd, "REVERSAL")
             logger.info(f"[{symbol}] REVERSAL: Closed opposite {pos_dir} #{pos.ticket} at {c_price:.2f}")
             msg = (
                 f"🔄 <b>[M15 Trend Reversal]</b>\n"
@@ -333,6 +362,12 @@ def run_scalping_cycle():
     except Exception:
         pass
         
+    # Check MT5 history deals to close any trades in analysis log that hit TP/SL
+    try:
+        sync_closed_trades_from_history()
+    except Exception:
+        pass
+        
     session_ok = is_session_active()
     
     for symbol, cfg in ASSET_CONFIGS.items():
@@ -351,12 +386,13 @@ def run_scalping_cycle():
             
             # Dynamic TP based on News Catalyst state
             is_catalyst = (catalyst.get('state') == 'CATALYST_IMPULSE')
+            event_name = catalyst.get('event', 'None')
             if is_catalyst:
                 if symbol == "XAUUSDm":
                     tp_dist = cfg['tp_catalyst_dollars'] / dollar_per_pt
                 else:
                     tp_dist = cfg['tp_catalyst_pts']
-                mode_desc = f"⚡ Catalyst Impulse ({catalyst.get('event')})"
+                mode_desc = f"⚡ Catalyst Impulse ({event_name})"
             else:
                 if symbol == "XAUUSDm":
                     tp_dist = cfg['tp_dollars'] / dollar_per_pt
@@ -385,7 +421,7 @@ def run_scalping_cycle():
                     if not has_pos and LAST_EXECUTED_BAR.get(symbol) != bar_time:
                         sl = tick.ask - sl_dist
                         tp = tick.ask + tp_dist
-                        if execute_order(symbol, "BUY", cfg['lot'], sl, tp, mode_desc):
+                        if execute_order(symbol, "BUY", cfg['lot'], sl, tp, mode_desc, event_name, ut_state['stop'], ut_state['atr']):
                             LAST_EXECUTED_BAR[symbol] = bar_time
                             
             elif ut_state['cross_dn']:
@@ -394,7 +430,7 @@ def run_scalping_cycle():
                     if not has_pos and LAST_EXECUTED_BAR.get(symbol) != bar_time:
                         sl = tick.bid + sl_dist
                         tp = tick.bid - tp_dist
-                        if execute_order(symbol, "SELL", cfg['lot'], sl, tp, mode_desc):
+                        if execute_order(symbol, "SELL", cfg['lot'], sl, tp, mode_desc, event_name, ut_state['stop'], ut_state['atr']):
                             LAST_EXECUTED_BAR[symbol] = bar_time
                             
         except Exception as e:
