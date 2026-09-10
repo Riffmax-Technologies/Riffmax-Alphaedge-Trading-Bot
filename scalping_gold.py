@@ -70,6 +70,24 @@ ACTIVE_BE_TRACKED = {} # ticket -> True if BE set
 LAST_EXECUTED_BAR = {} # symbol -> bar_time
 
 
+def apply_ai_learned_settings():
+    """Loads dynamically tuned parameters from the AI Auto-Learning Brain."""
+    cfg_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config_learned_m15.json")
+    if os.path.exists(cfg_file):
+        try:
+            with open(cfg_file, "r", encoding="utf-8") as f:
+                c = json.load(f)
+            ASSET_CONFIGS["XAUUSDm"]["tp_dollars"] = float(c.get("gold_tp_dollars", 8.0))
+            ASSET_CONFIGS["XAUUSDm"]["tp_catalyst_dollars"] = float(c.get("gold_tp_catalyst_dollars", 16.0))
+            ASSET_CONFIGS["XAUUSDm"]["be_trigger_dollars"] = float(c.get("gold_be_trigger_dollars", 6.0))
+            
+            ASSET_CONFIGS["DE30m"]["tp_pts"] = float(c.get("dax_tp_pts", 30.0))
+            ASSET_CONFIGS["DE30m"]["tp_catalyst_pts"] = float(c.get("dax_tp_catalyst_pts", 60.0))
+            ASSET_CONFIGS["DE30m"]["be_trigger_pts"] = float(c.get("dax_be_trigger_pts", 20.0))
+        except Exception as e:
+            logger.debug(f"[Scalp] Dynamic config load skipped: {e}")
+
+
 # ─── Telegram Alerts ───────────────────────────────────────────────────────────
 def _send_telegram(message):
     token   = os.getenv("TELEGRAM_TOKEN", "8617130364:AAHiEg1W9A-L5f7XkqVzgV6mTotb7TSiJV0")
@@ -369,6 +387,7 @@ def run_scalping_cycle():
         pass
         
     session_ok = is_session_active()
+    apply_ai_learned_settings()
     
     for symbol, cfg in ASSET_CONFIGS.items():
         try:

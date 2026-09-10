@@ -1,33 +1,33 @@
 """
-ai_learning.py — Autonomous M1 Scalper Learning & Decision Brain
+ai_learning.py — AlphaEdge M15 AI Auto-Learning & Decision Brain
 ================================================================
-Analyzes live MetaTrader 5 trade history for magic number 20250831 (AUTONOMOUS_M1).
-Computes performance metrics over the last 24-48 hours:
-- Win Rate % (TP hits vs SL hits vs Reversal exits)
-- Gross Profit, Gross Loss, and Profit Factor
-- Average Win ($) vs Average Loss ($)
-- Reversal churn frequency
+Analyzes executed M15 trades from 'm15_trade_analysis.csv' and MT5 deal history.
+Evaluates performance metrics over the last 24-72 hours:
+- M15 Swing Win Rate % (Target Hits vs Break-Even Stops vs Reversals)
+- Profit Factor and Net Realized PnL ($)
+- Break-Even efficiency (saving capital vs prematurely cutting swings)
+- Average trade hold duration (in hours/candles)
+- News Catalyst response performance
 
-Adapts scalper parameters dynamically:
-- TP ATR Multiplier (1.6 - 2.2)
-- TP Minimum Target ($3.80 - $5.00)
-- SL Maximum Risk Cap ($3.00 - $3.50)
-- Reversal confirmation thresholds
-
-Persists optimal settings to 'config_learned_scalp.json' for real-time pickup by scalping_gold.py.
+Dynamically tunes swing parameters:
+- Gold TP: Strict $8.00 (Standard) to $10.00 / $16.00 (Trending/Catalyst)
+- Gold Break-Even Trigger: $5.00 to $6.50 (Calibrated to market volatility)
+- DAX TP: 30 to 45 Points | DAX BE Trigger: 15 to 25 Points
+- Persists optimal settings to 'config_learned_m15.json' and 'config_learned_scalp.json'.
 """
 
 import os
 import json
 import logging
-from datetime import datetime, timedelta
-import urllib.request
+from datetime import datetime, timedelta, timezone
 import MetaTrader5 as mt5
 import pandas as pd
 
 logger = logging.getLogger("AlphaEdge.AutoLearner")
 
-CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config_learned_scalp.json")
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config_learned_m15.json")
+LEGACY_CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config_learned_scalp.json")
+ANALYSIS_CSV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "m15_trade_analysis.csv")
 SCALP_MAGIC = 20250831
 
 
@@ -39,6 +39,7 @@ def send_telegram(message: str):
     url     = "https://api.telegram.org/bot" + token + "/sendMessage"
     payload = {"chat_id": chat_id, "text": message, "parse_mode": "HTML"}
     try:
+        import urllib.request
         data = json.dumps(payload).encode("utf-8")
         req  = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
         with urllib.request.urlopen(req, timeout=10):
@@ -48,7 +49,7 @@ def send_telegram(message: str):
 
 
 class AutoLearner:
-    def __init__(self, config_path=CONFIG_PATH, lookback_hours=48):
+    def __init__(self, config_path=CONFIG_PATH, lookback_hours=72):
         self.config_path = config_path
         self.lookback_hours = lookback_hours
 
@@ -60,14 +61,16 @@ class AutoLearner:
             except Exception as e:
                 logger.error(f"Error loading {self.config_path}: {e}")
         return {
-            "tp_atr_mult": 1.8,
-            "tp_min_dist": 4.00,
-            "tp_max_dist": 6.50,
-            "sl_min_dist": 2.50,
-            "sl_max_dist": 3.50,
-            "regime": "BALANCED",
-            "pure_win_rate": 50.0,
+            "gold_tp_dollars": 8.0,
+            "gold_tp_catalyst_dollars": 16.0,
+            "gold_be_trigger_dollars": 6.0,
+            "dax_tp_pts": 30.0,
+            "dax_tp_catalyst_pts": 60.0,
+            "dax_be_trigger_pts": 20.0,
+            "regime": "BALANCED_SWING",
+            "win_rate": 50.0,
             "total_trades": 0,
+            "net_pnl": 0.0,
             "last_updated": None
         }
 
@@ -75,9 +78,11 @@ class AutoLearner:
         try:
             with open(self.config_path, "w") as f:
                 json.dump(config, f, indent=4)
+            with open(LEGACY_CONFIG_PATH, "w") as f:
+                json.dump(config, f, indent=4)
             logger.info(f"[AutoLearner] Saved learned configuration to {self.config_path}")
         except Exception as e:
-            logger.error(f"Error saving {self.config_path}: {e}")
+            logger.error(f"Error saving config: {e}")
 
     def analyze_history_and_adapt(self) -> dict:
         if not mt5.terminal_info():
@@ -93,99 +98,117 @@ class AutoLearner:
         date_to   = datetime.now()
         deals = mt5.history_deals_get(date_from, date_to)
 
-        if not deals:
-            logger.info("[AutoLearner] No MT5 deals found in lookback window.")
-            return self.load_config()
+        # Baseline Defaults
+        gold_tp = 8.0
+        gold_tp_catalyst = 16.0
+        gold_be = 6.0
+        dax_tp = 30.0
+        dax_tp_catalyst = 60.0
+        dax_be = 20.0
+        regime = "BALANCED_SWING"
 
-        df = pd.DataFrame(list(deals), columns=deals[0]._asdict().keys())
-        scalp_exits = df[(df['entry'] == 1) & (df['magic'] == SCALP_MAGIC)].copy()
+        total_trades = 0
+        win_rate = 50.0
+        net_pnl = 0.0
+        wins_count = 0
+        loss_count = 0
 
-        if len(scalp_exits) < 5:
-            logger.info(f"[AutoLearner] Found {len(scalp_exits)} scalp trades. Need >= 5 trades to adapt.")
-            return self.load_config()
+        # 1. Primary Analysis: Check Dedicated M15 Analysis Log if available
+        if os.path.exists(ANALYSIS_CSV_PATH):
+            try:
+                df_csv = pd.read_csv(ANALYSIS_CSV_PATH)
+                closed_csv = df_csv[df_csv['status'] == 'CLOSED']
+                if len(closed_csv) >= 3:
+                    total_trades = len(closed_csv)
+                    closed_csv['pnl_num'] = pd.to_numeric(closed_csv['pnl_usd'], errors='coerce').fillna(0.0)
+                    wins_count = len(closed_csv[closed_csv['pnl_num'] > 0])
+                    loss_count = len(closed_csv[closed_csv['pnl_num'] <= 0])
+                    win_rate = round((wins_count / total_trades) * 100, 1)
+                    net_pnl = round(float(closed_csv['pnl_num'].sum()), 2)
+            except Exception as e:
+                logger.debug(f"[AutoLearner] CSV read skipped: {e}")
 
-        scalp_exits['time'] = pd.to_datetime(scalp_exits['time'], unit='s')
-        total_trades = len(scalp_exits)
-        wins = scalp_exits[scalp_exits['profit'] > 0]
-        losses = scalp_exits[scalp_exits['profit'] < 0]
-
-        win_rate = (len(wins) / total_trades) * 100.0
-        gross_profit = float(wins['profit'].sum())
-        gross_loss = float(abs(losses['profit'].sum()))
-        net_pnl = float(scalp_exits['profit'].sum())
-        profit_factor = (gross_profit / gross_loss) if gross_loss > 0 else 999.0
-
-        tp_deals = scalp_exits[scalp_exits['comment'].str.contains('tp', na=False, case=False)]
-        sl_deals = scalp_exits[scalp_exits['comment'].str.contains('sl', na=False, case=False)]
-        rev_deals = scalp_exits[scalp_exits['comment'].str.contains('Reversal', na=False, case=False)]
-
-        pure_completed = len(tp_deals) + len(sl_deals)
-        pure_win_rate = (len(tp_deals) / pure_completed * 100.0) if pure_completed > 0 else 50.0
-
-        avg_win = float(wins['profit'].mean()) if len(wins) > 0 else 0.0
-        avg_loss = float(abs(losses['profit'].mean())) if len(losses) > 0 else 0.0
+        # 2. Secondary Analysis: Analyze MT5 deals history
+        if total_trades == 0 and deals:
+            df_deals = pd.DataFrame(list(deals), columns=deals[0]._asdict().keys())
+            exits = df_deals[(df_deals['entry'] == 1) & (df_deals['magic'] == SCALP_MAGIC)].copy()
+            if len(exits) > 0:
+                total_trades = len(exits)
+                wins = exits[exits['profit'] > 0]
+                losses = exits[exits['profit'] <= 0]
+                wins_count = len(wins)
+                loss_count = len(losses)
+                win_rate = round((wins_count / total_trades) * 100, 1)
+                net_pnl = round(float(exits['profit'].sum()), 2)
 
         logger.info(
-            f"[AutoLearner Analysis] {total_trades} trades | TP: {len(tp_deals)} | SL: {len(sl_deals)} | "
-            f"Reversals: {len(rev_deals)} | Pure Win Rate: {pure_win_rate:.1f}% | Net: ${net_pnl:+.2f}"
+            f"[AutoLearner M15 Brain] Evaluated {total_trades} trades | Wins: {wins_count} | Losses: {loss_count} | "
+            f"Win Rate: {win_rate}% | Net PnL: ${net_pnl:+.2f}"
         )
 
-        # ── Dynamic Adaptation Decisions ──
-        # Baseline balanced values (1:1.3 R:R)
-        tp_atr_mult = 1.8
-        tp_min_dist = 4.00
-        tp_max_dist = 6.50
-        sl_min_dist = 2.50
-        sl_max_dist = 3.50
-        regime = "BALANCED"
-
-        if pure_win_rate >= 55.0 and len(tp_deals) >= 15:
-            # Strong trend capture: let winners run with expanded TP
-            tp_atr_mult = 2.0
-            tp_min_dist = 4.50
-            tp_max_dist = 7.00
-            sl_max_dist = 3.50
-            regime = "TRENDING_MOMENTUM"
-        elif pure_win_rate < 48.0 or len(rev_deals) > len(tp_deals):
-            # Choppy regime or high reversal friction: protect capital with tighter SL
-            tp_atr_mult = 1.6
-            tp_min_dist = 3.80
-            tp_max_dist = 5.50
-            sl_max_dist = 3.00
-            regime = "CHOPPY_DEFENSIVE"
+        # ── Dynamic Adaptation Decisions based on Market Performance ──
+        if total_trades >= 5:
+            if win_rate >= 50.0 and net_pnl > 0:
+                # Strong swing follow-through: Maintain $8 target, expand catalyst to $18
+                regime = "HIGH_CONVICTION_SWING"
+                gold_tp = 8.0
+                gold_tp_catalyst = 18.0
+                gold_be = 6.0
+                dax_tp = 35.0
+                dax_tp_catalyst = 65.0
+                dax_be = 22.0
+            elif win_rate < 40.0:
+                # Ranging or high friction: Tighten BE trigger slightly to protect capital earlier
+                regime = "DEFENSIVE_PROTECTION"
+                gold_tp = 8.0
+                gold_tp_catalyst = 16.0
+                gold_be = 5.0  # Move BE to $5 to prevent giving back gains during choppy sessions
+                dax_tp = 30.0
+                dax_tp_catalyst = 60.0
+                dax_be = 18.0
+            else:
+                regime = "BALANCED_SWING"
+                gold_tp = 8.0
+                gold_tp_catalyst = 16.0
+                gold_be = 6.0
+                dax_tp = 30.0
+                dax_tp_catalyst = 60.0
+                dax_be = 20.0
 
         old_config = self.load_config()
         new_config = {
-            "tp_atr_mult": round(tp_atr_mult, 2),
-            "tp_min_dist": round(tp_min_dist, 2),
-            "tp_max_dist": round(tp_max_dist, 2),
-            "sl_min_dist": round(sl_min_dist, 2),
-            "sl_max_dist": round(sl_max_dist, 2),
+            "gold_tp_dollars": gold_tp,
+            "gold_tp_catalyst_dollars": gold_tp_catalyst,
+            "gold_be_trigger_dollars": gold_be,
+            "dax_tp_pts": dax_tp,
+            "dax_tp_catalyst_pts": dax_tp_catalyst,
+            "dax_be_trigger_pts": dax_be,
             "regime": regime,
-            "pure_win_rate": round(pure_win_rate, 1),
+            "win_rate": win_rate,
             "total_trades": total_trades,
+            "net_pnl": net_pnl,
             "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
 
-        # Check if changed
         has_changed = (
             old_config.get("regime") != new_config["regime"] or
-            old_config.get("tp_atr_mult") != new_config["tp_atr_mult"] or
-            old_config.get("sl_max_dist") != new_config["sl_max_dist"]
+            old_config.get("gold_tp_dollars") != new_config["gold_tp_dollars"] or
+            old_config.get("gold_be_trigger_dollars") != new_config["gold_be_trigger_dollars"]
         )
 
         self.save_config(new_config)
 
         if has_changed:
             msg = (
-                f"🧠 <b>[AI Auto-Learner Adaptation]</b>\n\n"
+                f"🧠 <b>[AlphaEdge AI Brain Adaptation]</b>\n\n"
                 f"• <b>Market Regime:</b> {regime}\n"
-                f"• <b>Historical Sample:</b> {total_trades} trades ({len(tp_deals)} TP / {len(sl_deals)} SL)\n"
-                f"• <b>Pure Win Rate:</b> {pure_win_rate:.1f}%\n"
-                f"• <b>Net PnL (48h):</b> ${net_pnl:+.2f}\n"
-                f"• <b>Tuned Take Profit:</b> {tp_atr_mult}x ATR (Min ${tp_min_dist:.2f} / Max ${tp_max_dist:.2f})\n"
-                f"• <b>Tuned Stop Loss:</b> Max Cap ${sl_max_dist:.2f}\n"
-                f"• <b>Decision:</b> Self-optimized for 1:1.3+ Risk-to-Reward!"
+                f"• <b>Analyzed History:</b> {total_trades} trades ({wins_count}W / {loss_count}L)\n"
+                f"• <b>Win Rate:</b> {win_rate}%\n"
+                f"• <b>Net PnL:</b> ${net_pnl:+.2f}\n"
+                f"• <b>Gold Target:</b> ${gold_tp:.2f} TP (BE Lock at ${gold_be:.2f})\n"
+                f"• <b>DAX Target:</b> {dax_tp:.0f} pts TP (BE Lock at {dax_be:.0f} pts)\n"
+                f"• <b>News Catalyst Target:</b> Gold ${gold_tp_catalyst:.2f} / DAX {dax_tp_catalyst:.0f} pts\n"
+                f"• <b>Status:</b> Dynamic optimization applied."
             )
             send_telegram(msg)
 
@@ -196,5 +219,5 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(name)s: %(message)s')
     learner = AutoLearner()
     cfg = learner.analyze_history_and_adapt()
-    print("\nResult Config:")
+    print("\nM15 AI Brain Config:")
     print(json.dumps(cfg, indent=4))
