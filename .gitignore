@@ -8,3 +8,6 @@ browser/
 .env
 __pycache__/
 
+
+*.csv
+*.xlsx

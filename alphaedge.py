@@ -50,8 +50,8 @@ MT5_CONFIG = {
 }
 
 ASSET_CONFIG = {
-    # Focused Gold Scalper Mode
-    "XAUUSDm": {"strategies": ["ut_liquidity"], "timeframes": [mt5.TIMEFRAME_M1], "sessions": ["24/7"]},
+    "XAUUSDm": {"strategies": ["m15_swing"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London", "NY"]},
+    "DE30m":   {"strategies": ["m15_swing"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London", "NY"]},
 }
 SYMBOLS = list(ASSET_CONFIG.keys())
 
@@ -1815,26 +1815,27 @@ def process_tv_signals():
 if __name__ == "__main__":
 
     logger.info("=" * 65)
-    logger.info("  ALPHAEDGE — GOLD SCALPING ENGINE v2.2")
-    logger.info("  Asset: XAUUSDz (Gold) — FOCUSED SINGLE-ASSET MODE")
-    logger.info("  Regime Filter: ADX + BB-Width + Choppiness (No Consolidation)")
-    logger.info("  Scalper: UT-MA + M5 EMA + Swing SL + 3-Trade TP Cascade")
-    logger.info("  Cascade: TP1->Breakeven | TP2->TP1 Lock | TP3->Runner")
+    logger.info("  ALPHAEDGE — M15 SWING & NEWS CATALYST ENGINE v3.0")
+    logger.info("  Assets: XAUUSDm (Gold) & DE30m (DAX) — M15 TIMEFRAME")
+    logger.info("  Strategy: HPotter UT Bot (Key=1.0, ATR=10)")
+    logger.info("  Gold: 0.01 lot | TP $8.00 ($16.00 Catalyst) | BE Lock $5.00")
+    logger.info("  DAX:  0.07 lot | TP 30 pts (60 pts Catalyst) | BE Lock 20 pts")
+    logger.info("  Guidance: ForexFactory Real-Time Macro News Engine (USD & EUR)")
     logger.info("=" * 65)
 
     # 1. Send Online Startup Notification to Telegram
     startup_msg = (
-        "<b>🟢 AlphaEdge Gold Scalper Bot is Active!</b>\n\n"
-        "<b>Market:</b> Gold (XAUUSD)\n"
-        "<b>Account Balance Target:</b> $100\n"
-        "<b>Trade Size:</b> 0.01 Lots (Ultra-Safe Micro Risk)\n\n"
-
-        "<b>How It Protects Your Account:</b>\n"
-        "• <b>Consolidation Shield:</b> Refuses to trade during sideways or choppy markets.\n"
-        "• <b>Trend Alignment:</b> Only trades in the direction of strong gold momentum.\n"
-        "• <b>Hedge Protection:</b> Completely isolates scalping trades from your open hedge.\n"
-        "• <b>Profit Lock System:</b> Automatically moves stop-loss to breakeven as targets are hit.\n\n"
-        "<b>Status:</b> Scanning Gold market every 60 seconds for high-probability setups."
+        "<b>🟢 AlphaEdge M15 Swing & News Catalyst Bot Active!</b>\n\n"
+        "<b>Assets:</b> Gold (XAUUSDm) & DAX (DE30m)\n"
+        "<b>Timeframe:</b> 15-Minute (M15) Chart\n"
+        "<b>Strategy:</b> UT Bot (Key=1.0, ATR=10)\n\n"
+        "<b>Profit & Risk Targets:</b>\n"
+        "• <b>Gold (XAUUSDm):</b> $8.00 TP | $5.00 Break-Even Lock | 0.01 Lot\n"
+        "• <b>DAX (DE30m):</b> 30 Pts TP | 20 Pts Break-Even Lock | 0.07 Lot\n\n"
+        "<b>News Catalyst Guidance:</b>\n"
+        "• <b>Pre-News Freeze:</b> Protects open trades & locks BE 5m before release.\n"
+        "• <b>Catalyst Impulse:</b> Automatically expands TP up to $16+ during news runs.\n\n"
+        "<b>Status:</b> Autonomous M15 engine active. Ready to trade."
     )
     send_telegram_alert(startup_msg)
 
@@ -1870,7 +1871,7 @@ if __name__ == "__main__":
             print("\n" + "-" * 65)
 
 
-            logger.info(f"Scanning {len(ASSET_CONFIG)} assets at {cycle_start.strftime('%Y-%m-%d %H:%M:%S')}...")
+            logger.info(f"AlphaEdge M15 Swing Engine scanning at {cycle_start.strftime('%Y-%m-%d %H:%M:%S')}...")
 
             # Check pause state from Telegram /stop_scanner
             state_file = Path("bot_state.txt")
@@ -1883,23 +1884,13 @@ if __name__ == "__main__":
 
 
             else:
+                # ── Autonomous M1 Gold Scalper (Macro Engine Disabled) ──
                 try:
-                    run_alphaedge(execute_orders=True)
-                except Exception as e:
-                    logger.error(f"Error during scan cycle: {e}")
-                    send_telegram_alert(f"<b>AlphaEdge Scan Error</b>\n{e}")
-
-
-
-
-                # ── Gold Scalping Layer (runs every cycle after main bot) ──
-                if ENABLE_SCALPING:
-                    try:
-                        from scalping_gold import run_scalping_cycle
-                        run_scalping_cycle()
-                    except Exception as scalp_err:
-                        import traceback
-                        logger.error(f"[Scalp] Cycle error:\n{traceback.format_exc()}")
+                    from scalping_gold import run_scalping_cycle
+                    run_scalping_cycle()
+                except Exception as scalp_err:
+                    import traceback
+                    logger.error(f"[Scalp] Cycle error:\n{traceback.format_exc()}")
 
 
             # ── End-of-Day Pre-Close Gold Market Analysis (20:45 UTC) ──────────────
@@ -1977,10 +1968,21 @@ if __name__ == "__main__":
                     except Exception as e:
                         logger.error(f"Failed to send weekly report: {e}")
 
-            # Remainder sleep to complete ultra-fast 5-second cycle
+            # ── Periodic AI Auto-Learning Brain (Every 30 Minutes) ──────────
+            if now.minute in [0, 30] and getattr(run_scalping_cycle, "_ai_run_minute", None) != (now.hour, now.minute):
+                run_scalping_cycle._ai_run_minute = (now.hour, now.minute)
+                try:
+                    from ai_learning import AutoLearner
+                    logger.info("Executing periodic AI Auto-Learning evaluation...")
+                    learner = AutoLearner()
+                    learner.analyze_history_and_adapt()
+                except Exception as ai_err:
+                    logger.error(f"[AI Brain] Periodic learning error: {ai_err}")
+
+            # Remainder sleep to complete precision 60-second M1 candle cycle
             cycle_end = datetime.now()
             elapsed = (cycle_end - cycle_start).total_seconds()
-            sleep_time = max(0, 5.0 - elapsed)
+            sleep_time = max(0, 60.0 - elapsed)
             time.sleep(sleep_time)
 
 

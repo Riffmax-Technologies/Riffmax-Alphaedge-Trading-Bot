@@ -19,6 +19,9 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 PROJECT_ROOT = Path(__file__).resolve().parent
 ENV_FILE = PROJECT_ROOT / ".env"
 
+import sys
+sys.path.append(str(PROJECT_ROOT / ".agents"))
+
 if ENV_FILE.is_file():
     for line in ENV_FILE.read_text(encoding="utf-8").splitlines():
         line = line.strip()

@@ -1,72 +1,105 @@
-# AlphaEdge Trading Bot 
+# AlphaEdge M15 Swing & News Catalyst Trading Engine
 
-AlphaEdge is a fully autonomous, institutional-grade MetaTrader 5 (MT5) trading bot built for high-frequency scanning and execution. Designed to trade across Forex, Crypto, Metals, and Indices, it utilizes a concurrent multi-strategy architecture to execute precision entries while strictly enforcing dynamic account risk management.
+AlphaEdge is an institutional-grade autonomous trading system built for **MetaTrader 5 (MT5)**, powered by a mathematical replication of the **TradingView HPotter UT Bot (Version 6)**.
 
----
-
-## ⚙️ Core Architecture
-
-AlphaEdge runs continuously, scanning an active watchlist of assets (like `XAUUSDm`, `BTCUSDm`, `EURUSDm`) on every 5-minute candle close. It dispatches market data to a highly optimized Python risk engine that evaluates the market using three distinct, mathematically robust strategies.
-
-The bot supports **Concurrent Multi-Asset Execution**, meaning it can hold multiple trades on the exact same asset simultaneously if different strategies trigger at the same time.
-
-### 1. Core System (Institutional Daily Reversals)
-The flagship strategy targets massive, highly manipulated institutional moves—specifically when market makers sweep the **Previous Day's High (PDH)** or **Previous Day's Low (PDL)** to hunt retail stop losses before reversing the daily trend.
-- **Stop Loss:** A massive **3.0 ATR** buffer structurally placed completely outside the manipulation zone to survive the stop hunts.
-- **Take Profit:** Deep structural targets aiming for 2:1 Reward-to-Risk or greater based on the daily reversal.
-
-### 2. Liquidity Sweep (Intraday Mean Reversion)
-A fast-acting mean-reversion strategy that hunts local, intraday liquidity sweeps. It enters aggressively when price pierces extreme structural lows/highs and is immediately rejected back into moving average alignment.
-- **Stop Loss:** A wide **2.5 ATR** buffer beyond the local swing extreme to defend against market noise and wicks on volatile pairs like USOIL or Crypto.
-- **Take Profit:** Targets the mean (Bollinger Band midline) or a trailing mathematical target.
-
-### 3. Volatility Breakout (Momentum Expansion)
-A trend-riding strategy that waits for periods of extreme compression and strikes when the price violently expands and closes completely outside the Bollinger Bands, riding the new momentum.
-- **Stop Loss:** Dynamically trailed behind the midline of the volatility bands.
+The engine executes exclusively on the **15-Minute (M15) timeframe**, combining swing trend-following with a **Dynamic Break-Even Shield** and real-time **Macro News Catalyst Guidance** across **Gold (`XAUUSDm`)** and **DAX (`DE30m`)**.
 
 ---
 
-## 🛡️ Dynamic Risk Management Engine
+## 🏛️ Core Strategy & Math (TradingView 1:1 Parity)
 
-AlphaEdge employs strict institutional risk modeling. Regardless of how wide the Stop Loss is mathematically placed (e.g., 3.0 ATR for the Core System vs tighter trailing stops for Breakouts), the bot's risk engine dynamically recalculates the exact **Lot Size** required to keep your maximum dollar loss to strictly **0.5% of your total account balance** per trade.
-
-If a strategy requires a wider stop to survive volatility, the bot automatically reduces the lot size. You will never risk more than 0.5% on any single setup.
+The engine replicates TradingView Pine Script with mathematical precision:
+1. **Wilder's Smoothing ATR (RMA)**:
+   $$\text{ATR}_i = \frac{\text{TR}_i + 9.0 \times \text{ATR}_{i-1}}{10.0}$$
+   Replicates TradingView's native `ta.rma(tr, 10)`.
+2. **Recursive Trailing Stop**:
+   Implements `f_calcTrailingStop` with `Key Value = 1.0` and `ATR Period = 10`.
+3. **Signal Confirmation**:
+   - **Strong Buy**: `ta.crossover(close, stop) and close > stop and close > close[1]`
+   - **Strong Sell**: `ta.crossover(stop, close) and close < stop and close < close[1]`
+   - Signals are confirmed on **completed candle close** (`index -2`), eliminating repainting.
+4. **Instant Reversal**:
+   When an opposite verified signal occurs, the engine closes the active trade immediately and flips direction to ride the new trend without lag.
 
 ---
 
-## 📱 Live Telegram Integration
+## 🎯 Asset Profiles & Risk Controls
 
-The bot provides real-time, zero-latency alerts directly to your phone via Telegram. When a trade is fired, you receive an instant breakdown showing:
-- The **Strategy Tag** (e.g., `AE_CORE`, `AE_SWEEP`, `AE_BREAK`)
-- The Asset Symbol
-- Action (BUY/SELL)
-- Precise Entry, Stop Loss, and Take Profit prices
-- Dynamically calculated Lot Size
+| Parameter | Gold (`XAUUSDm`) | DAX (`DE30m`) |
+| :--- | :---: | :---: |
+| **Execution Timeframe** | 15-Minute (`M15`) | 15-Minute (`M15`) |
+| **Volume Size** | `0.01 Lot` (Micro Risk) | `0.07 Lot` (Broker Minimum) |
+| **Take Profit (Standard)** | **+$8.00 USD** | **30 Index Points** (~$2.10) |
+| **Take Profit (News Catalyst)** | **+$16.00 USD** | **60 Index Points** (~$4.20) |
+| **Dynamic Break-Even Trigger** | **+$5.00 USD** | **20 Index Points** |
+| **Stop Loss Formula** | $1.2 \times \text{ATR}$ below/above entry | $1.2 \times \text{ATR}$ below/above entry |
+
+### 🛡️ Dynamic Break-Even Shield
+To eliminate fakeout losses and protect profits:
+- As soon as a Gold position gains **+$5.00** (or DAX gains **+20 points**), the engine shifts the Stop Loss to **Entry Price + Spread**.
+- If the market stalls or reverses, the trade exits at **Break-Even (Zero Loss)**, preserving 100% of trading capital.
+
+---
+
+## ⚡ News Catalyst Guidance Engine (`news_catalyst_engine.py`)
+
+AlphaEdge integrates real-time macro fundamentals from ForexFactory / FairEconomy covering High-Impact releases for **USD** (Gold) and **EUR** (DAX):
+
+```mermaid
+graph TD
+    A["ForexFactory High-Impact Calendar"] --> B{"Event Timing"}
+    B -->|"5 Mins Prior to Release"| C["Pre-News Window"]
+    C --> C1["Move Open Winning Trades to Break-Even"]
+    C --> C2["Pause New Entries to Avoid Broker Spread Spikes"]
+    
+    B -->|"0 to 25 Mins Post-Release"| D["Catalyst Impulse Mode"]
+    D --> D1["Institutional Momentum Surge Detected"]
+    D --> D2["M15 UT Bot Confirms Trend Direction"]
+    D --> D3["Expand Profit Targets: Gold $16.00+ / DAX 60+ Pts"]
+    
+    B -->|"Standard Session"| E["Standard M15 Swing Rules"]
+    E --> E1["Gold: $8.00 TP | $5.00 BE Lock"]
+    E --> E2["DAX: 30 Pts TP | 20 Pts BE Lock"]
+```
+
+* **Pre-News Protection (5m prior)**: Pauses new entries to avoid artificial broker spread widening and locks Break-Even on winning positions.
+* **Catalyst Impulse (0 to 25m post-release)**: When institutional volume enters (NFP, CPI, PPI, ECB decisions), the engine automatically expands Take Profit to capture multi-candle macro runs.
+* **Persistent Disk Cache**: Caches events locally (`economic_calendar_cache.json`) to prevent rate-limiting.
+
+---
+
+## ⏰ Active Trading Sessions
+
+AlphaEdge trades continuously through the high-volume European and American sessions:
+- **Active Hours**: **07:00 UTC to 21:00 UTC** (London Open through New York Close).
+- **Session Lock**: Automatically pauses entries during the late Asian dead-zone (21:00 to 07:00 UTC) and market weekends (Friday 21:00 UTC to Sunday 22:00 UTC) to prevent low-liquidity whipsaws.
 
 ---
 
 ## 🚀 How to Run the Bot
 
-1. Ensure MetaTrader 5 is open, logged into your trading account, and Auto-Trading is enabled.
-2. Ensure your `.env` file contains your MT5 credentials and Telegram Bot Token.
-3. Open a terminal in the project directory and run the master boot script:
+Launch the unified system with a single command:
 
-```bash
-python start_bot.py
+```powershell
+python alphaedge.py
 ```
 
-This single command safely initializes:
-1. The **Autonomous Scanner** loop (checking the markets every 5 minutes).
-2. The **Telegram Listener** (for manual status checks and reporting).
-
-*(To stop the engine gracefully, simply press `Ctrl+C` in your terminal).*
+### What Initializes:
+1. **M15 Swing Engine**: Continuous monitoring of `XAUUSDm` and `DE30m`.
+2. **News Catalyst Engine**: Live background calendar tracking.
+3. **Telegram Command Listener**: Supports interactive commands directly from your phone:
+   - `/status` — View open positions, floating PnL, and current market state.
+   - `/start_scanner` — Resume scanning.
+   - `/stop_scanner` — Pause new trade execution.
+4. **Daily & Weekly Reports**: Dispatches automated end-of-day and weekly performance reports to Telegram.
 
 ---
 
-## 📂 Project Structure
+## 📂 Project Architecture
 
-- `alphaedge.py`: The heart of the bot. Contains the 3 strategy formulas, the risk engine, MT5 execution logic, and concurrent trading architecture.
-- `start_bot.py`: The master execution script that binds the scanner and the Telegram API together.
-- `run_autonomous_scanner.py`: The isolated daemon that manages the scan cycles and data retrieval.
-- `telegram_bot.py`: The listener script for handling incoming Telegram commands.
-- `trade_log.csv`: A local ledger recording every trade executed by the bot.
+* `alphaedge.py` — Master bot entrypoint, session manager, Telegram bot listener, and reporting scheduler.
+* `scalping_gold.py` — The core M15 execution engine, Pine Script mathematical calculations, and Break-Even management for Gold & DAX.
+* `news_catalyst_engine.py` — Real-time ForexFactory institutional news tracker with disk persistence.
+* `economic_calendar_cache.json` — Persistent local cache for economic calendar events.
+* `config_learned_scalp.json` — Parameters dynamically calibrated by the AI Auto-Learning Brain.
+* `ut_bot_strategy.pine` — Reference TradingView Pine Script (`@version=6`) for visual chart comparison.

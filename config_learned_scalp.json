@@ -1,0 +1,11 @@
+{
+    "tp_atr_mult": 1.6,
+    "tp_min_dist": 3.8,
+    "tp_max_dist": 5.5,
+    "sl_min_dist": 2.5,
+    "sl_max_dist": 3.0,
+    "regime": "CHOPPY_DEFENSIVE",
+    "pure_win_rate": 48.5,
+    "total_trades": 277,
+    "last_updated": "2026-09-10 16:00:53"
+}
