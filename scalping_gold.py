@@ -89,27 +89,37 @@ def apply_ai_learned_settings():
 
 
 # ─── Telegram Alerts ───────────────────────────────────────────────────────────
+# Recipients: personal DM + @riffexalphaedgebot signal channel
+_TELEGRAM_RECIPIENTS = [
+    os.getenv("TELEGRAM_CHAT_ID", "915238743"),          # Personal chat (owner DM)
+    os.getenv("TELEGRAM_CHANNEL_ID", "@riffexalphaedgebot"),  # Public signal channel
+]
+
 def _send_telegram(message):
-    token   = os.getenv("TELEGRAM_TOKEN", "8617130364:AAHiEg1W9A-L5f7XkqVzgV6mTotb7TSiJV0")
-    chat_id = os.getenv("TELEGRAM_CHAT_ID", "915238743")
-    if not token or not chat_id:
+    """Broadcasts message to personal chat AND the signal channel."""
+    token = os.getenv("TELEGRAM_TOKEN", "8617130364:AAHiEg1W9A-L5f7XkqVzgV6mTotb7TSiJV0")
+    if not token:
         return
-    url     = "https://api.telegram.org/bot" + token + "/sendMessage"
-    payload = {"chat_id": chat_id, "text": message, "parse_mode": "HTML"}
-    try:
-        data = json.dumps(payload).encode("utf-8")
-        req  = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=10):
-            pass
-    except Exception:
+    url = "https://api.telegram.org/bot" + token + "/sendMessage"
+    for recipient in _TELEGRAM_RECIPIENTS:
+        if not recipient:
+            continue
+        payload = {"chat_id": recipient, "text": message, "parse_mode": "HTML"}
         try:
-            payload.pop("parse_mode", None)
             data = json.dumps(payload).encode("utf-8")
             req  = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
             with urllib.request.urlopen(req, timeout=10):
                 pass
         except Exception:
-            pass
+            try:
+                # Fallback: retry without parse_mode
+                p2 = {"chat_id": recipient, "text": message}
+                data = json.dumps(p2).encode("utf-8")
+                req  = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+                with urllib.request.urlopen(req, timeout=10):
+                    pass
+            except Exception:
+                pass
 
 
 # ─── Session Filter ────────────────────────────────────────────────────────────

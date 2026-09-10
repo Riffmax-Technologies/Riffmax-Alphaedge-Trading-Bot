@@ -245,35 +245,43 @@ def is_trading_session_active() -> bool:
 
 
 
+_TELEGRAM_ALERT_RECIPIENTS = [
+    os.getenv("TELEGRAM_CHAT_ID", "915238743"),              # Personal chat (owner DM)
+    os.getenv("TELEGRAM_CHANNEL_ID", "@riffexalphaedgebot"),  # Public signal channel
+]
+
 def send_telegram_alert(message: str):
+    """Broadcasts system-level alerts to personal DM and the signal channel."""
     token = os.getenv("TELEGRAM_TOKEN", "8617130364:AAHiEg1W9A-L5f7XkqVzgV6mTotb7TSiJV0")
-    chat_id = os.getenv("TELEGRAM_CHAT_ID", "915238743")
-    if not token or not chat_id:
-        logger.warning("Telegram token or chat_id not configured. Alert skipped.")
+    if not token:
+        logger.warning("Telegram token not configured. Alert skipped.")
         return
     import urllib.request
     import urllib.parse
     import json
     url = f"https://api.telegram.org/bot{token}/sendMessage"
-    payload = {
-        "chat_id": chat_id,
-        "text": message,
-        "parse_mode": "HTML"
-    }
-    try:
-        data = json.dumps(payload).encode("utf-8")
-        req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=10) as response:
-            logger.info("Telegram notification sent successfully.")
-    except Exception as e:
+    for recipient in _TELEGRAM_ALERT_RECIPIENTS:
+        if not recipient:
+            continue
+        payload = {
+            "chat_id": recipient,
+            "text": message,
+            "parse_mode": "HTML"
+        }
         try:
-            payload.pop("parse_mode", None)
             data = json.dumps(payload).encode("utf-8")
             req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
             with urllib.request.urlopen(req, timeout=10) as response:
-                logger.info("Telegram notification sent successfully (plain text fallback).")
-        except Exception as e2:
-            logger.error(f"Failed to send Telegram alert: {e2}")
+                logger.info(f"Telegram notification sent to {recipient}.")
+        except Exception as e:
+            try:
+                payload.pop("parse_mode", None)
+                data = json.dumps(payload).encode("utf-8")
+                req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+                with urllib.request.urlopen(req, timeout=10) as response:
+                    logger.info(f"Telegram notification sent to {recipient} (plain text fallback).")
+            except Exception as e2:
+                logger.error(f"Failed to send Telegram alert to {recipient}: {e2}")
 
 
 def get_lot_size(symbol: str, sl_price: float = 0.0, entry_price: float = 0.0) -> float:
