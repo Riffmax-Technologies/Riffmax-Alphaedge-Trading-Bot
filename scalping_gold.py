@@ -124,11 +124,13 @@ def _send_telegram(message):
 
 # ─── Session Filter ────────────────────────────────────────────────────────────
 def is_session_active():
-    """Active throughout London and New York sessions (07:00 to 21:00 UTC). Pauses during late Asian dead-zone & weekends."""
+    """Active from 07:00 EAT (04:00 UTC) through New York Close (21:00 UTC = 00:00 EAT).
+    East Africa Time is UTC+3. Session start: 04:00 UTC = 07:00 EAT.
+    Pauses on weekends (Friday 21:00 UTC through Sunday 22:00 UTC)."""
     now = datetime.now(timezone.utc)
     weekday = now.weekday()
     hour = now.hour
-    
+
     # Weekend close (Friday 21:00 UTC to Sunday 22:00 UTC)
     if weekday == 4 and hour >= 21:
         return False
@@ -136,9 +138,9 @@ def is_session_active():
         return False
     if weekday == 6 and hour < 22:
         return False
-        
-    # Active from London Open (07:00 UTC) through New York Close (21:00 UTC)
-    return 7 <= hour < 21
+
+    # Active from 04:00 UTC (07:00 EAT) through 21:00 UTC (00:00 EAT midnight)
+    return 4 <= hour < 21
 
 
 # ─── Exact TradingView Pine Script Replication ─────────────────────────────────
