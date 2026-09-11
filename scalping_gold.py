@@ -386,21 +386,33 @@ def run_scalping_cycle():
     global NEWS_ENGINE, LAST_EXECUTED_BAR
     if NEWS_ENGINE is None:
         NEWS_ENGINE = NewsCatalystEngine()
-        
+
     try:
         NEWS_ENGINE.sync_calendar()
     except Exception:
         pass
-        
+
+    # Daily news briefing — fires once per day on first cycle
+    try:
+        NEWS_ENGINE.send_daily_briefing()
+    except Exception:
+        pass
+
+    # 30-minute countdown alerts — checked every cycle, fires once per event
+    try:
+        NEWS_ENGINE.check_and_send_30min_alerts()
+    except Exception:
+        pass
+
     # Check MT5 history deals to close any trades in analysis log that hit TP/SL
     try:
         sync_closed_trades_from_history()
     except Exception:
         pass
-        
+
     session_ok = is_session_active()
     apply_ai_learned_settings()
-    
+
     for symbol, cfg in ASSET_CONFIGS.items():
         try:
             catalyst = NEWS_ENGINE.get_market_catalyst_status(symbol)
@@ -446,18 +458,21 @@ def run_scalping_cycle():
             )
             
             # Signal Crossover Execution
+            # Block entries during: PRE_NEWS_FREEZE (5min before) and NEWS_SPIKE_BLOCK (0-5min after)
+            news_blocks_entry = catalyst.get('state') in ('PRE_NEWS_FREEZE', 'NEWS_SPIKE_BLOCK')
+
             if ut_state['cross_up']:
                 close_opposite_positions(symbol, "BUY")
-                if session_ok and catalyst.get('state') != 'PRE_NEWS_FREEZE':
+                if session_ok and not news_blocks_entry:
                     if not has_pos and LAST_EXECUTED_BAR.get(symbol) != bar_time:
                         sl = tick.ask - sl_dist
                         tp = tick.ask + tp_dist
                         if execute_order(symbol, "BUY", cfg['lot'], sl, tp, mode_desc, event_name, ut_state['stop'], ut_state['atr']):
                             LAST_EXECUTED_BAR[symbol] = bar_time
-                            
+
             elif ut_state['cross_dn']:
                 close_opposite_positions(symbol, "SELL")
-                if session_ok and catalyst.get('state') != 'PRE_NEWS_FREEZE':
+                if session_ok and not news_blocks_entry:
                     if not has_pos and LAST_EXECUTED_BAR.get(symbol) != bar_time:
                         sl = tick.bid + sl_dist
                         tp = tick.bid - tp_dist
