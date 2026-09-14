@@ -89,37 +89,43 @@ def apply_ai_learned_settings():
 
 
 # ─── Telegram Alerts ───────────────────────────────────────────────────────────
-# Recipients: personal DM + @riffexalphaedgebot signal channel
-_TELEGRAM_RECIPIENTS = [
-    os.getenv("TELEGRAM_CHAT_ID", "915238743"),          # Personal chat (owner DM)
-    os.getenv("TELEGRAM_CHANNEL_ID", "@riffexalphaedgebot"),  # Public signal channel
-]
+_TELEGRAM_TOKEN     = os.getenv("TELEGRAM_TOKEN",      "8617130364:AAHiEg1W9A-L5f7XkqVzgV6mTotb7TSiJV0")
+_TELEGRAM_PERSONAL  = os.getenv("TELEGRAM_CHAT_ID",    "915238743")           # Owner DM — receives ALL messages
+_TELEGRAM_CHANNEL   = os.getenv("TELEGRAM_CHANNEL_ID", "@riffexalphaedgebot") # Public channel — trade signals ONLY
 
-def _send_telegram(message):
-    """Broadcasts message to personal chat AND the signal channel."""
-    token = os.getenv("TELEGRAM_TOKEN", "8617130364:AAHiEg1W9A-L5f7XkqVzgV6mTotb7TSiJV0")
-    if not token:
+def _tg_send(chat_id, message):
+    """Low-level: sends a single message to one recipient."""
+    if not _TELEGRAM_TOKEN or not chat_id:
         return
-    url = "https://api.telegram.org/bot" + token + "/sendMessage"
-    for recipient in _TELEGRAM_RECIPIENTS:
-        if not recipient:
-            continue
-        payload = {"chat_id": recipient, "text": message, "parse_mode": "HTML"}
+    url = "https://api.telegram.org/bot" + _TELEGRAM_TOKEN + "/sendMessage"
+    payload = {"chat_id": chat_id, "text": message, "parse_mode": "HTML"}
+    try:
+        data = json.dumps(payload).encode("utf-8")
+        req  = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=10):
+            pass
+    except Exception:
         try:
-            data = json.dumps(payload).encode("utf-8")
+            p2 = {"chat_id": chat_id, "text": message}
+            data = json.dumps(p2).encode("utf-8")
             req  = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
             with urllib.request.urlopen(req, timeout=10):
                 pass
         except Exception:
-            try:
-                # Fallback: retry without parse_mode
-                p2 = {"chat_id": recipient, "text": message}
-                data = json.dumps(p2).encode("utf-8")
-                req  = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
-                with urllib.request.urlopen(req, timeout=10):
-                    pass
-            except Exception:
-                pass
+            pass
+
+def _send_personal(message):
+    """Sends to owner DM only — for system/management messages (BE lock, pre-news, errors)."""
+    _tg_send(_TELEGRAM_PERSONAL, message)
+
+def _send_signal(message):
+    """Sends to BOTH owner DM AND public channel — for trade entries and trade results only."""
+    _tg_send(_TELEGRAM_PERSONAL, message)
+    _tg_send(_TELEGRAM_CHANNEL, message)
+
+# Keep _send_telegram as alias for personal-only (safe default for any leftover calls)
+def _send_telegram(message):
+    _send_personal(message)
 
 
 # ─── Session Filter ────────────────────────────────────────────────────────────
@@ -323,7 +329,7 @@ def execute_order(symbol, order_type, lot, sl, tp, catalyst_desc="Standard", new
             atr=atr
         )
         msg = (
-            f"🚀 <b>[AlphaEdge M15 Trade Executed]</b>\n"
+            f"🚀 <b>[AlphaEdge Signal]</b>\n"
             f"Asset: <b>{symbol}</b>\n"
             f"Action: <b>{order_type}</b> @ {price:.2f}\n"
             f"Volume: {lot} Lot\n"
@@ -331,7 +337,7 @@ def execute_order(symbol, order_type, lot, sl, tp, catalyst_desc="Standard", new
             f"Take Profit: {tp:.2f}\n"
             f"Mode: {catalyst_desc}"
         )
-        _send_telegram(msg)
+        _send_signal(msg)
         return res.order
     else:
         logger.error(f"[{symbol}] Order Failed: {res.comment} (Retcode: {res.retcode})")
@@ -368,13 +374,16 @@ def close_opposite_positions(symbol, target_dir):
             pnl_usd = pts * contract * pos.volume
             log_trade_closed(pos.ticket, c_price, pnl_usd, "REVERSAL")
             logger.info(f"[{symbol}] REVERSAL: Closed opposite {pos_dir} #{pos.ticket} at {c_price:.2f}")
+            result_emoji = "✅" if pnl_usd >= 0 else "❌"
             msg = (
-                f"🔄 <b>[M15 Trend Reversal]</b>\n"
+                f"🔄 <b>[Trade Closed — Reversal]</b>\n"
                 f"Asset: <b>{symbol}</b>\n"
-                f"Closed opposite {pos_dir} #{pos.ticket} at {c_price:.2f}.\n"
-                f"Flipping to {target_dir} following M15 UT Bot swing."
+                f"Direction: {pos_dir} #{pos.ticket}\n"
+                f"Close Price: {c_price:.2f}\n"
+                f"Result: {result_emoji} <b>${pnl_usd:.2f}</b> ({'WIN' if pnl_usd >= 0 else 'LOSS'})\n"
+                f"Reason: M15 UT Bot signal flip to {target_dir}"
             )
-            _send_telegram(msg)
+            _send_signal(msg)
 
 
 # ─── Autonomous Scan Cycle ─────────────────────────────────────────────────────

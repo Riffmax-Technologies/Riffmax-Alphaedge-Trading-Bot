@@ -160,31 +160,27 @@ class NewsCatalystEngine:
 
     # ── Telegram helpers ─────────────────────────────────────────────────────────
     def _telegram(self, message):
-        """Send message to all configured Telegram recipients."""
-        token = os.getenv("TELEGRAM_TOKEN", "8617130364:AAHiEg1W9A-L5f7XkqVzgV6mTotb7TSiJV0")
-        recipients = [
-            os.getenv("TELEGRAM_CHAT_ID", "915238743"),
-            os.getenv("TELEGRAM_CHANNEL_ID", "@riffexalphaedgebot"),
-        ]
+        """Send to owner DM only — news briefings and alerts are private/operational, not public signals."""
+        token   = os.getenv("TELEGRAM_TOKEN",   "8617130364:AAHiEg1W9A-L5f7XkqVzgV6mTotb7TSiJV0")
+        chat_id = os.getenv("TELEGRAM_CHAT_ID", "915238743")
+        if not token or not chat_id:
+            return
         url = "https://api.telegram.org/bot" + token + "/sendMessage"
-        for chat_id in recipients:
-            if not chat_id:
-                continue
-            payload = {"chat_id": chat_id, "text": message, "parse_mode": "HTML"}
+        payload = {"chat_id": chat_id, "text": message, "parse_mode": "HTML"}
+        try:
+            data = json.dumps(payload).encode("utf-8")
+            req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=10):
+                pass
+        except Exception:
             try:
+                payload.pop("parse_mode", None)
                 data = json.dumps(payload).encode("utf-8")
                 req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
                 with urllib.request.urlopen(req, timeout=10):
                     pass
             except Exception:
-                try:
-                    payload.pop("parse_mode", None)
-                    data = json.dumps(payload).encode("utf-8")
-                    req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
-                    with urllib.request.urlopen(req, timeout=10):
-                        pass
-                except Exception:
-                    pass
+                pass
 
     def send_daily_briefing(self):
         """
