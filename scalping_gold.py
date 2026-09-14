@@ -88,15 +88,52 @@ def apply_ai_learned_settings():
             logger.debug(f"[Scalp] Dynamic config load skipped: {e}")
 
 
-# ─── Telegram Alerts ───────────────────────────────────────────────────────────
+# ─── Telegram Alerts & Strict Channel Firewall ─────────────────────────────────
 _TELEGRAM_TOKEN     = os.getenv("TELEGRAM_TOKEN",      "8617130364:AAHiEg1W9A-L5f7XkqVzgV6mTotb7TSiJV0")
 _TELEGRAM_PERSONAL  = os.getenv("TELEGRAM_CHAT_ID",    "915238743")           # Owner DM — receives ALL messages
 _TELEGRAM_CHANNEL   = os.getenv("TELEGRAM_CHANNEL_ID", "@riffexalphaedgebot") # Public channel — trade signals ONLY
 
+def _is_channel_allowed(message: str) -> bool:
+    """
+    STRICT ENFORCEMENT FIREWALL FOR PUBLIC CHANNEL (@riffexalphaedgebot):
+    Only two types of messages are ever permitted:
+      1. Trade Entry Signals: containing [AlphaEdge Signal]
+      2. Trade Exit Results: containing [Trade Closed
+    All other messages (Daily Reports, Market Summaries, Bot Status, News Briefings,
+    30-min countdowns, Break-Even notices, Pre-news protections, AI updates, Errors)
+    are strictly dropped and NEVER sent to the channel.
+    """
+    msg_lower = message.lower()
+
+    # Blocklist: any of these immediately disqualifies message from channel
+    blocked_keywords = [
+        "daily", "weekly", "report", "analysis", "briefing",
+        "bot status", "bot offline", "bot online", "shut down", "started",
+        "scanner paused", "scanner resumed", "command", "balance & pnl",
+        "account equity", "break-even protected", "pre-news", "30-minute news",
+        "economic calendar", "protection activated", "capital preserved", "fakeout risk"
+    ]
+    for kw in blocked_keywords:
+        if kw in msg_lower:
+            return False
+
+    # Allowlist: must have valid trade entry or close tag
+    is_entry = "[alphaedge signal]" in msg_lower
+    is_close = "[trade closed" in msg_lower
+
+    return is_entry or is_close
+
 def _tg_send(chat_id, message):
-    """Low-level: sends a single message to one recipient."""
+    """Low-level: sends a single message to one recipient with strict firewall."""
     if not _TELEGRAM_TOKEN or not chat_id:
         return
+
+    # FIREWALL CHECK: If recipient is the public channel, verify message whitelist
+    if str(chat_id).strip().lower() in (_TELEGRAM_CHANNEL.lower(), "-1003973403139", "@riffexalphaedgebot"):
+        if not _is_channel_allowed(message):
+            logger.warning(f"[Telegram Firewall] BLOCKED non-trade message to channel: {message[:60]}...")
+            return
+
     url = "https://api.telegram.org/bot" + _TELEGRAM_TOKEN + "/sendMessage"
     payload = {"chat_id": chat_id, "text": message, "parse_mode": "HTML"}
     try:
@@ -115,17 +152,70 @@ def _tg_send(chat_id, message):
             pass
 
 def _send_personal(message):
-    """Sends to owner DM only — for system/management messages (BE lock, pre-news, errors)."""
+    """Sends to owner DM ONLY (915238743) — never to public channel."""
     _tg_send(_TELEGRAM_PERSONAL, message)
 
 def _send_signal(message):
-    """Sends to BOTH owner DM AND public channel — for trade entries and trade results only."""
+    """Sends to BOTH owner DM AND public channel (subject to strict channel firewall)."""
     _tg_send(_TELEGRAM_PERSONAL, message)
     _tg_send(_TELEGRAM_CHANNEL, message)
 
-# Keep _send_telegram as alias for personal-only (safe default for any leftover calls)
+def send_trade_entry_broadcast(symbol, order_type, price, lot, sl, tp, catalyst_desc="Standard"):
+    """Broadcasts clean trade entry signal to channel and owner DM."""
+    channel_msg = (
+        f"🚀 <b>[AlphaEdge Signal]</b>\n"
+        f"Asset: <b>{symbol}</b>\n"
+        f"Action: <b>{order_type}</b> @ {price:.2f}\n"
+        f"Take Profit: {tp:.2f}\n"
+        f"Stop Loss: {sl:.2f}"
+    )
+    dm_msg = (
+        f"🚀 <b>[AlphaEdge Signal]</b>\n"
+        f"Asset: <b>{symbol}</b>\n"
+        f"Action: <b>{order_type}</b> @ {price:.2f}\n"
+        f"Volume: {lot} Lot\n"
+        f"Stop Loss: {sl:.2f}\n"
+        f"Take Profit: {tp:.2f}\n"
+        f"Mode: {catalyst_desc}"
+    )
+    _tg_send(_TELEGRAM_PERSONAL, dm_msg)
+    _tg_send(_TELEGRAM_CHANNEL, channel_msg)
+
+def send_trade_close_broadcast(symbol, direction, open_price, close_price, pnl_usd, reason):
+    """Broadcasts trade result (Win/Loss) to both public channel and owner DM."""
+    if pnl_usd > 0:
+        emoji = "🎯"
+        tag = "WIN"
+        result_text = f"✅ <b>+${pnl_usd:.2f} (WIN)</b>"
+        detail = "Take Profit Target Hit!" if reason == "TP_HIT" else "Closed in Profit"
+    elif pnl_usd < 0:
+        emoji = "🛑"
+        tag = "LOSS"
+        result_text = f"❌ <b>-${abs(pnl_usd):.2f} (LOSS)</b>"
+        detail = "Stop Loss Executed" if reason == "SL_HIT" else "Closed with Loss"
+    else:
+        emoji = "🛡️"
+        tag = "BREAK-EVEN"
+        result_text = f"⚪ <b>${pnl_usd:+.2f} (BREAK-EVEN)</b>"
+        detail = "Break-Even Capital Protected"
+
+    if reason == "REVERSAL":
+        detail = "M15 UT Bot Signal Flip Reversal"
+
+    msg = (
+        f"{emoji} <b>[Trade Closed — {tag}]</b>\n"
+        f"Asset: <b>{symbol}</b> ({direction})\n"
+        f"Entry: {open_price} ➔ Exit: {close_price}\n"
+        f"Result: {result_text}\n"
+        f"Outcome: {detail}"
+    )
+    _tg_send(_TELEGRAM_PERSONAL, msg)
+    _tg_send(_TELEGRAM_CHANNEL, msg)
+
+# Alias for backwards-compatibility: default to personal only
 def _send_telegram(message):
     _send_personal(message)
+
 
 
 # ─── Session Filter ────────────────────────────────────────────────────────────
@@ -328,16 +418,15 @@ def execute_order(symbol, order_type, lot, sl, tp, catalyst_desc="Standard", new
             ut_stop=ut_stop,
             atr=atr
         )
-        msg = (
-            f"🚀 <b>[AlphaEdge Signal]</b>\n"
-            f"Asset: <b>{symbol}</b>\n"
-            f"Action: <b>{order_type}</b> @ {price:.2f}\n"
-            f"Volume: {lot} Lot\n"
-            f"Stop Loss: {sl:.2f}\n"
-            f"Take Profit: {tp:.2f}\n"
-            f"Mode: {catalyst_desc}"
+        send_trade_entry_broadcast(
+            symbol=symbol,
+            order_type=order_type,
+            price=price,
+            lot=lot,
+            sl=sl,
+            tp=tp,
+            catalyst_desc=catalyst_desc
         )
-        _send_signal(msg)
         return res.order
     else:
         logger.error(f"[{symbol}] Order Failed: {res.comment} (Retcode: {res.retcode})")
@@ -374,16 +463,14 @@ def close_opposite_positions(symbol, target_dir):
             pnl_usd = pts * contract * pos.volume
             log_trade_closed(pos.ticket, c_price, pnl_usd, "REVERSAL")
             logger.info(f"[{symbol}] REVERSAL: Closed opposite {pos_dir} #{pos.ticket} at {c_price:.2f}")
-            result_emoji = "✅" if pnl_usd >= 0 else "❌"
-            msg = (
-                f"🔄 <b>[Trade Closed — Reversal]</b>\n"
-                f"Asset: <b>{symbol}</b>\n"
-                f"Direction: {pos_dir} #{pos.ticket}\n"
-                f"Close Price: {c_price:.2f}\n"
-                f"Result: {result_emoji} <b>${pnl_usd:.2f}</b> ({'WIN' if pnl_usd >= 0 else 'LOSS'})\n"
-                f"Reason: M15 UT Bot signal flip to {target_dir}"
+            send_trade_close_broadcast(
+                symbol=symbol,
+                direction=pos_dir,
+                open_price=f"{pos.price_open:.2f}",
+                close_price=f"{c_price:.2f}",
+                pnl_usd=round(pnl_usd, 2),
+                reason="REVERSAL"
             )
-            _send_signal(msg)
 
 
 # ─── Autonomous Scan Cycle ─────────────────────────────────────────────────────

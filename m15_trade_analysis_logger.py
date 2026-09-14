@@ -139,6 +139,7 @@ def sync_closed_trades_from_history():
     if not deals:
         return
         
+    closed_notifications = []
     updated = False
     for deal in deals:
         pos_id = str(deal.position_id)
@@ -152,7 +153,7 @@ def sync_closed_trades_from_history():
                     tp_val = float(row.get("tp_target", 0.0))
                     sl_val = float(row.get("sl_initial", 0.0))
                     is_be = (row.get("be_activated") == "True")
-                    
+
                     if deal.profit > 0 and abs(deal.price - tp_val) <= 0.5:
                         reason = "TP_HIT"
                     elif is_be and abs(deal.profit) < 0.5:
@@ -161,7 +162,7 @@ def sync_closed_trades_from_history():
                         reason = "SL_HIT"
                     else:
                         reason = "EXIT_CLOSED"
-                        
+
                     row["exit_reason"] = reason
                     row["status"] = "CLOSED"
                     try:
@@ -170,14 +171,39 @@ def sync_closed_trades_from_history():
                         row["hold_duration_mins"] = round((close_dt - open_dt).total_seconds() / 60.0, 1)
                     except Exception:
                         pass
+
+                    closed_notifications.append({
+                        "symbol": row.get("symbol", ""),
+                        "direction": row.get("direction", ""),
+                        "open_price": row.get("open_price", ""),
+                        "close_price": row["close_price"],
+                        "pnl_usd": row["pnl_usd"],
+                        "reason": reason
+                    })
+
                     updated = True
                     open_tickets.remove(pos_id)
-                    
+
     if updated:
         with open(CSV_FILE, mode='w', newline='', encoding='utf-8') as f:
             writer = csv.DictWriter(f, fieldnames=CSV_HEADERS)
             writer.writeheader()
             writer.writerows(rows)
+
+        # Broadcast each trade result (Win/Loss) to both channel and personal DM
+        for item in closed_notifications:
+            try:
+                from scalping_gold import send_trade_close_broadcast
+                send_trade_close_broadcast(
+                    symbol=item["symbol"],
+                    direction=item["direction"],
+                    open_price=item["open_price"],
+                    close_price=item["close_price"],
+                    pnl_usd=item["pnl_usd"],
+                    reason=item["reason"]
+                )
+            except Exception:
+                pass
 
 def get_performance_summary():
     """Returns a dict of metrics from m15_trade_analysis.csv."""

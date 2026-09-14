@@ -127,6 +127,36 @@ print(f"  Token   : {'SET' if token else 'MISSING'}")
 print(f"  Chat ID : {chat_id}")
 print(f"  Channel : {channel}")
 
+# ── 8. Public Channel Firewall Verification ──────────────────────────────────
+print()
+print("--- Channel Firewall Security Test ---")
+from scalping_gold import _is_channel_allowed
+
+firewall_test_cases = [
+    ("🚀 <b>[AlphaEdge Signal]</b>\nAsset: XAUUSDm\nAction: BUY", True, "Trade Entry Signal"),
+    ("🎯 <b>[Trade Closed — WIN]</b>\nAsset: XAUUSDm (BUY)\nResult: +$10.00", True, "Trade Close Win"),
+    ("🛑 <b>[Trade Closed — LOSS]</b>\nAsset: XAUUSDm (BUY)\nResult: -$10.00", True, "Trade Close Loss"),
+    ("🛡️ <b>[Trade Closed — BREAK-EVEN]</b>\nAsset: XAUUSDm", True, "Trade Close Break-Even"),
+    ("🔄 <b>[Trade Closed — REVERSAL]</b>\nAsset: XAUUSDm", True, "Trade Close Reversal"),
+    ("📊 <b>AlphaEdge Daily Gold Market Report</b>\nEnd of Day", False, "Daily Market Report"),
+    ("📊 ALPHAEDGE DAILY REPORT\nDate: 2026-09-14", False, "Daily Performance Report"),
+    ("🛑 <b>[AlphaEdge Bot Offline]</b>\nScanner was stopped", False, "Bot Offline Notification"),
+    ("🟢 <b>AlphaEdge Bot Status Report</b>\nMarket: Gold", False, "Bot Status Reply"),
+    ("📅 <b>AlphaEdge Daily News Briefing</b>\nHigh-Impact", False, "News Briefing"),
+    ("⏰ <b>30-Minute News Alert</b>\nCore CPI m/m", False, "30-Min News Alert"),
+    ("🛡️ <b>[Break-Even Protected]</b>\nAsset: XAUUSDm", False, "Break-Even Protection"),
+    ("⚠️ <b>[Pre-News Protection]</b>\nAsset: XAUUSDm", False, "Pre-News Protection"),
+]
+
+for msg, expected_allowed, desc in firewall_test_cases:
+    actual = _is_channel_allowed(msg)
+    ok = (actual == expected_allowed)
+    status = "OK " if ok else "ERR"
+    action = "PERMITTED" if actual else "BLOCKED  "
+    if not ok:
+        errors.append(f"Firewall test failed for '{desc}': got {actual}, expected {expected_allowed}")
+    print(f"  {status} [{action}] {desc:30s} -> {'pass' if ok else 'FAIL'}")
+
 # ── Final Result ──────────────────────────────────────────────────────────────
 print()
 if errors:
