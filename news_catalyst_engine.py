@@ -161,7 +161,7 @@ class NewsCatalystEngine:
     # ── Telegram helpers ─────────────────────────────────────────────────────────
     def _telegram(self, message):
         """Send to owner DM only — news briefings and alerts are private/operational, not public signals."""
-        token   = os.getenv("TELEGRAM_TOKEN",   "8617130364:AAHiEg1W9A-L5f7XkqVzgV6mTotb7TSiJV0")
+        token   = os.getenv("TELEGRAM_TOKEN", "")
         chat_id = os.getenv("TELEGRAM_CHAT_ID", "915238743")
         if not token or not chat_id:
             return

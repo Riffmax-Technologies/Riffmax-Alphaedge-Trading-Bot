@@ -13,8 +13,15 @@ import urllib.request
 import json
 import MetaTrader5 as mt5
 
-TELEGRAM_TOKEN   = "8617130364:AAHiEg1W9A-L5f7XkqVzgV6mTotb7TSiJV0"
-TELEGRAM_CHAT_ID = "915238743"
+import os
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"), override=True)
+except Exception:
+    pass
+
+TELEGRAM_TOKEN   = os.getenv("TELEGRAM_TOKEN", "")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "915238743")
 
 BOT_PAUSED     = False
 LAST_UPDATE_ID = 0

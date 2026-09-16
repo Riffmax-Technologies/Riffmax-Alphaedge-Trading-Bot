@@ -31,8 +31,14 @@ ANALYSIS_CSV_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "m1
 SCALP_MAGIC = 20250831
 
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"), override=True)
+except Exception:
+    pass
+
 def send_telegram(message: str):
-    token   = os.getenv("TELEGRAM_TOKEN", "8617130364:AAHiEg1W9A-L5f7XkqVzgV6mTotb7TSiJV0")
+    token   = os.getenv("TELEGRAM_TOKEN", "")
     chat_id = os.getenv("TELEGRAM_CHAT_ID", "915238743")
     if not token or not chat_id:
         return

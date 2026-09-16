@@ -88,9 +88,15 @@ def apply_ai_learned_settings():
             logger.debug(f"[Scalp] Dynamic config load skipped: {e}")
 
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"), override=True)
+except Exception:
+    pass
+
 # ─── Telegram Alerts & Strict Channel Firewall ─────────────────────────────────
-_TELEGRAM_TOKEN     = os.getenv("TELEGRAM_TOKEN",      "8617130364:AAHiEg1W9A-L5f7XkqVzgV6mTotb7TSiJV0")
-_TELEGRAM_PERSONAL  = os.getenv("TELEGRAM_CHAT_ID",    "915238743")           # Owner DM — receives ALL messages
+_TELEGRAM_TOKEN     = os.getenv("TELEGRAM_TOKEN", "")
+_TELEGRAM_PERSONAL  = os.getenv("TELEGRAM_CHAT_ID", "915238743")              # Owner DM — receives ALL messages
 _TELEGRAM_CHANNEL   = os.getenv("TELEGRAM_CHANNEL_ID", "@riffexalphaedgebot") # Public channel — trade signals ONLY
 
 def _is_channel_allowed(message: str) -> bool:

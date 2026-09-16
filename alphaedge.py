@@ -38,7 +38,7 @@ def load_environment_file() -> None:
             if not line or line.startswith("#") or "=" not in line:
                 continue
             key, value = line.split("=", 1)
-            os.environ.setdefault(key.strip(), value.strip())
+            os.environ[key.strip()] = value.strip()
 
 
 load_environment_file()
@@ -126,7 +126,7 @@ _last_telegram_update_id = 0
 def process_telegram_commands():
     """Polls Telegram getUpdates API for incoming commands (/status, /pnl, /help, /stop_scanner, /start_scanner) and responds instantly in plain English."""
     global _last_telegram_update_id
-    token = os.getenv("TELEGRAM_TOKEN", "8617130364:AAHiEg1W9A-L5f7XkqVzgV6mTotb7TSiJV0")
+    token = os.getenv("TELEGRAM_TOKEN", "")
     if not token:
         return
     import urllib.request, json, MetaTrader5 as mt5
@@ -248,7 +248,7 @@ def is_trading_session_active() -> bool:
 def send_telegram_alert(message: str):
     """Sends system-level alerts to owner DM only (startup, shutdown, daily reports, commands).
     NOT sent to the public channel — channel receives trade signals only."""
-    token   = os.getenv("TELEGRAM_TOKEN",   "8617130364:AAHiEg1W9A-L5f7XkqVzgV6mTotb7TSiJV0")
+    token   = os.getenv("TELEGRAM_TOKEN", "")
     chat_id = os.getenv("TELEGRAM_CHAT_ID", "915238743")
     if not token or not chat_id:
         logger.warning("Telegram token or chat_id not configured. Alert skipped.")

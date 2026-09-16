@@ -29,15 +29,14 @@ MANUAL_TRIGGER_KEY = "A"
 # Scan schedule (minutes between automatic scans)
 SCAN_INTERVAL_MINUTES = 10
 
+import os
 # Telegram Alert Settings
 TELEGRAM_ENABLED = True  # Set to True once you enter your token and chat ID
-TELEGRAM_TOKEN = "8617130364:AAHiEg1W9A-L5f7XkqVzgV6mTotb7TSiJV0"
-TELEGRAM_CHAT_ID = "915238743"
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "915238743")
 
 # Broker configuration – using Deriv (credentials in .env)
 USE_DERIV = True
-
-import os
 DERIV_CONFIG = {
     "login": int(os.environ.get("MT5_LOGIN", "32346236")),
     "password": os.environ.get("MT5_PASSWORD", "Iamgreat@2030"),

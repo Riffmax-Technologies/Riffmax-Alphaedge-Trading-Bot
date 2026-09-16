@@ -118,9 +118,14 @@ for offset, expected_state in state_tests:
 
 # ── 7. Telegram recipients check ─────────────────────────────────────────────
 print()
-print("--- Telegram config ---")
 import os
-token   = os.getenv("TELEGRAM_TOKEN",      "8617130364:AAHiEg1W9A-L5f7XkqVzgV6mTotb7TSiJV0")
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"), override=True)
+except Exception:
+    pass
+
+token   = os.getenv("TELEGRAM_TOKEN", "")
 chat_id = os.getenv("TELEGRAM_CHAT_ID",    "915238743")
 channel = os.getenv("TELEGRAM_CHANNEL_ID", "@riffexalphaedgebot")
 print(f"  Token   : {'SET' if token else 'MISSING'}")
