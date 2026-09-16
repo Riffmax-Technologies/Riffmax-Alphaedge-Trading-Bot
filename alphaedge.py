@@ -50,8 +50,8 @@ MT5_CONFIG = {
 }
 
 ASSET_CONFIG = {
-    "XAUUSDm": {"strategies": ["m15_swing"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London", "NY"]},
-    "DE30m":   {"strategies": ["m15_swing"], "timeframes": [mt5.TIMEFRAME_M15], "sessions": ["London", "NY"]},
+    "XAUUSDm": {"strategies": ["h1_swing"], "timeframes": [mt5.TIMEFRAME_H1], "sessions": ["London", "NY"]},
+    "DE30m":   {"strategies": ["h1_swing"], "timeframes": [mt5.TIMEFRAME_H1], "sessions": ["London", "NY"]},
 }
 SYMBOLS = list(ASSET_CONFIG.keys())
 
@@ -1812,26 +1812,26 @@ def process_tv_signals():
 if __name__ == "__main__":
 
     logger.info("=" * 65)
-    logger.info("  ALPHAEDGE — M15 SWING & NEWS CATALYST ENGINE v3.0")
-    logger.info("  Assets: XAUUSDm (Gold) & DE30m (DAX) — M15 TIMEFRAME")
+    logger.info("  ALPHAEDGE — 1-HOUR (1H) SWING & NEWS CATALYST ENGINE")
+    logger.info("  Assets: XAUUSDm (Gold) & DE30m (DAX) — 1H TIMEFRAME")
     logger.info("  Strategy: HPotter UT Bot (Key=1.0, ATR=10)")
-    logger.info("  Gold: 0.01 lot | Take Profit: $10.00 USD (Let trade run to full target)")
-    logger.info("  DAX:  0.07 lot | Take Profit: 30 pts (Let trade run to full target)")
+    logger.info("  Gold: 0.01 lot | Take Profit: $20.00 USD (Let trade run to full target)")
+    logger.info("  DAX:  0.10 lot | Take Profit: 60 pts (Let trade run to full target)")
     logger.info("  Guidance: ForexFactory Real-Time Macro News Engine (USD & EUR)")
     logger.info("=" * 65)
 
     # 1. Send Online Startup Notification to Telegram
     startup_msg = (
-        "<b>🟢 AlphaEdge M15 Swing & News Catalyst Bot Active!</b>\n\n"
+        "<b>🟢 AlphaEdge 1H Swing & News Catalyst Bot Active!</b>\n\n"
         "<b>Assets:</b> Gold (XAUUSDm) & DAX (DE30m)\n"
-        "<b>Timeframe:</b> 15-Minute (M15) Chart\n"
+        "<b>Timeframe:</b> 1-Hour (1H) Chart\n"
         "<b>Strategy:</b> UT Bot (Key=1.0, ATR=10)\n\n"
         "<b>Profit & Risk Targets:</b>\n"
-        "• <b>Gold (XAUUSDm):</b> Strict $10.00 Take Profit | 0.01 Lot\n"
-        "• <b>DAX (DE30m):</b> Strict 30 Pts Take Profit | 0.07 Lot\n\n"
+        "• <b>Gold (XAUUSDm):</b> $20.00 Take Profit | 0.01 Lot\n"
+        "• <b>DAX (DE30m):</b> 60 Pts Take Profit | 0.10 Lot\n\n"
         "<b>Execution Mode:</b>\n"
-        "• Trades wait out the move to reach full target (no frequent micro-scalping).\n"
-        "• Session: London & New York (07:00 to 21:00 UTC).\n"
+        "• 1-Hour candle confirmation filters out choppy sub-hour noise.\n"
+        "• Session: 07:00 EAT to midnight EAT (04:00 to 21:00 UTC).\n"
         "• News Guidance: Pre-news protection & expanded targets during macro momentum.\n\n"
         "<b>Status:</b> Engine ready."
     )

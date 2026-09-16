@@ -39,27 +39,27 @@ from m15_trade_analysis_logger import (
 
 logger = logging.getLogger("AlphaEdge.M15Swing")
 
-# Asset Configurations
+# Asset Configurations (1-Hour UT Bot Swing)
 ASSET_CONFIGS = {
     "XAUUSDm": {
         "symbol": "XAUUSDm",
         "lot": 0.01,
         "key_mult": 1.0,
         "atr_period": 10,
-        "tp_dollars": 10.0,           # Strict $10.00 Take Profit Target
-        "tp_catalyst_dollars": 16.0,   # Expanded $16.00 Target during News Impulse
-        "be_trigger_dollars": 6.0,     # Protects at $6.00 gain (75% to target) to let trade reach $8.00 cleanly
+        "tp_dollars": 20.0,           # Target: $20.00 USD Profit (1H Swing)
+        "tp_catalyst_dollars": 30.0,   # Expanded $30.00 Target during News Impulse
+        "be_trigger_dollars": 12.0,    # Protects at $12.00 gain (60% to target)
         "sl_atr_mult": 1.2,
         "currency": "USD"
     },
     "DE30m": {
         "symbol": "DE30m",
-        "lot": 0.07,
+        "lot": 0.1,                    # Upgraded to 0.1 Lot
         "key_mult": 1.0,
         "atr_period": 10,
-        "tp_pts": 30.0,
-        "tp_catalyst_pts": 60.0,
-        "be_trigger_pts": 20.0,
+        "tp_pts": 60.0,                # Increased reach: 60 pts Target
+        "tp_catalyst_pts": 100.0,      # Expanded 100 pts during News Impulse
+        "be_trigger_pts": 35.0,        # Protects at 35 pts gain
         "sl_atr_mult": 1.2,
         "currency": "EUR"
     }
@@ -77,13 +77,13 @@ def apply_ai_learned_settings():
         try:
             with open(cfg_file, "r", encoding="utf-8") as f:
                 c = json.load(f)
-            ASSET_CONFIGS["XAUUSDm"]["tp_dollars"] = float(c.get("gold_tp_dollars", 8.0))
-            ASSET_CONFIGS["XAUUSDm"]["tp_catalyst_dollars"] = float(c.get("gold_tp_catalyst_dollars", 16.0))
-            ASSET_CONFIGS["XAUUSDm"]["be_trigger_dollars"] = float(c.get("gold_be_trigger_dollars", 6.0))
+            ASSET_CONFIGS["XAUUSDm"]["tp_dollars"] = float(c.get("gold_tp_dollars", 20.0))
+            ASSET_CONFIGS["XAUUSDm"]["tp_catalyst_dollars"] = float(c.get("gold_tp_catalyst_dollars", 30.0))
+            ASSET_CONFIGS["XAUUSDm"]["be_trigger_dollars"] = float(c.get("gold_be_trigger_dollars", 12.0))
             
-            ASSET_CONFIGS["DE30m"]["tp_pts"] = float(c.get("dax_tp_pts", 30.0))
-            ASSET_CONFIGS["DE30m"]["tp_catalyst_pts"] = float(c.get("dax_tp_catalyst_pts", 60.0))
-            ASSET_CONFIGS["DE30m"]["be_trigger_pts"] = float(c.get("dax_be_trigger_pts", 20.0))
+            ASSET_CONFIGS["DE30m"]["tp_pts"] = float(c.get("dax_tp_pts", 60.0))
+            ASSET_CONFIGS["DE30m"]["tp_catalyst_pts"] = float(c.get("dax_tp_catalyst_pts", 100.0))
+            ASSET_CONFIGS["DE30m"]["be_trigger_pts"] = float(c.get("dax_be_trigger_pts", 35.0))
         except Exception as e:
             logger.debug(f"[Scalp] Dynamic config load skipped: {e}")
 
@@ -248,7 +248,7 @@ def is_session_active():
 # ─── Exact TradingView Pine Script Replication ─────────────────────────────────
 def compute_m15_ut_bot(symbol, key_mult=1.0, atr_period=10, n_bars=300):
     mt5.symbol_select(symbol, True)
-    rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M15, 0, n_bars)
+    rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, 0, n_bars)
     if rates is None or len(rates) < 50:
         return None
         
