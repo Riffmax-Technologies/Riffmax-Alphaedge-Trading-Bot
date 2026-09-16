@@ -24,7 +24,7 @@ import json
 import logging
 import traceback
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import MetaTrader5 as mt5
 import numpy as np
 import pandas as pd
@@ -51,6 +51,7 @@ ASSET_CONFIGS = {
         "be_trigger_dollars": 5.0,        # Stage 1: Move SL to Entry at $5.00 profit
         "lock_trigger_dollars": 15.0,     # Stage 2: Trigger Profit Lock at $15.00 profit
         "lock_amount_dollars": 12.0,      # Stage 2: Lock $12.00 profit into SL
+        "max_sl_dollars": 15.0,           # Max Initial Risk Cap: $15.00 USD
         "sl_atr_mult": 1.2,
         "currency": "USD"
     },
@@ -64,6 +65,7 @@ ASSET_CONFIGS = {
         "be_trigger_pts": 15.0,           # Stage 1: Move SL to Entry at 15 pts profit
         "lock_trigger_pts": 45.0,         # Stage 2: Trigger Profit Lock at 45 pts profit
         "lock_amount_pts": 36.0,          # Stage 2: Lock 36 pts profit into SL
+        "max_sl_pts": 45.0,               # Max Initial Risk Cap: 45 pts
         "sl_atr_mult": 1.2,
         "currency": "EUR"
     }
@@ -229,25 +231,31 @@ def _send_telegram(message):
 
 
 
-# ─── Session Filter ────────────────────────────────────────────────────────────
+# ─── Session Filter (London 8:00 AM EAT to New York 8:00 PM EAT) ─────────────────
 def is_session_active():
-    """Active from 07:00 EAT (04:00 UTC) through New York Close (21:00 UTC = 00:00 EAT).
-    East Africa Time is UTC+3. Session start: 04:00 UTC = 07:00 EAT.
-    Pauses on weekends (Friday 21:00 UTC through Sunday 22:00 UTC)."""
-    now = datetime.now(timezone.utc)
-    weekday = now.weekday()
-    hour = now.hour
+    """
+    Session Gateway:
+    Active strictly from 08:00 AM EAT (05:00 UTC) to 08:00 PM EAT (17:00 UTC).
+    Covers London Open through peak New York session.
+    Entries outside this window (Asian / overnight chop) and weekends are blocked.
+    """
+    now_utc = datetime.now(timezone.utc)
+    weekday = now_utc.weekday()
+    
+    # EAT is UTC+3
+    now_eat = now_utc + timedelta(hours=3)
+    hour_eat = now_eat.hour
 
-    # Weekend close (Friday 21:00 UTC to Sunday 22:00 UTC)
-    if weekday == 4 and hour >= 21:
+    # Weekend close (Friday 20:00 EAT through Sunday 20:00 EAT)
+    if weekday == 4 and hour_eat >= 20:
         return False
     if weekday == 5:
         return False
-    if weekday == 6 and hour < 22:
+    if weekday == 6 and hour_eat < 20:
         return False
 
-    # Active from 04:00 UTC (07:00 EAT) through 21:00 UTC (00:00 EAT midnight)
-    return 4 <= hour < 21
+    # Strictly 8:00 AM EAT to 8:00 PM EAT (08:00 <= hour < 20:00)
+    return 8 <= hour_eat < 20
 
 
 # ─── Exact TradingView Pine Script Replication ─────────────────────────────────
@@ -577,6 +585,10 @@ def run_scalping_cycle():
                 mode_desc = "Standard M15 Target"
                 
             sl_dist = cfg['sl_atr_mult'] * ut_state['atr']
+            if symbol == "XAUUSDm" and 'max_sl_dollars' in cfg:
+                sl_dist = min(sl_dist, cfg['max_sl_dollars'] / dollar_per_pt)
+            elif symbol == "DE30m" and 'max_sl_pts' in cfg:
+                sl_dist = min(sl_dist, cfg['max_sl_pts'])
             
             positions = mt5.positions_get(symbol=symbol)
             has_pos = len(positions) > 0 if positions else False
