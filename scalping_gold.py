@@ -39,35 +39,40 @@ from m15_trade_analysis_logger import (
 
 logger = logging.getLogger("AlphaEdge.M15Swing")
 
-# Asset Configurations (1-Hour UT Bot Swing)
+# Asset Configurations (1-Hour UT Bot Swing with 2-Stage Profit Lock)
 ASSET_CONFIGS = {
     "XAUUSDm": {
         "symbol": "XAUUSDm",
         "lot": 0.01,
         "key_mult": 1.0,
         "atr_period": 10,
-        "tp_dollars": 20.0,           # Target: $20.00 USD Profit (1H Swing)
-        "tp_catalyst_dollars": 30.0,   # Expanded $30.00 Target during News Impulse
-        "be_trigger_dollars": 12.0,    # Protects at $12.00 gain (60% to target)
+        "tp_dollars": 20.0,              # Full Target: $20.00 USD Profit
+        "tp_catalyst_dollars": 30.0,      # Expanded $30.00 Target during News Impulse
+        "be_trigger_dollars": 5.0,        # Stage 1: Move SL to Entry at $5.00 profit
+        "lock_trigger_dollars": 15.0,     # Stage 2: Trigger Profit Lock at $15.00 profit
+        "lock_amount_dollars": 12.0,      # Stage 2: Lock $12.00 profit into SL
         "sl_atr_mult": 1.2,
         "currency": "USD"
     },
     "DE30m": {
         "symbol": "DE30m",
-        "lot": 0.1,                    # Upgraded to 0.1 Lot
+        "lot": 0.1,                       # 0.1 Lot
         "key_mult": 1.0,
         "atr_period": 10,
-        "tp_pts": 60.0,                # Increased reach: 60 pts Target
-        "tp_catalyst_pts": 100.0,      # Expanded 100 pts during News Impulse
-        "be_trigger_pts": 35.0,        # Protects at 35 pts gain
+        "tp_pts": 60.0,                   # Full Target: 60 pts Target
+        "tp_catalyst_pts": 100.0,         # Expanded 100 pts during News Impulse
+        "be_trigger_pts": 15.0,           # Stage 1: Move SL to Entry at 15 pts profit
+        "lock_trigger_pts": 45.0,         # Stage 2: Trigger Profit Lock at 45 pts profit
+        "lock_amount_pts": 36.0,          # Stage 2: Lock 36 pts profit into SL
         "sl_atr_mult": 1.2,
         "currency": "EUR"
     }
 }
 
 NEWS_ENGINE = None
-ACTIVE_BE_TRACKED = {} # ticket -> True if BE set
-LAST_EXECUTED_BAR = {} # symbol -> bar_time
+ACTIVE_BE_TRACKED = {}   # ticket -> True if Stage 1 BE set
+ACTIVE_LOCK_TRACKED = {} # ticket -> True if Stage 2 Lock set
+LAST_EXECUTED_BAR = {}   # symbol -> bar_time
 
 
 def apply_ai_learned_settings():
@@ -336,7 +341,7 @@ def manage_open_positions(symbol, cfg, catalyst_state):
         pts_gain = (current_price - entry_price) if pos_type == "BUY" else (entry_price - current_price)
         dollar_gain = pts_gain * dollar_per_point
         
-        # 1. Dynamic Break-Even Shield Check
+        # 1. Stage 1: Dynamic Break-Even Shield Check ($5.00 Gold / 15 pts DAX)
         is_be_active = ACTIVE_BE_TRACKED.get(ticket, False)
         if not is_be_active:
             be_condition = False
@@ -358,9 +363,35 @@ def manage_open_positions(symbol, cfg, catalyst_state):
                 )
                 logger.info(f"[{symbol}] BREAK-EVEN LOCKED on #{ticket}! Gain: ${dollar_gain:.2f}")
                 _send_telegram(msg)
+
+        # 2. Stage 2: Advanced Profit Lock ($15.00 Gold -> Lock $12.00 / 45 pts DAX -> Lock 36 pts)
+        is_lock_active = ACTIVE_LOCK_TRACKED.get(ticket, False)
+        if not is_lock_active:
+            lock_condition = False
+            if symbol == "XAUUSDm" and dollar_gain >= cfg.get('lock_trigger_dollars', 15.0):
+                lock_condition = True
+                lock_dist = cfg.get('lock_amount_dollars', 12.0) / dollar_per_point
+            elif symbol == "DE30m" and pts_gain >= cfg.get('lock_trigger_pts', 45.0):
+                lock_condition = True
+                lock_dist = cfg.get('lock_amount_pts', 36.0)
+
+            if lock_condition:
+                new_sl = (entry_price + lock_dist) if pos_type == "BUY" else (entry_price - lock_dist)
+                modify_sl(ticket, symbol, new_sl, current_tp)
+                ACTIVE_LOCK_TRACKED[ticket] = True
+                ACTIVE_BE_TRACKED[ticket] = True
+                locked_profit_desc = f"+${cfg.get('lock_amount_dollars', 12.0):.2f}" if symbol == "XAUUSDm" else f"+{cfg.get('lock_amount_pts', 36.0)} pts"
+                msg = (
+                    f"🔒 <b>[Profit Lock Activated]</b>\n"
+                    f"Asset: <b>{symbol}</b> (#{ticket})\n"
+                    f"Gain Reached: +${dollar_gain:.2f}\n"
+                    f"SL locked to <b>{locked_profit_desc}</b> ({new_sl:.2f}). Profit guaranteed!"
+                )
+                logger.info(f"[{symbol}] PROFIT LOCKED on #{ticket}! Gain: ${dollar_gain:.2f} -> SL: {new_sl:.2f}")
+                _send_telegram(msg)
                 
-        # 2. Pre-News Profit Protection
-        if catalyst_state.get('state') == 'PRE_NEWS_FREEZE' and dollar_gain > 1.0 and not is_be_active:
+        # 3. Pre-News Profit Protection
+        if catalyst_state.get('state') == 'PRE_NEWS_FREEZE' and dollar_gain > 1.0 and not is_be_active and not is_lock_active:
             new_sl = entry_price + (10 * point) if pos_type == "BUY" else entry_price - (10 * point)
             modify_sl(ticket, symbol, new_sl, current_tp)
             ACTIVE_BE_TRACKED[ticket] = True
