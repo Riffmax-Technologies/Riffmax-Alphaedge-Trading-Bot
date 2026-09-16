@@ -104,14 +104,14 @@ class AutoLearner:
         date_to   = datetime.now()
         deals = mt5.history_deals_get(date_from, date_to)
 
-        # Baseline Defaults
-        gold_tp = 10.0
-        gold_tp_catalyst = 16.0
-        gold_be = 6.0
-        dax_tp = 30.0
-        dax_tp_catalyst = 60.0
-        dax_be = 20.0
-        regime = "BALANCED_SWING"
+        # Baseline Defaults (1H Swing Targets)
+        gold_tp = 15.0
+        gold_tp_catalyst = 25.0
+        gold_be = 4.0
+        dax_tp = 60.0
+        dax_tp_catalyst = 100.0
+        dax_be = 15.0
+        regime = "BALANCED_1H_SWING"
 
         total_trades = 0
         win_rate = 50.0
@@ -154,40 +154,40 @@ class AutoLearner:
 
         # ── Dynamic Adaptation Decisions based on Market Performance (1H Swing Baseline) ──
         if total_trades >= 5:
-            if win_rate >= 50.0 and net_pnl > 0:
-                # Strong swing follow-through: Maintain $20 target, expand catalyst to $35
+            if win_rate >= 60.0 and net_pnl > 0:
+                # Strong swing follow-through: High-probability $15 target
                 regime = "HIGH_CONVICTION_1H_SWING"
-                gold_tp = 20.0
-                gold_tp_catalyst = 35.0
-                gold_be = 12.0
-                dax_tp = 70.0
-                dax_tp_catalyst = 120.0
-                dax_be = 40.0
-            elif win_rate < 40.0:
-                # Ranging or high friction: Tighten BE trigger slightly to protect capital earlier
-                regime = "DEFENSIVE_1H_SWING"
-                gold_tp = 20.0
-                gold_tp_catalyst = 30.0
-                gold_be = 10.0
+                gold_tp = 15.0
+                gold_tp_catalyst = 25.0
+                gold_be = 4.0
                 dax_tp = 60.0
                 dax_tp_catalyst = 100.0
-                dax_be = 30.0
+                dax_be = 15.0
+            elif win_rate < 50.0:
+                # Defensive mode: Tighten BE trigger slightly
+                regime = "DEFENSIVE_1H_SWING"
+                gold_tp = 15.0
+                gold_tp_catalyst = 20.0
+                gold_be = 3.5
+                dax_tp = 50.0
+                dax_tp_catalyst = 80.0
+                dax_be = 12.0
             else:
                 regime = "BALANCED_1H_SWING"
-                gold_tp = 20.0
-                gold_tp_catalyst = 30.0
-                gold_be = 12.0
+                gold_tp = 15.0
+                gold_tp_catalyst = 25.0
+                gold_be = 4.0
                 dax_tp = 60.0
                 dax_tp_catalyst = 100.0
-                dax_be = 35.0
+                dax_be = 15.0
         else:
             regime = "INITIAL_1H_SWING"
-            gold_tp = 20.0
-            gold_tp_catalyst = 30.0
-            gold_be = 12.0
+            gold_tp = 15.0
+            gold_tp_catalyst = 25.0
+            gold_be = 4.0
             dax_tp = 60.0
             dax_tp_catalyst = 100.0
-            dax_be = 35.0
+            dax_be = 15.0
 
         old_config = self.load_config()
         new_config = {
