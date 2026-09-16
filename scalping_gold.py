@@ -46,12 +46,12 @@ ASSET_CONFIGS = {
         "lot": 0.01,
         "key_mult": 1.0,
         "atr_period": 10,
-        "tp_dollars": 20.0,              # Full Target: $20.00 USD Profit
-        "tp_catalyst_dollars": 30.0,      # Expanded $30.00 Target during News Impulse
-        "be_trigger_dollars": 5.0,        # Stage 1: Move SL to Entry at $5.00 profit
-        "lock_trigger_dollars": 15.0,     # Stage 2: Trigger Profit Lock at $15.00 profit
-        "lock_amount_dollars": 12.0,      # Stage 2: Lock $12.00 profit into SL
-        "max_sl_dollars": 15.0,           # Max Initial Risk Cap: $15.00 USD
+        "tp_dollars": 15.0,              # Full Target: $15.00 USD Profit (High Probability Reach)
+        "tp_catalyst_dollars": 25.0,      # Expanded $25.00 Target during News Impulse
+        "be_trigger_dollars": 4.0,        # Stage 1: Move SL to Entry at $4.00 profit
+        "lock_trigger_dollars": 10.0,     # Stage 2: Trigger Profit Lock at $10.00 profit
+        "lock_amount_dollars": 8.0,       # Stage 2: Lock $8.00 profit into SL
+        "max_sl_dollars": 10.0,           # Max Initial Risk Cap: $10.00 USD
         "sl_atr_mult": 1.2,
         "currency": "USD"
     },
