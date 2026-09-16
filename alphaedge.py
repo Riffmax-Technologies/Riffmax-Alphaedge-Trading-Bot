@@ -1815,25 +1815,25 @@ if __name__ == "__main__":
     logger.info("  ALPHAEDGE — 1-HOUR (1H) SWING & NEWS CATALYST ENGINE")
     logger.info("  Assets: XAUUSDm (Gold) & DE30m (DAX) — 1H TIMEFRAME")
     logger.info("  Strategy: HPotter UT Bot (Key=1.0, ATR=10)")
-    logger.info("  Gold: 0.01 lot | Take Profit: $20.00 USD (Let trade run to full target)")
-    logger.info("  DAX:  0.10 lot | Take Profit: 60 pts (Let trade run to full target)")
+    logger.info("  Gold: 0.01 lot | Take Profit: $15.00 USD | BE: $4.00 | Lock: $10 -> $8")
+    logger.info("  DAX:  0.10 lot | Take Profit: 60 pts     | BE: 15 pts | Lock: 45 -> 36 pts")
+    logger.info("  Session: 08:00 AM - 08:00 PM EAT (London + New York only)")
     logger.info("  Guidance: ForexFactory Real-Time Macro News Engine (USD & EUR)")
     logger.info("=" * 65)
 
     # 1. Send Online Startup Notification to Telegram
     startup_msg = (
-        "<b>🟢 AlphaEdge 1H Swing & News Catalyst Bot Active!</b>\n\n"
+        "<b>AlphaEdge 1H Swing & News Catalyst Bot Active!</b>\n\n"
         "<b>Assets:</b> Gold (XAUUSDm) & DAX (DE30m)\n"
         "<b>Timeframe:</b> 1-Hour (1H) Chart\n"
         "<b>Strategy:</b> UT Bot (Key=1.0, ATR=10)\n\n"
         "<b>Profit & Risk Targets:</b>\n"
-        "• <b>Gold (XAUUSDm):</b> $20.00 Take Profit | 0.01 Lot\n"
-        "• <b>DAX (DE30m):</b> 60 Pts Take Profit | 0.10 Lot\n\n"
-        "<b>Execution Mode:</b>\n"
-        "• 1-Hour candle confirmation filters out choppy sub-hour noise.\n"
-        "• Session: 07:00 EAT to midnight EAT (04:00 to 21:00 UTC).\n"
-        "• News Guidance: Pre-news protection & expanded targets during macro momentum.\n\n"
-        "<b>Status:</b> Engine ready."
+        "• <b>Gold (XAUUSDm):</b> $15.00 Take Profit | BE at $4.00 | Lock $10-&gt;$8 | 0.01 Lot\n"
+        "• <b>DAX (DE30m):</b> 60 Pts Take Profit | BE at 15 pts | Lock 45-&gt;36 pts | 0.10 Lot\n\n"
+        "<b>Session Gateway:</b>\n"
+        "• Active: 08:00 AM to 08:00 PM EAT (London + New York only).\n"
+        "• News shield: Entries frozen 5 min before & after high-impact events.\n\n"
+        "<b>Status:</b> Engine ready. Monitoring markets now."
     )
     send_telegram_alert(startup_msg)
 

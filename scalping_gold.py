@@ -1,22 +1,28 @@
 """
-scalping_gold.py — AlphaEdge M15 Swing & News Catalyst Trading Engine (Gold & DAX)
+scalping_gold.py — AlphaEdge 1H Swing & News Catalyst Trading Engine (Gold & DAX)
 ===================================================================================
-100% Replaces the legacy M1 scalper.
-Mathematical Replication of TradingView HPotter UT Bot (Version 6):
+HPotter UT Bot (Version 6) — Exact TradingView Pine Script Replication:
   - ATR Formula: Exact TradingView Wilder's RMA: ta.rma(tr, 10)
   - Trailing Stop: Exact f_calcTrailingStop(prev, close, nLoss)
-  - Signals:
-      BUY:  ta.crossover(close, stop) and close > stop and close > close[1]
-      SELL: ta.crossover(stop, close) and close < stop and close < close[1]
-  - Execution Timeframe: 15-Minute (M15)
-  - Target & Risk:
-      1. Gold (XAUUSDm): 0.01 lot | Strict TP = $8.00 ($16.00 Catalyst) | Break-Even Lock = $6.00
-      2. DAX (DE30m):   0.07 lot | Strict TP = 30 pts (60 pts Catalyst) | Break-Even Lock = 20 pts
-  - Dynamic Break-Even Shield: Shifts SL to Entry + Spread when BE trigger is reached.
+  - Crossover Signals:
+      BUY:  prev_close <= prev_stop AND current_close > current_stop
+      SELL: prev_close >= prev_stop AND current_close < current_stop
+  - Execution Timeframe: 1-Hour (1H)
+  - Session Gateway: 08:00 AM to 08:00 PM EAT (London + New York only)
+  - Target & Risk (Gold XAUUSDm, 0.01 lot):
+      1. Full TP = $15.00 USD
+      2. Stage 1 Break-Even Shield: Triggers at +$4.00 -> SL moves to Entry
+      3. Stage 2 Profit Lock: Triggers at +$10.00 -> SL locks at +$8.00
+      4. Max Initial SL Risk: $10.00 USD
+  - Target & Risk (DAX DE30m, 0.10 lot):
+      1. Full TP = 60 pts
+      2. Stage 1 Break-Even Shield: Triggers at +15 pts -> SL moves to Entry
+      3. Stage 2 Profit Lock: Triggers at +45 pts -> SL locks at +36 pts
+      4. Max Initial SL Risk: 45 pts
   - News Catalyst Guidance: ForexFactory High-Impact USD & EUR live integration.
-  - Sessions: Active 07:00 UTC to 21:00 UTC (London Open through New York Close).
-  - Instant Reversal: Closes opposite trade instantly upon verified M15 signal flip.
-  - Dedicated Trade Logging: Logs every trade to 'm15_trade_analysis.csv' starting from upgrade.
+  - Instant Reversal: Closes opposite trade instantly upon verified 1H signal flip.
+  - Telegram Firewall: Channel (@riffexalphaedgebot) receives entry signals & trade
+    close results ONLY. All management alerts go to personal DM only.
 """
 
 import os
@@ -84,13 +90,15 @@ def apply_ai_learned_settings():
         try:
             with open(cfg_file, "r", encoding="utf-8") as f:
                 c = json.load(f)
-            ASSET_CONFIGS["XAUUSDm"]["tp_dollars"] = float(c.get("gold_tp_dollars", 20.0))
-            ASSET_CONFIGS["XAUUSDm"]["tp_catalyst_dollars"] = float(c.get("gold_tp_catalyst_dollars", 30.0))
-            ASSET_CONFIGS["XAUUSDm"]["be_trigger_dollars"] = float(c.get("gold_be_trigger_dollars", 12.0))
-            
-            ASSET_CONFIGS["DE30m"]["tp_pts"] = float(c.get("dax_tp_pts", 60.0))
+            # Gold: apply all tuned parameters (fallbacks match $15 TP calibration)
+            ASSET_CONFIGS["XAUUSDm"]["tp_dollars"]          = float(c.get("gold_tp_dollars", 15.0))
+            ASSET_CONFIGS["XAUUSDm"]["tp_catalyst_dollars"] = float(c.get("gold_tp_catalyst_dollars", 25.0))
+            ASSET_CONFIGS["XAUUSDm"]["be_trigger_dollars"]  = float(c.get("gold_be_trigger_dollars", 4.0))
+
+            # DAX: apply all tuned parameters
+            ASSET_CONFIGS["DE30m"]["tp_pts"]          = float(c.get("dax_tp_pts", 60.0))
             ASSET_CONFIGS["DE30m"]["tp_catalyst_pts"] = float(c.get("dax_tp_catalyst_pts", 100.0))
-            ASSET_CONFIGS["DE30m"]["be_trigger_pts"] = float(c.get("dax_be_trigger_pts", 35.0))
+            ASSET_CONFIGS["DE30m"]["be_trigger_pts"]  = float(c.get("dax_be_trigger_pts", 15.0))
         except Exception as e:
             logger.debug(f"[Scalp] Dynamic config load skipped: {e}")
 
@@ -349,7 +357,7 @@ def manage_open_positions(symbol, cfg, catalyst_state):
         pts_gain = (current_price - entry_price) if pos_type == "BUY" else (entry_price - current_price)
         dollar_gain = pts_gain * dollar_per_point
         
-        # 1. Stage 1: Dynamic Break-Even Shield Check ($5.00 Gold / 15 pts DAX)
+        # 1. Stage 1: Dynamic Break-Even Shield Check ($4.00 Gold / 15 pts DAX)
         is_be_active = ACTIVE_BE_TRACKED.get(ticket, False)
         if not is_be_active:
             be_condition = False
@@ -372,13 +380,13 @@ def manage_open_positions(symbol, cfg, catalyst_state):
                 logger.info(f"[{symbol}] BREAK-EVEN LOCKED on #{ticket}! Gain: ${dollar_gain:.2f}")
                 _send_telegram(msg)
 
-        # 2. Stage 2: Advanced Profit Lock ($15.00 Gold -> Lock $12.00 / 45 pts DAX -> Lock 36 pts)
+        # 2. Stage 2: Advanced Profit Lock ($10.00 Gold -> Lock $8.00 / 45 pts DAX -> Lock 36 pts)
         is_lock_active = ACTIVE_LOCK_TRACKED.get(ticket, False)
         if not is_lock_active:
             lock_condition = False
-            if symbol == "XAUUSDm" and dollar_gain >= cfg.get('lock_trigger_dollars', 15.0):
+            if symbol == "XAUUSDm" and dollar_gain >= cfg.get('lock_trigger_dollars', 10.0):
                 lock_condition = True
-                lock_dist = cfg.get('lock_amount_dollars', 12.0) / dollar_per_point
+                lock_dist = cfg.get('lock_amount_dollars', 8.0) / dollar_per_point
             elif symbol == "DE30m" and pts_gain >= cfg.get('lock_trigger_pts', 45.0):
                 lock_condition = True
                 lock_dist = cfg.get('lock_amount_pts', 36.0)
@@ -388,7 +396,7 @@ def manage_open_positions(symbol, cfg, catalyst_state):
                 modify_sl(ticket, symbol, new_sl, current_tp)
                 ACTIVE_LOCK_TRACKED[ticket] = True
                 ACTIVE_BE_TRACKED[ticket] = True
-                locked_profit_desc = f"+${cfg.get('lock_amount_dollars', 12.0):.2f}" if symbol == "XAUUSDm" else f"+{cfg.get('lock_amount_pts', 36.0)} pts"
+                locked_profit_desc = f"+${cfg.get('lock_amount_dollars', 8.0):.2f}" if symbol == "XAUUSDm" else f"+{cfg.get('lock_amount_pts', 36.0)} pts"
                 msg = (
                     f"🔒 <b>[Profit Lock Activated]</b>\n"
                     f"Asset: <b>{symbol}</b> (#{ticket})\n"
@@ -397,6 +405,7 @@ def manage_open_positions(symbol, cfg, catalyst_state):
                 )
                 logger.info(f"[{symbol}] PROFIT LOCKED on #{ticket}! Gain: ${dollar_gain:.2f} -> SL: {new_sl:.2f}")
                 _send_telegram(msg)
+
                 
         # 3. Pre-News Profit Protection
         if catalyst_state.get('state') == 'PRE_NEWS_FREEZE' and dollar_gain > 1.0 and not is_be_active and not is_lock_active:
@@ -582,7 +591,7 @@ def run_scalping_cycle():
                     tp_dist = cfg['tp_dollars'] / dollar_per_pt
                 else:
                     tp_dist = cfg['tp_pts']
-                mode_desc = "Standard M15 Target"
+                mode_desc = "Standard 1H Target"
                 
             sl_dist = cfg['sl_atr_mult'] * ut_state['atr']
             if symbol == "XAUUSDm" and 'max_sl_dollars' in cfg:
