@@ -297,9 +297,9 @@ def compute_m15_ut_bot(symbol, key_mult=1.0, atr_period=10, n_bars=300):
     c_atr   = atr_tv[last_closed_idx]
     bar_time = int(df['time'].iloc[last_closed_idx])
     
-    # Exact Pine Script strong_buy & strong_sell logic
-    cross_up = (p_close <= p_stop) and (c_close > c_stop) and (c_close > p_close)
-    cross_dn = (p_close >= p_stop) and (c_close < c_stop) and (c_close < p_close)
+    # Exact TradingView HPotter UT Bot crossover / crossunder
+    cross_up = (p_close <= p_stop) and (c_close > c_stop)
+    cross_dn = (p_close >= p_stop) and (c_close < c_stop)
     current_trend = "BUY" if c_close > c_stop else "SELL"
     
     return {
@@ -565,6 +565,8 @@ def run_scalping_cycle():
 
             if ut_state['cross_up']:
                 close_opposite_positions(symbol, "BUY")
+                positions = mt5.positions_get(symbol=symbol)
+                has_pos = len(positions) > 0 if positions else False
                 if session_ok and not news_blocks_entry:
                     if not has_pos and LAST_EXECUTED_BAR.get(symbol) != bar_time:
                         sl = tick.ask - sl_dist
@@ -574,6 +576,8 @@ def run_scalping_cycle():
 
             elif ut_state['cross_dn']:
                 close_opposite_positions(symbol, "SELL")
+                positions = mt5.positions_get(symbol=symbol)
+                has_pos = len(positions) > 0 if positions else False
                 if session_ok and not news_blocks_entry:
                     if not has_pos and LAST_EXECUTED_BAR.get(symbol) != bar_time:
                         sl = tick.bid + sl_dist
