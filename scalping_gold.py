@@ -16,7 +16,7 @@ HPotter UT Bot (Version 6) — Exact TradingView Pine Script Replication:
       4. Max Initial SL Risk: $10.00 USD
   - Target & Risk (DAX DE30m, 0.10 lot):
       1. Full TP = 60 pts
-      2. Stage 1 Break-Even Shield: Triggers at +15 pts -> SL moves to Entry
+      2. Stage 1 Break-Even Shield: Triggers at +25 pts -> SL moves to Entry
       3. Stage 2 Profit Lock: Triggers at +45 pts -> SL locks at +36 pts
       4. Max Initial SL Risk: 45 pts
   - News Catalyst Guidance: ForexFactory High-Impact USD & EUR live integration.
@@ -68,7 +68,7 @@ ASSET_CONFIGS = {
         "atr_period": 10,
         "tp_pts": 60.0,                   # Full Target: 60 pts Target
         "tp_catalyst_pts": 100.0,         # Expanded 100 pts during News Impulse
-        "be_trigger_pts": 15.0,           # Stage 1: Move SL to Entry at 15 pts profit
+        "be_trigger_pts": 25.0,           # Stage 1: Move SL to Entry at 25 pts profit (was 15, raised to let trade breathe)
         "lock_trigger_pts": 45.0,         # Stage 2: Trigger Profit Lock at 45 pts profit
         "lock_amount_pts": 36.0,          # Stage 2: Lock 36 pts profit into SL
         "max_sl_pts": 45.0,               # Max Initial Risk Cap: 45 pts
@@ -80,7 +80,39 @@ ASSET_CONFIGS = {
 NEWS_ENGINE = None
 ACTIVE_BE_TRACKED = {}   # ticket -> True if Stage 1 BE set
 ACTIVE_LOCK_TRACKED = {} # ticket -> True if Stage 2 Lock set
-LAST_EXECUTED_BAR = {}   # symbol -> bar_time
+
+# ─── Persistent Bar State (survives bot restarts — prevents re-entry on same 1H bar) ────
+_BAR_STATE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_executed_bar.json")
+
+def _load_bar_state():
+    """Load LAST_EXECUTED_BAR from disk. Returns dict of {symbol: bar_time (int)}."""
+    try:
+        if os.path.exists(_BAR_STATE_FILE):
+            with open(_BAR_STATE_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            # Only keep bars from the current trading day — stale days are cleared
+            now_utc = datetime.now(timezone.utc)
+            today_date = now_utc.date()
+            filtered = {}
+            for sym, ts in data.items():
+                bar_dt = datetime.fromtimestamp(int(ts), tz=timezone.utc).date()
+                if bar_dt == today_date:
+                    filtered[sym] = int(ts)
+            return filtered
+    except Exception:
+        pass
+    return {}
+
+def _save_bar_state(bar_dict):
+    """Persist LAST_EXECUTED_BAR to disk."""
+    try:
+        with open(_BAR_STATE_FILE, "w", encoding="utf-8") as f:
+            json.dump(bar_dict, f)
+    except Exception:
+        pass
+
+# Load on startup — populated with today's already-executed bars (if any)
+LAST_EXECUTED_BAR = _load_bar_state()
 
 
 def apply_ai_learned_settings():
@@ -98,7 +130,7 @@ def apply_ai_learned_settings():
             # DAX: apply all tuned parameters
             ASSET_CONFIGS["DE30m"]["tp_pts"]          = float(c.get("dax_tp_pts", 60.0))
             ASSET_CONFIGS["DE30m"]["tp_catalyst_pts"] = float(c.get("dax_tp_catalyst_pts", 100.0))
-            ASSET_CONFIGS["DE30m"]["be_trigger_pts"]  = float(c.get("dax_be_trigger_pts", 15.0))
+            ASSET_CONFIGS["DE30m"]["be_trigger_pts"]  = float(c.get("dax_be_trigger_pts", 25.0))
         except Exception as e:
             logger.debug(f"[Scalp] Dynamic config load skipped: {e}")
 
@@ -626,6 +658,7 @@ def run_scalping_cycle():
                         tp = tick.ask + tp_dist
                         if execute_order(symbol, "BUY", cfg['lot'], sl, tp, mode_desc, event_name, ut_state['stop'], ut_state['atr']):
                             LAST_EXECUTED_BAR[symbol] = bar_time
+                            _save_bar_state(LAST_EXECUTED_BAR)  # persist — survives restart
 
             elif ut_state['cross_dn']:
                 # Fresh crossover on the last closed bar
@@ -638,11 +671,12 @@ def run_scalping_cycle():
                         tp = tick.bid - tp_dist
                         if execute_order(symbol, "SELL", cfg['lot'], sl, tp, mode_desc, event_name, ut_state['stop'], ut_state['atr']):
                             LAST_EXECUTED_BAR[symbol] = bar_time
+                            _save_bar_state(LAST_EXECUTED_BAR)  # persist — survives restart
 
             else:
-                # No fresh crossover — but check if trend is active and we have no position yet.
-                # This catches the case where the bot restarted after a crossover bar already closed
-                # OR is running for the first time mid-trend on a 1H chart.
+                # No fresh crossover — trend-follow entry on restart / first run mid-trend.
+                # LAST_EXECUTED_BAR (persisted to disk) ensures this only fires ONCE per 1H bar,
+                # even across multiple bot restarts within the same hour.
                 if session_ok and not news_blocks_entry:
                     positions = mt5.positions_get(symbol=symbol)
                     has_pos = len(positions) > 0 if positions else False
@@ -650,16 +684,18 @@ def run_scalping_cycle():
                         if ut_state['trend'] == "BUY":
                             sl = tick.ask - sl_dist
                             tp = tick.ask + tp_dist
-                            logger.info(f"[1H Swing] {symbol} Trend-Follow Entry: BUY (trend active, no position open)")
+                            logger.info(f"[1H Swing] {symbol} Trend-Follow Entry: BUY (trend active, no open position)")
                             if execute_order(symbol, "BUY", cfg['lot'], sl, tp, "1H Trend-Follow", event_name, ut_state['stop'], ut_state['atr']):
                                 LAST_EXECUTED_BAR[symbol] = bar_time
+                                _save_bar_state(LAST_EXECUTED_BAR)  # persist — survives restart
                         elif ut_state['trend'] == "SELL":
                             sl = tick.bid + sl_dist
                             tp = tick.bid - tp_dist
-                            logger.info(f"[1H Swing] {symbol} Trend-Follow Entry: SELL (trend active, no position open)")
+                            logger.info(f"[1H Swing] {symbol} Trend-Follow Entry: SELL (trend active, no open position)")
                             if execute_order(symbol, "SELL", cfg['lot'], sl, tp, "1H Trend-Follow", event_name, ut_state['stop'], ut_state['atr']):
                                 LAST_EXECUTED_BAR[symbol] = bar_time
-                            
+                                _save_bar_state(LAST_EXECUTED_BAR)  # persist — survives restart
+
         except Exception as e:
             logger.error(f"[1H Swing] Error processing {symbol}: {e}\n{traceback.format_exc()}")
 
