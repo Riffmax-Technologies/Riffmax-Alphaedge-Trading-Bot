@@ -606,7 +606,7 @@ def run_scalping_cycle():
             tick = mt5.symbol_info_tick(symbol)
             curr_price = tick.bid if tick else 0.0
             logger.info(
-                f"[M15 Swing] {symbol} | Price: {curr_price:.2f} | UT Stop: {ut_state['stop']:.2f} | "
+                f"[1H Swing] {symbol} | Price: {curr_price:.2f} | UT Stop: {ut_state['stop']:.2f} | "
                 f"Trend: {ut_state['trend']} | Pos: {len(positions) if positions else 0} | "
                 f"Session: {'OPEN' if session_ok else 'CLOSED'} | News: {catalyst.get('state')}"
             )
@@ -616,6 +616,7 @@ def run_scalping_cycle():
             news_blocks_entry = catalyst.get('state') in ('PRE_NEWS_FREEZE', 'NEWS_SPIKE_BLOCK')
 
             if ut_state['cross_up']:
+                # Fresh crossover on the last closed bar
                 close_opposite_positions(symbol, "BUY")
                 positions = mt5.positions_get(symbol=symbol)
                 has_pos = len(positions) > 0 if positions else False
@@ -627,6 +628,7 @@ def run_scalping_cycle():
                             LAST_EXECUTED_BAR[symbol] = bar_time
 
             elif ut_state['cross_dn']:
+                # Fresh crossover on the last closed bar
                 close_opposite_positions(symbol, "SELL")
                 positions = mt5.positions_get(symbol=symbol)
                 has_pos = len(positions) > 0 if positions else False
@@ -636,6 +638,28 @@ def run_scalping_cycle():
                         tp = tick.bid - tp_dist
                         if execute_order(symbol, "SELL", cfg['lot'], sl, tp, mode_desc, event_name, ut_state['stop'], ut_state['atr']):
                             LAST_EXECUTED_BAR[symbol] = bar_time
+
+            else:
+                # No fresh crossover — but check if trend is active and we have no position yet.
+                # This catches the case where the bot restarted after a crossover bar already closed
+                # OR is running for the first time mid-trend on a 1H chart.
+                if session_ok and not news_blocks_entry:
+                    positions = mt5.positions_get(symbol=symbol)
+                    has_pos = len(positions) > 0 if positions else False
+                    if not has_pos and LAST_EXECUTED_BAR.get(symbol) != bar_time:
+                        if ut_state['trend'] == "BUY":
+                            sl = tick.ask - sl_dist
+                            tp = tick.ask + tp_dist
+                            logger.info(f"[1H Swing] {symbol} Trend-Follow Entry: BUY (trend active, no position open)")
+                            if execute_order(symbol, "BUY", cfg['lot'], sl, tp, "1H Trend-Follow", event_name, ut_state['stop'], ut_state['atr']):
+                                LAST_EXECUTED_BAR[symbol] = bar_time
+                        elif ut_state['trend'] == "SELL":
+                            sl = tick.bid + sl_dist
+                            tp = tick.bid - tp_dist
+                            logger.info(f"[1H Swing] {symbol} Trend-Follow Entry: SELL (trend active, no position open)")
+                            if execute_order(symbol, "SELL", cfg['lot'], sl, tp, "1H Trend-Follow", event_name, ut_state['stop'], ut_state['atr']):
+                                LAST_EXECUTED_BAR[symbol] = bar_time
                             
         except Exception as e:
-            logger.error(f"[M15 Swing] Error processing {symbol}: {e}\n{traceback.format_exc()}")
+            logger.error(f"[1H Swing] Error processing {symbol}: {e}\n{traceback.format_exc()}")
+
