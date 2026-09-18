@@ -660,9 +660,10 @@ def run_scalping_cycle():
             positions = mt5.positions_get(symbol=symbol)
             has_pos = len(positions) > 0 if positions else False
 
+            ut_tag = f" | UT: {setup.get('ut_bot', 'NONE')}" if setup.get('ut_bot') else ""
             logger.info(
                 f"[Institutional MTF] {symbol} | Price: {curr_price:.2f} | Range: {loc_pct} | "
-                f"Vol: {whale_str} | Pos: {len(positions) if positions else 0} | "
+                f"Vol: {whale_str} | Pos: {len(positions) if positions else 0}{ut_tag} | "
                 f"Setup: {setup.get('direction')} (Valid: {setup.get('valid')}) | {setup.get('reason')}"
             )
 

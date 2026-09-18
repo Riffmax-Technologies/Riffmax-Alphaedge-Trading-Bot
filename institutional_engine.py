@@ -191,6 +191,105 @@ class InstitutionalEngine:
 
         return False, 0.0
 
+    def compute_ut_bot_signal(self, df: pd.DataFrame, key_value: float = 1.0, atr_period: int = 10) -> str:
+        """
+        UT Bot Alerts — Pure Python implementation of QuantNomad's UT Bot.
+        Uses an ATR trailing stop to detect confirmed momentum reversals.
+
+        Parameters:
+            key_value   : Sensitivity multiplier (default 1.0 = standard, higher = fewer signals)
+            atr_period  : ATR period (default 10, matching TradingView default)
+
+        Returns:
+            "BUY"  — price just crossed ABOVE the trailing stop (confirmed upward reversal)
+            "SELL" — price just crossed BELOW the trailing stop (confirmed downward reversal)
+            "NONE" — no confirmed signal on the latest completed bar
+
+        Logic (mirrors TradingView Pine Script):
+            nLoss = key_value * ATR(atr_period)
+            if close > prev_stop and prev_close > prev_stop:
+                stop = max(prev_stop, close - nLoss)
+            elif close < prev_stop and prev_close < prev_stop:
+                stop = min(prev_stop, close + nLoss)
+            else:
+                stop = close - nLoss  if close > prev_stop  else close + nLoss
+
+            BUY  = prev_close < prev_stop and close > stop   (cross above)
+            SELL = prev_close > prev_stop and close < stop   (cross below)
+        """
+        min_bars = atr_period + 5
+        if df is None or len(df) < min_bars:
+            return "NONE"
+
+        closes = df['close'].astype(float).values
+        highs  = df['high'].astype(float).values
+        lows   = df['low'].astype(float).values
+
+        # Compute ATR for every bar
+        trs = [0.0]
+        for i in range(1, len(closes)):
+            tr = max(highs[i] - lows[i],
+                     abs(highs[i] - closes[i-1]),
+                     abs(lows[i]  - closes[i-1]))
+            trs.append(tr)
+
+        # Simple rolling ATR (period-window mean of TR)
+        atrs = []
+        for i in range(len(trs)):
+            start = max(0, i - atr_period + 1)
+            atrs.append(float(np.mean(trs[start:i+1])))
+
+        # Build trailing stop array
+        stops = [0.0] * len(closes)
+        stops[0] = closes[0]
+
+        for i in range(1, len(closes)):
+            n_loss   = key_value * atrs[i]
+            prev_c   = closes[i-1]
+            c        = closes[i]
+            prev_s   = stops[i-1]
+
+            if c > prev_s and prev_c > prev_s:
+                stops[i] = max(prev_s, c - n_loss)
+            elif c < prev_s and prev_c < prev_s:
+                stops[i] = min(prev_s, c + n_loss)
+            else:
+                stops[i] = c - n_loss if c > prev_s else c + n_loss
+
+        # Check last 3 completed bars for crossover or prevailing trend
+        # Index -2 is the latest fully confirmed/closed bar
+        i = len(closes) - 2
+        if i < 2:
+            return "NONE"
+
+        curr_close = closes[i]
+        curr_stop  = stops[i]
+        
+        # Recent cross within last 3 bars
+        has_cross_buy = False
+        has_cross_sell = False
+        for offset in [0, 1, 2]:
+            idx = i - offset
+            if idx > 0:
+                if closes[idx - 1] <= stops[idx - 1] and closes[idx] > stops[idx]:
+                    has_cross_buy = True
+                if closes[idx - 1] >= stops[idx - 1] and closes[idx] < stops[idx]:
+                    has_cross_sell = True
+
+        # If a fresh cross occurred within last 3 bars, prioritize that
+        if has_cross_buy and not has_cross_sell:
+            return "BUY"
+        if has_cross_sell and not has_cross_buy:
+            return "SELL"
+
+        # Otherwise follow the sustained trend if price is cleanly on that side
+        if curr_close > curr_stop:
+            return "BUY"
+        elif curr_close < curr_stop:
+            return "SELL"
+
+        return "NONE"
+
     def evaluate_institutional_setup(self, symbol: str):
         """
         Comprehensive Institutional Setup Evaluation:
@@ -227,43 +326,58 @@ class InstitutionalEngine:
 
         has_buy_fvg, fvg_size = self.detect_fair_value_gap(df_h1, "BUY")
 
+        # ── UT Bot Confirmation (M15) — Gate 1.5 ─────────────────────────────
+        # Detect confirmed momentum reversal using ATR trailing stop crossover.
+        # This eliminates sweeps that don't follow through (false reversals).
+        ut_signal_m15 = self.compute_ut_bot_signal(df_m15, key_value=1.0, atr_period=10)
+        ut_signal_h1  = self.compute_ut_bot_signal(df_h1,  key_value=1.0, atr_period=10)
+        # UT Bot passes if either M15 OR H1 agrees with the setup direction
+        # (M15 is more sensitive, H1 adds higher-timeframe confirmation)
+
         if is_discount and (has_buy_sweep or (range_info["is_deep_discount"] and has_whale_vol)):
-            sweep_ref = min(h1_low, m15_low) if has_buy_sweep else range_info["range_low"]
+            ut_confirms_buy = (ut_signal_m15 == "BUY") or (ut_signal_h1 == "BUY")
+            if ut_confirms_buy:
+                sweep_ref = min(h1_low, m15_low) if has_buy_sweep else range_info["range_low"]
 
-            # ── ATR-Dynamic SL: sweep wick low minus 0.4 × H1 ATR ────────────
-            h1_atr = _compute_atr(df_h1, period=14)
-            is_gold = symbol == "XAUUSDm"
-            atr_sl_offset = round(h1_atr * 0.4, 5)
-            # Hard floor: minimum SL buffer regardless of ATR
-            min_sl_offset = 4.0 if is_gold else 20.0
-            sl_offset = max(atr_sl_offset, min_sl_offset)
-            sl_price = sweep_ref - sl_offset
+                # ── ATR-Dynamic SL: sweep wick low minus 0.4 × H1 ATR ────────────
+                h1_atr = _compute_atr(df_h1, period=14)
+                is_gold = symbol == "XAUUSDm"
+                atr_sl_offset = round(h1_atr * 0.4, 5)
+                # Hard floor: minimum SL buffer regardless of ATR
+                min_sl_offset = 4.0 if is_gold else 20.0
+                sl_offset = max(atr_sl_offset, min_sl_offset)
+                sl_price = sweep_ref - sl_offset
 
-            # TP = minimum 2:1 R:R from entry, but no less than 1 ATR
-            sl_dist_from_entry = abs(tick.ask - sl_price)
-            tp_offset = max(sl_dist_from_entry * 2.0, h1_atr)
-            tp_price = tick.ask + tp_offset
+                # TP = minimum 2:1 R:R from entry, but no less than 1 ATR
+                sl_dist_from_entry = abs(tick.ask - sl_price)
+                tp_offset = max(sl_dist_from_entry * 2.0, h1_atr)
+                tp_price = tick.ask + tp_offset
 
-            logger.info(
-                f"[InstitutionalEngine] BUY SL — sweep_ref: {sweep_ref:.2f}, "
-                f"H1_ATR: {h1_atr:.4f}, offset: {sl_offset:.4f}, "
-                f"SL: {sl_price:.2f}, TP: {tp_price:.2f} (R:R {tp_offset/sl_dist_from_entry:.2f})"
-            )
+                logger.info(
+                    f"[InstitutionalEngine] BUY SL — sweep_ref: {sweep_ref:.2f}, "
+                    f"H1_ATR: {h1_atr:.4f}, offset: {sl_offset:.4f}, "
+                    f"SL: {sl_price:.2f}, TP: {tp_price:.2f} (R:R {tp_offset/sl_dist_from_entry:.2f})"
+                )
 
-
-            return {
-                "valid": True,
-                "direction": "BUY",
-                "reason": f"Institutional Bottom Accumulation (Discount: {range_info['location_pct']:.1f}%, Vol: {max_vol_ratio}x, Sweep: {has_buy_sweep})",
-                "entry_price": tick.ask,
-                "sl_price": sl_price,
-                "tp_price": tp_price,
-                "deal_range": range_info,
-                "whale_detected": has_whale_vol,
-                "vol_ratio": max_vol_ratio,
-                "sweep_level": sweep_ref,
-                "fvg_detected": has_buy_fvg
-            }
+                return {
+                    "valid": True,
+                    "direction": "BUY",
+                    "reason": f"Institutional Bottom Accumulation (Discount: {range_info['location_pct']:.1f}%, Vol: {max_vol_ratio}x, Sweep: {has_buy_sweep}, UT: {ut_signal_m15}/{ut_signal_h1})",
+                    "entry_price": tick.ask,
+                    "sl_price": sl_price,
+                    "tp_price": tp_price,
+                    "deal_range": range_info,
+                    "whale_detected": has_whale_vol,
+                    "vol_ratio": max_vol_ratio,
+                    "sweep_level": sweep_ref,
+                    "fvg_detected": has_buy_fvg,
+                    "ut_bot": ut_signal_m15
+                }
+            else:
+                logger.info(
+                    f"[UT Bot] {symbol} BUY sweep detected but UT Bot not confirming "
+                    f"(M15: {ut_signal_m15}, H1: {ut_signal_h1}) — waiting for crossover."
+                )
 
         # 3. Check for Top SELL Setup
         is_premium = range_info["is_premium"]
@@ -273,40 +387,48 @@ class InstitutionalEngine:
         has_sell_fvg, _ = self.detect_fair_value_gap(df_h1, "SELL")
 
         if is_premium and (has_sell_sweep or (range_info["is_deep_premium"] and has_whale_vol)):
-            sweep_ref = max(h1_high, m15_high) if has_sell_sweep else range_info["range_high"]
+            ut_confirms_sell = (ut_signal_m15 == "SELL") or (ut_signal_h1 == "SELL")
+            if ut_confirms_sell:
+                sweep_ref = max(h1_high, m15_high) if has_sell_sweep else range_info["range_high"]
 
-            # ── ATR-Dynamic SL: sweep wick high plus 0.4 × H1 ATR ────────────
-            h1_atr = _compute_atr(df_h1, period=14)
-            is_gold = symbol == "XAUUSDm"
-            atr_sl_offset = round(h1_atr * 0.4, 5)
-            min_sl_offset = 4.0 if is_gold else 20.0
-            sl_offset = max(atr_sl_offset, min_sl_offset)
-            sl_price = sweep_ref + sl_offset
+                # ── ATR-Dynamic SL: sweep wick high plus 0.4 × H1 ATR ────────────
+                h1_atr = _compute_atr(df_h1, period=14)
+                is_gold = symbol == "XAUUSDm"
+                atr_sl_offset = round(h1_atr * 0.4, 5)
+                min_sl_offset = 4.0 if is_gold else 20.0
+                sl_offset = max(atr_sl_offset, min_sl_offset)
+                sl_price = sweep_ref + sl_offset
 
-            # TP = minimum 2:1 R:R from entry, but no less than 1 ATR
-            sl_dist_from_entry = abs(sl_price - tick.bid)
-            tp_offset = max(sl_dist_from_entry * 2.0, h1_atr)
-            tp_price = tick.bid - tp_offset
+                # TP = minimum 2:1 R:R from entry, but no less than 1 ATR
+                sl_dist_from_entry = abs(sl_price - tick.bid)
+                tp_offset = max(sl_dist_from_entry * 2.0, h1_atr)
+                tp_price = tick.bid - tp_offset
 
-            logger.info(
-                f"[InstitutionalEngine] SELL SL — sweep_ref: {sweep_ref:.2f}, "
-                f"H1_ATR: {h1_atr:.4f}, offset: {sl_offset:.4f}, "
-                f"SL: {sl_price:.2f}, TP: {tp_price:.2f} (R:R {tp_offset/sl_dist_from_entry:.2f})"
-            )
+                logger.info(
+                    f"[InstitutionalEngine] SELL SL — sweep_ref: {sweep_ref:.2f}, "
+                    f"H1_ATR: {h1_atr:.4f}, offset: {sl_offset:.4f}, "
+                    f"SL: {sl_price:.2f}, TP: {tp_price:.2f} (R:R {tp_offset/sl_dist_from_entry:.2f})"
+                )
 
-            return {
-                "valid": True,
-                "direction": "SELL",
-                "reason": f"Institutional Top Distribution (Premium: {range_info['location_pct']:.1f}%, Vol: {max_vol_ratio}x, Sweep: {has_sell_sweep})",
-                "entry_price": tick.bid,
-                "sl_price": sl_price,
-                "tp_price": tp_price,
-                "deal_range": range_info,
-                "whale_detected": has_whale_vol,
-                "vol_ratio": max_vol_ratio,
-                "sweep_level": sweep_ref,
-                "fvg_detected": has_sell_fvg
-            }
+                return {
+                    "valid": True,
+                    "direction": "SELL",
+                    "reason": f"Institutional Top Distribution (Premium: {range_info['location_pct']:.1f}%, Vol: {max_vol_ratio}x, Sweep: {has_sell_sweep}, UT: {ut_signal_m15}/{ut_signal_h1})",
+                    "entry_price": tick.bid,
+                    "sl_price": sl_price,
+                    "tp_price": tp_price,
+                    "deal_range": range_info,
+                    "whale_detected": has_whale_vol,
+                    "vol_ratio": max_vol_ratio,
+                    "sweep_level": sweep_ref,
+                    "fvg_detected": has_sell_fvg,
+                    "ut_bot": ut_signal_m15
+                }
+            else:
+                logger.info(
+                    f"[UT Bot] {symbol} SELL sweep detected but UT Bot not confirming "
+                    f"(M15: {ut_signal_m15}, H1: {ut_signal_h1}) — waiting for crossover."
+                )
 
         skip_reason = "Waiting. "
         if not is_discount and not is_premium:
@@ -315,6 +437,8 @@ class InstitutionalEngine:
             skip_reason += f"In Discount ({range_info['location_pct']:.1f}%), waiting for bottom liquidity sweep/whale surge."
         elif is_premium and not has_sell_sweep:
             skip_reason += f"In Premium ({range_info['location_pct']:.1f}%), waiting for top liquidity sweep/whale surge."
+        else:
+            skip_reason += f"Sweep detected but UT Bot confirms no momentum yet (M15: {ut_signal_m15}, H1: {ut_signal_h1})."
 
         return {
             "valid": False,
