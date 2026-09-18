@@ -148,6 +148,12 @@ _TELEGRAM_TOKEN     = os.getenv("TELEGRAM_TOKEN", "")
 _TELEGRAM_PERSONAL  = os.getenv("TELEGRAM_CHAT_ID", "915238743")              # Owner DM — receives ALL messages
 _TELEGRAM_CHANNEL   = os.getenv("TELEGRAM_CHANNEL_ID", "@riffexalphaedgebot") # Public channel — trade signals ONLY
 
+# ─── CHANNEL SILENT MODE ────────────────────────────────────────────────────────
+# Set to True  → Channel receives NOTHING. Owner DM still works 100% normally.
+# Set to False → Channel broadcasts re-enabled (only when bot is proven profitable).
+CHANNEL_SILENT_MODE = True
+# ────────────────────────────────────────────────────────────────────────────────
+
 def _is_channel_allowed(message: str) -> bool:
     """
     STRICT ENFORCEMENT FIREWALL FOR PUBLIC CHANNEL (@riffexalphaedgebot):
@@ -183,8 +189,16 @@ def _tg_send(chat_id, message):
     if not _TELEGRAM_TOKEN or not chat_id:
         return
 
+    # SILENT MODE: channel completely muted until bot is proven profitable
+    is_channel = str(chat_id).strip().lower() in (
+        _TELEGRAM_CHANNEL.lower(), "-1003973403139", "@riffexalphaedgebot"
+    )
+    if is_channel and CHANNEL_SILENT_MODE:
+        logger.debug(f"[Channel Silent Mode] Message suppressed (channel muted): {message[:60]}...")
+        return
+
     # FIREWALL CHECK: If recipient is the public channel, verify message whitelist
-    if str(chat_id).strip().lower() in (_TELEGRAM_CHANNEL.lower(), "-1003973403139", "@riffexalphaedgebot"):
+    if is_channel:
         if not _is_channel_allowed(message):
             logger.warning(f"[Telegram Firewall] BLOCKED non-trade message to channel: {message[:60]}...")
             return
