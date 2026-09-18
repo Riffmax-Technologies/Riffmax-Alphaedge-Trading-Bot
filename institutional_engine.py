@@ -207,8 +207,8 @@ class InstitutionalEngine:
 
         if is_discount and (has_buy_sweep or (range_info["is_deep_discount"] and has_whale_vol)):
             sweep_ref = min(h1_low, m15_low) if has_buy_sweep else range_info["range_low"]
-            sl_price = sweep_ref - (1.5 if symbol == "XAUUSDm" else 20.0)
-            tp_price = tick.ask + (3.5 if symbol == "XAUUSDm" else 50.0)
+            sl_price = sweep_ref - (6.0 if symbol == "XAUUSDm" else 25.0)
+            tp_price = tick.ask + (15.0 if symbol == "XAUUSDm" else 35.0)
 
             return {
                 "valid": True,
@@ -233,8 +233,8 @@ class InstitutionalEngine:
 
         if is_premium and (has_sell_sweep or (range_info["is_deep_premium"] and has_whale_vol)):
             sweep_ref = max(h1_high, m15_high) if has_sell_sweep else range_info["range_high"]
-            sl_price = sweep_ref + (1.5 if symbol == "XAUUSDm" else 20.0)
-            tp_price = tick.bid - (3.5 if symbol == "XAUUSDm" else 50.0)
+            sl_price = sweep_ref + (6.0 if symbol == "XAUUSDm" else 25.0)
+            tp_price = tick.bid - (15.0 if symbol == "XAUUSDm" else 35.0)
 
             return {
                 "valid": True,

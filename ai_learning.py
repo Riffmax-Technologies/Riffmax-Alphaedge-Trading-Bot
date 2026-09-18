@@ -104,13 +104,13 @@ class AutoLearner:
         date_to   = datetime.now()
         deals = mt5.history_deals_get(date_from, date_to)
 
-        # Baseline Defaults (Institutional MTF Swing Engine Targets)
-        gold_tp = 30.0
-        gold_tp_catalyst = 45.0
-        gold_be = 15.0
-        dax_tp = 50.0
-        dax_tp_catalyst = 80.0
-        dax_be = 25.0
+        # Baseline Defaults (Institutional MTF Swing Engine - Micro Risk Targets)
+        gold_tp = 15.0
+        gold_tp_catalyst = 25.0
+        gold_be = 5.0
+        dax_tp = 35.0
+        dax_tp_catalyst = 60.0
+        dax_be = 18.0
         regime = "BALANCED_INSTITUTIONAL_SWING"
 
         total_trades = 0
@@ -157,37 +157,37 @@ class AutoLearner:
             if win_rate >= 60.0 and net_pnl > 0:
                 # Strong institutional flow follow-through: expand catalyst targets
                 regime = "HIGH_CONVICTION_INSTITUTIONAL_SWING"
-                gold_tp = 30.0
-                gold_tp_catalyst = 50.0
-                gold_be = 15.0
-                dax_tp = 50.0
-                dax_tp_catalyst = 90.0
-                dax_be = 25.0
+                gold_tp = 20.0
+                gold_tp_catalyst = 30.0
+                gold_be = 6.0
+                dax_tp = 45.0
+                dax_tp_catalyst = 75.0
+                dax_be = 22.0
             elif win_rate < 50.0:
                 # Defensive mode: tighten slightly but hold swing character
                 regime = "DEFENSIVE_INSTITUTIONAL_SWING"
-                gold_tp = 25.0
-                gold_tp_catalyst = 35.0
-                gold_be = 12.0
-                dax_tp = 40.0
-                dax_tp_catalyst = 65.0
-                dax_be = 20.0
+                gold_tp = 12.0
+                gold_tp_catalyst = 20.0
+                gold_be = 4.0
+                dax_tp = 25.0
+                dax_tp_catalyst = 45.0
+                dax_be = 15.0
             else:
                 regime = "BALANCED_INSTITUTIONAL_SWING"
-                gold_tp = 30.0
-                gold_tp_catalyst = 45.0
-                gold_be = 15.0
-                dax_tp = 50.0
-                dax_tp_catalyst = 80.0
-                dax_be = 25.0
+                gold_tp = 15.0
+                gold_tp_catalyst = 25.0
+                gold_be = 5.0
+                dax_tp = 35.0
+                dax_tp_catalyst = 60.0
+                dax_be = 18.0
         else:
             regime = "INITIAL_INSTITUTIONAL_SWING"
-            gold_tp = 30.0
-            gold_tp_catalyst = 45.0
-            gold_be = 15.0
-            dax_tp = 50.0
-            dax_tp_catalyst = 80.0
-            dax_be = 25.0
+            gold_tp = 15.0
+            gold_tp_catalyst = 25.0
+            gold_be = 5.0
+            dax_tp = 35.0
+            dax_tp_catalyst = 60.0
+            dax_be = 18.0
 
         old_config = self.load_config()
         new_config = {

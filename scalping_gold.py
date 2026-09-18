@@ -45,33 +45,33 @@ from m15_trade_analysis_logger import (
 
 logger = logging.getLogger("AlphaEdge.Institutional")
 
-# Asset Configurations (Institutional MTF Swing Engine)
+# Asset Configurations (Institutional MTF Swing Engine - Conservative Micro Risk)
 ASSET_CONFIGS = {
     "XAUUSDm": {
         "symbol": "XAUUSDm",
-        "lot": 0.10,                      # 0.10 Lot for swing capture
+        "lot": 0.01,                      # 0.01 Lot (safest minimum volume - zero blowup risk)
         "key_mult": 1.0,
         "atr_period": 10,
-        "tp_dollars": 30.0,              # Full Target: $30.00 USD Profit (Held for full swing)
-        "tp_catalyst_dollars": 45.0,      # Expanded $45.00 Target during News Impulse
-        "be_trigger_dollars": 15.0,       # Stage 1: Move SL to Entry at $15.00 profit (no premature scratches)
-        "lock_trigger_dollars": 25.0,     # Stage 2: Trigger Profit Lock at $25.00 profit
-        "lock_amount_dollars": 20.0,      # Stage 2: Lock $20.00 profit into SL
-        "max_sl_dollars": 18.0,           # Max Initial Risk Cap: $18.00 USD
+        "tp_dollars": 15.0,              # Target: $15.00 USD Profit (15.00 price move with 0.01 lot)
+        "tp_catalyst_dollars": 25.0,      # Expanded $25.00 Target during News Impulse
+        "be_trigger_dollars": 5.0,        # Stage 1: Move SL to Entry at $5.00 profit
+        "lock_trigger_dollars": 10.0,     # Stage 2: Trigger Profit Lock at $10.00 profit
+        "lock_amount_dollars": 7.0,       # Stage 2: Lock $7.00 profit into SL
+        "max_sl_dollars": 8.0,            # Max Initial Risk Cap: $8.00 USD ($8.00 price buffer with 0.01 lot)
         "sl_atr_mult": 1.2,
         "currency": "USD"
     },
     "DE30m": {
         "symbol": "DE30m",
-        "lot": 0.20,                      # 0.20 Lot
+        "lot": 0.07,                      # 0.07 Lot (broker minimum volume on Exness)
         "key_mult": 1.0,
         "atr_period": 10,
-        "tp_pts": 50.0,                   # Target: 50 pts ($10.00+ USD)
-        "tp_catalyst_pts": 80.0,          # Expanded 80 pts during News Impulse
-        "be_trigger_pts": 25.0,           # Stage 1: Move SL to Entry at 25 pts profit
-        "lock_trigger_pts": 40.0,         # Stage 2: Trigger Profit Lock at 40 pts profit
-        "lock_amount_pts": 30.0,          # Stage 2: Lock 30 pts profit into SL
-        "max_sl_pts": 30.0,               # Max Initial Risk Cap: 30 pts
+        "tp_pts": 35.0,                   # Target: 35 pts (~$2.60 USD profit)
+        "tp_catalyst_pts": 60.0,          # Expanded 60 pts during News Impulse
+        "be_trigger_pts": 18.0,           # Stage 1: Move SL to Entry at 18 pts profit
+        "lock_trigger_pts": 28.0,         # Stage 2: Trigger Profit Lock at 28 pts profit
+        "lock_amount_pts": 20.0,          # Stage 2: Lock 20 pts profit into SL
+        "max_sl_pts": 25.0,               # Max Initial Risk Cap: 25 pts (~$1.90 USD max risk)
         "sl_atr_mult": 1.2,
         "currency": "EUR"
     }
@@ -124,15 +124,15 @@ def apply_ai_learned_settings():
         try:
             with open(cfg_file, "r", encoding="utf-8") as f:
                 c = json.load(f)
-            # Gold: apply all tuned parameters (fallbacks match $30 TP swing calibration)
-            ASSET_CONFIGS["XAUUSDm"]["tp_dollars"]          = float(c.get("gold_tp_dollars", 30.0))
-            ASSET_CONFIGS["XAUUSDm"]["tp_catalyst_dollars"] = float(c.get("gold_tp_catalyst_dollars", 45.0))
-            ASSET_CONFIGS["XAUUSDm"]["be_trigger_dollars"]  = float(c.get("gold_be_trigger_dollars", 15.0))
+            # Gold: apply all tuned parameters (fallbacks match 0.01 micro lot calibration)
+            ASSET_CONFIGS["XAUUSDm"]["tp_dollars"]          = float(c.get("gold_tp_dollars", 15.0))
+            ASSET_CONFIGS["XAUUSDm"]["tp_catalyst_dollars"] = float(c.get("gold_tp_catalyst_dollars", 25.0))
+            ASSET_CONFIGS["XAUUSDm"]["be_trigger_dollars"]  = float(c.get("gold_be_trigger_dollars", 5.0))
 
             # DAX: apply all tuned parameters
-            ASSET_CONFIGS["DE30m"]["tp_pts"]          = float(c.get("dax_tp_pts", 50.0))
-            ASSET_CONFIGS["DE30m"]["tp_catalyst_pts"] = float(c.get("dax_tp_catalyst_pts", 80.0))
-            ASSET_CONFIGS["DE30m"]["be_trigger_pts"]  = float(c.get("dax_be_trigger_pts", 25.0))
+            ASSET_CONFIGS["DE30m"]["tp_pts"]          = float(c.get("dax_tp_pts", 35.0))
+            ASSET_CONFIGS["DE30m"]["tp_catalyst_pts"] = float(c.get("dax_tp_catalyst_pts", 60.0))
+            ASSET_CONFIGS["DE30m"]["be_trigger_pts"]  = float(c.get("dax_be_trigger_pts", 18.0))
         except Exception as e:
             logger.debug(f"[Scalp] Dynamic config load skipped: {e}")
 
@@ -428,23 +428,23 @@ def manage_open_positions(symbol, cfg, catalyst_state):
                 logger.info(f"[{symbol}] BREAK-EVEN LOCKED on #{ticket}! Gain: ${dollar_gain:.2f}")
                 _send_telegram(msg)
 
-        # 2. Stage 2: Advanced Profit Lock ($25.00 Gold -> Lock $20.00 / 40 pts DAX -> Lock 30 pts)
+        # 2. Stage 2: Advanced Profit Lock ($10.00 Gold -> Lock $7.00 / 28 pts DAX -> Lock 20 pts)
         is_lock_active = ACTIVE_LOCK_TRACKED.get(ticket, False)
         if not is_lock_active:
             lock_condition = False
-            if symbol == "XAUUSDm" and dollar_gain >= cfg.get('lock_trigger_dollars', 25.0):
+            if symbol == "XAUUSDm" and dollar_gain >= cfg.get('lock_trigger_dollars', 10.0):
                 lock_condition = True
-                lock_dist = cfg.get('lock_amount_dollars', 20.0) / dollar_per_point
-            elif symbol == "DE30m" and pts_gain >= cfg.get('lock_trigger_pts', 40.0):
+                lock_dist = cfg.get('lock_amount_dollars', 7.0) / dollar_per_point
+            elif symbol == "DE30m" and pts_gain >= cfg.get('lock_trigger_pts', 28.0):
                 lock_condition = True
-                lock_dist = cfg.get('lock_amount_pts', 30.0)
+                lock_dist = cfg.get('lock_amount_pts', 20.0)
 
             if lock_condition:
                 new_sl = (entry_price + lock_dist) if pos_type == "BUY" else (entry_price - lock_dist)
                 modify_sl(ticket, symbol, new_sl, current_tp)
                 ACTIVE_LOCK_TRACKED[ticket] = True
                 ACTIVE_BE_TRACKED[ticket] = True
-                locked_profit_desc = f"+${cfg.get('lock_amount_dollars', 20.0):.2f}" if symbol == "XAUUSDm" else f"+{cfg.get('lock_amount_pts', 30.0)} pts"
+                locked_profit_desc = f"+${cfg.get('lock_amount_dollars', 7.0):.2f}" if symbol == "XAUUSDm" else f"+{cfg.get('lock_amount_pts', 20.0)} pts"
                 msg = (
                     f"🔒 <b>[Profit Lock Activated]</b>\n"
                     f"Asset: <b>{symbol}</b> (#{ticket})\n"
