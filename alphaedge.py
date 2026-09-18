@@ -1816,7 +1816,7 @@ if __name__ == "__main__":
     logger.info("  Assets: XAUUSDm (Gold) & DE30m (DAX) — 1H TIMEFRAME")
     logger.info("  Strategy: HPotter UT Bot (Key=1.0, ATR=10)")
     logger.info("  Gold: 0.01 lot | Take Profit: $15.00 USD | BE: $4.00 | Lock: $10 -> $8")
-    logger.info("  DAX:  0.10 lot | Take Profit: 60 pts     | BE: 15 pts | Lock: 45 -> 36 pts")
+    logger.info("  DAX:  0.20 lot | Take Profit: 30 pts     | BE: 20 pts | Lock: 25 -> 20 pts")
     logger.info("  Session: 08:00 AM - 08:00 PM EAT (London + New York only)")
     logger.info("  Guidance: ForexFactory Real-Time Macro News Engine (USD & EUR)")
     logger.info("=" * 65)
@@ -1829,7 +1829,7 @@ if __name__ == "__main__":
         "<b>Strategy:</b> UT Bot (Key=1.0, ATR=10)\n\n"
         "<b>Profit & Risk Targets:</b>\n"
         "• <b>Gold (XAUUSDm):</b> $15.00 Take Profit | BE at $4.00 | Lock $10-&gt;$8 | 0.01 Lot\n"
-        "• <b>DAX (DE30m):</b> 60 Pts Take Profit | BE at 15 pts | Lock 45-&gt;36 pts | 0.10 Lot\n\n"
+        "• <b>DAX (DE30m):</b> 30 Pts Take Profit | BE at 20 pts | Lock 25-&gt;20 pts | 0.20 Lot\n\n"
         "<b>Session Gateway:</b>\n"
         "• Active: 08:00 AM to 08:00 PM EAT (London + New York only).\n"
         "• News shield: Entries frozen 5 min before & after high-impact events.\n\n"

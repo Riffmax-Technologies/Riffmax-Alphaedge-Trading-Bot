@@ -14,11 +14,11 @@ HPotter UT Bot (Version 6) — Exact TradingView Pine Script Replication:
       2. Stage 1 Break-Even Shield: Triggers at +$4.00 -> SL moves to Entry
       3. Stage 2 Profit Lock: Triggers at +$10.00 -> SL locks at +$8.00
       4. Max Initial SL Risk: $10.00 USD
-  - Target & Risk (DAX DE30m, 0.10 lot):
-      1. Full TP = 60 pts
-      2. Stage 1 Break-Even Shield: Triggers at +25 pts -> SL moves to Entry
-      3. Stage 2 Profit Lock: Triggers at +45 pts -> SL locks at +36 pts
-      4. Max Initial SL Risk: 45 pts
+  - Target & Risk (DAX DE30m, 0.20 lot):
+      1. Full TP = 30 pts (Easy Reach ~$6.00+ profit at 0.2 lot)
+      2. Stage 1 Break-Even Shield: Triggers at +20 pts -> SL moves to Entry
+      3. Stage 2 Profit Lock: Triggers at +25 pts -> SL locks at +20 pts
+      4. Max Initial SL Risk: 30 pts
   - News Catalyst Guidance: ForexFactory High-Impact USD & EUR live integration.
   - Instant Reversal: Closes opposite trade instantly upon verified 1H signal flip.
   - Telegram Firewall: Channel (@riffexalphaedgebot) receives entry signals & trade
@@ -63,15 +63,15 @@ ASSET_CONFIGS = {
     },
     "DE30m": {
         "symbol": "DE30m",
-        "lot": 0.1,                       # 0.1 Lot
+        "lot": 0.2,                       # Increased to 0.2 Lot for higher profit per point
         "key_mult": 1.0,
         "atr_period": 10,
-        "tp_pts": 60.0,                   # Full Target: 60 pts Target
-        "tp_catalyst_pts": 100.0,         # Expanded 100 pts during News Impulse
-        "be_trigger_pts": 25.0,           # Stage 1: Move SL to Entry at 25 pts profit (was 15, raised to let trade breathe)
-        "lock_trigger_pts": 45.0,         # Stage 2: Trigger Profit Lock at 45 pts profit
-        "lock_amount_pts": 36.0,          # Stage 2: Lock 36 pts profit into SL
-        "max_sl_pts": 45.0,               # Max Initial Risk Cap: 45 pts
+        "tp_pts": 30.0,                   # Original Easy Target: 30 pts ($6.00+ on 0.2 lot)
+        "tp_catalyst_pts": 60.0,          # Expanded 60 pts during News Impulse
+        "be_trigger_pts": 20.0,           # Stage 1: Move SL to Entry at 20 pts profit (lets trade breathe to 30 TP)
+        "lock_trigger_pts": 25.0,         # Stage 2: Trigger Profit Lock at 25 pts profit
+        "lock_amount_pts": 20.0,          # Stage 2: Lock 20 pts profit into SL
+        "max_sl_pts": 30.0,               # Max Initial Risk Cap: 30 pts
         "sl_atr_mult": 1.2,
         "currency": "EUR"
     }
@@ -128,9 +128,9 @@ def apply_ai_learned_settings():
             ASSET_CONFIGS["XAUUSDm"]["be_trigger_dollars"]  = float(c.get("gold_be_trigger_dollars", 4.0))
 
             # DAX: apply all tuned parameters
-            ASSET_CONFIGS["DE30m"]["tp_pts"]          = float(c.get("dax_tp_pts", 60.0))
-            ASSET_CONFIGS["DE30m"]["tp_catalyst_pts"] = float(c.get("dax_tp_catalyst_pts", 100.0))
-            ASSET_CONFIGS["DE30m"]["be_trigger_pts"]  = float(c.get("dax_be_trigger_pts", 25.0))
+            ASSET_CONFIGS["DE30m"]["tp_pts"]          = float(c.get("dax_tp_pts", 30.0))
+            ASSET_CONFIGS["DE30m"]["tp_catalyst_pts"] = float(c.get("dax_tp_catalyst_pts", 60.0))
+            ASSET_CONFIGS["DE30m"]["be_trigger_pts"]  = float(c.get("dax_be_trigger_pts", 20.0))
         except Exception as e:
             logger.debug(f"[Scalp] Dynamic config load skipped: {e}")
 
@@ -412,23 +412,23 @@ def manage_open_positions(symbol, cfg, catalyst_state):
                 logger.info(f"[{symbol}] BREAK-EVEN LOCKED on #{ticket}! Gain: ${dollar_gain:.2f}")
                 _send_telegram(msg)
 
-        # 2. Stage 2: Advanced Profit Lock ($10.00 Gold -> Lock $8.00 / 45 pts DAX -> Lock 36 pts)
+        # 2. Stage 2: Advanced Profit Lock ($10.00 Gold -> Lock $8.00 / 25 pts DAX -> Lock 20 pts)
         is_lock_active = ACTIVE_LOCK_TRACKED.get(ticket, False)
         if not is_lock_active:
             lock_condition = False
             if symbol == "XAUUSDm" and dollar_gain >= cfg.get('lock_trigger_dollars', 10.0):
                 lock_condition = True
                 lock_dist = cfg.get('lock_amount_dollars', 8.0) / dollar_per_point
-            elif symbol == "DE30m" and pts_gain >= cfg.get('lock_trigger_pts', 45.0):
+            elif symbol == "DE30m" and pts_gain >= cfg.get('lock_trigger_pts', 25.0):
                 lock_condition = True
-                lock_dist = cfg.get('lock_amount_pts', 36.0)
+                lock_dist = cfg.get('lock_amount_pts', 20.0)
 
             if lock_condition:
                 new_sl = (entry_price + lock_dist) if pos_type == "BUY" else (entry_price - lock_dist)
                 modify_sl(ticket, symbol, new_sl, current_tp)
                 ACTIVE_LOCK_TRACKED[ticket] = True
                 ACTIVE_BE_TRACKED[ticket] = True
-                locked_profit_desc = f"+${cfg.get('lock_amount_dollars', 8.0):.2f}" if symbol == "XAUUSDm" else f"+{cfg.get('lock_amount_pts', 36.0)} pts"
+                locked_profit_desc = f"+${cfg.get('lock_amount_dollars', 8.0):.2f}" if symbol == "XAUUSDm" else f"+{cfg.get('lock_amount_pts', 20.0)} pts"
                 msg = (
                     f"🔒 <b>[Profit Lock Activated]</b>\n"
                     f"Asset: <b>{symbol}</b> (#{ticket})\n"

@@ -108,9 +108,9 @@ class AutoLearner:
         gold_tp = 15.0
         gold_tp_catalyst = 25.0
         gold_be = 4.0
-        dax_tp = 60.0
-        dax_tp_catalyst = 100.0
-        dax_be = 15.0
+        dax_tp = 30.0
+        dax_tp_catalyst = 60.0
+        dax_be = 20.0
         regime = "BALANCED_1H_SWING"
 
         total_trades = 0
@@ -155,39 +155,39 @@ class AutoLearner:
         # ── Dynamic Adaptation Decisions based on Market Performance (1H Swing Baseline) ──
         if total_trades >= 5:
             if win_rate >= 60.0 and net_pnl > 0:
-                # Strong swing follow-through: High-probability $15 target
+                # Strong swing follow-through: High-probability $15 target for gold, 30 pts for DAX
                 regime = "HIGH_CONVICTION_1H_SWING"
                 gold_tp = 15.0
                 gold_tp_catalyst = 25.0
                 gold_be = 4.0
-                dax_tp = 60.0
-                dax_tp_catalyst = 100.0
-                dax_be = 15.0
+                dax_tp = 30.0
+                dax_tp_catalyst = 60.0
+                dax_be = 20.0
             elif win_rate < 50.0:
                 # Defensive mode: Tighten BE trigger slightly
                 regime = "DEFENSIVE_1H_SWING"
                 gold_tp = 15.0
                 gold_tp_catalyst = 20.0
                 gold_be = 3.5
-                dax_tp = 50.0
-                dax_tp_catalyst = 80.0
-                dax_be = 12.0
+                dax_tp = 25.0
+                dax_tp_catalyst = 50.0
+                dax_be = 18.0
             else:
                 regime = "BALANCED_1H_SWING"
                 gold_tp = 15.0
                 gold_tp_catalyst = 25.0
                 gold_be = 4.0
-                dax_tp = 60.0
-                dax_tp_catalyst = 100.0
-                dax_be = 15.0
+                dax_tp = 30.0
+                dax_tp_catalyst = 60.0
+                dax_be = 20.0
         else:
             regime = "INITIAL_1H_SWING"
             gold_tp = 15.0
             gold_tp_catalyst = 25.0
             gold_be = 4.0
-            dax_tp = 60.0
-            dax_tp_catalyst = 100.0
-            dax_be = 15.0
+            dax_tp = 30.0
+            dax_tp_catalyst = 60.0
+            dax_be = 20.0
 
         old_config = self.load_config()
         new_config = {

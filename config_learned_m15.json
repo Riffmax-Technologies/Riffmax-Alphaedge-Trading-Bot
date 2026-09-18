@@ -2,12 +2,12 @@
     "gold_tp_dollars": 15.0,
     "gold_tp_catalyst_dollars": 25.0,
     "gold_be_trigger_dollars": 4.0,
-    "dax_tp_pts": 60.0,
-    "dax_tp_catalyst_pts": 100.0,
-    "dax_be_trigger_pts": 25.0,
+    "dax_tp_pts": 30.0,
+    "dax_tp_catalyst_pts": 60.0,
+    "dax_be_trigger_pts": 20.0,
     "regime": "HIGH_CONVICTION_1H_SWING",
-    "win_rate": 62.2,
-    "total_trades": 74,
-    "net_pnl": 18.95,
-    "last_updated": "2026-09-17 22:30:55"
+    "win_rate": 62.8,
+    "total_trades": 78,
+    "net_pnl": 36.81,
+    "last_updated": "2026-09-18 10:30:32"
 }
