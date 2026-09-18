@@ -1812,23 +1812,23 @@ def process_tv_signals():
 if __name__ == "__main__":
 
     logger.info("=" * 65)
-    logger.info("  ALPHAEDGE — INSTITUTIONAL MTF WHALE FLOW SWING ENGINE (MICRO RISK)")
+    logger.info("  ALPHAEDGE — INSTITUTIONAL MTF WHALE FLOW SWING ENGINE")
     logger.info("  Assets: XAUUSDm (Gold) & DE30m (DAX)")
     logger.info("  Strategy: H4 Dealing Range | Liquidity Sweep | Whale Volume | Pre-Trade BT")
-    logger.info("  Gold: 0.01 lot | Take Profit: $15.00 USD | BE: $5.00 | Lock: $10 -> $7")
-    logger.info("  DAX:  0.07 lot | Take Profit: 35 pts     | BE: 18 pts | Lock: 28 -> 20 pts")
+    logger.info("  Gold: 0.02 lot | Take Profit: $25.00 USD | BE: $10.00 | Lock: $18 -> $12")
+    logger.info("  DAX:  0.10 lot | Take Profit: 40 pts     | BE: 20 pts  | Lock: 30 -> 20 pts")
     logger.info("  Session: 08:00 AM - 08:00 PM EAT (London + New York only)")
     logger.info("  Guidance: ForexFactory Real-Time Macro News Engine (USD & EUR)")
     logger.info("=" * 65)
 
     # 1. Send Online Startup Notification to Telegram
     startup_msg = (
-        "<b>🏛 AlphaEdge — Institutional MTF Whale Flow Engine Active (Micro Risk)</b>\n\n"
+        "<b>🏛 AlphaEdge — Institutional MTF Whale Flow Engine Active</b>\n\n"
         "<b>Assets:</b> Gold (XAUUSDm) &amp; DAX (DE30m)\n"
         "<b>Strategy:</b> H4 Dealing Range · Liquidity Sweep · Whale Volume · Pre-Trade Backtest Gate\n\n"
-        "<b>Profit &amp; Risk Targets (Ultra Safe Micro Lots):</b>\n"
-        "• <b>Gold (XAUUSDm):</b> $15.00 TP | BE at $5.00 | Lock $10→$7 | <b>0.01 Lot</b>\n"
-        "• <b>DAX (DE30m):</b> 35 Pts TP | BE at 18 pts | Lock 28→20 pts | <b>0.07 Lot (Broker Min)</b>\n\n"
+        "<b>Profit &amp; Risk Targets:</b>\n"
+        "• <b>Gold (XAUUSDm):</b> $25.00 TP | BE at $10.00 | Lock $18→$12 | <b>0.02 Lot</b>\n"
+        "• <b>DAX (DE30m):</b> 40 Pts TP | BE at 20 pts | Lock 30→20 pts | <b>0.10 Lot</b>\n\n"
         "<b>Entry Rules:</b>\n"
         "• Strict Discount (BUY) / Premium (SELL) zone only — never chase halfway!\n"
         "• Requires: Liquidity Sweep OR Deep Zone + Whale Volume surge (≥1.6x avg)\n"
