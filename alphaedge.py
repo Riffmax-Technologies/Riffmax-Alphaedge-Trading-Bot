@@ -1812,28 +1812,31 @@ def process_tv_signals():
 if __name__ == "__main__":
 
     logger.info("=" * 65)
-    logger.info("  ALPHAEDGE — 1-HOUR (1H) SWING & NEWS CATALYST ENGINE")
-    logger.info("  Assets: XAUUSDm (Gold) & DE30m (DAX) — 1H TIMEFRAME")
-    logger.info("  Strategy: HPotter UT Bot (Key=1.0, ATR=10)")
-    logger.info("  Gold: 0.01 lot | Take Profit: $15.00 USD | BE: $4.00 | Lock: $10 -> $8")
-    logger.info("  DAX:  0.20 lot | Take Profit: 30 pts     | BE: 20 pts | Lock: 25 -> 20 pts")
+    logger.info("  ALPHAEDGE — INSTITUTIONAL MTF WHALE FLOW SWING ENGINE")
+    logger.info("  Assets: XAUUSDm (Gold) & DE30m (DAX)")
+    logger.info("  Strategy: H4 Dealing Range | Liquidity Sweep | Whale Volume | Pre-Trade BT")
+    logger.info("  Gold: 0.10 lot | Take Profit: $30.00 USD | BE: $15 | Lock: $25 -> $20")
+    logger.info("  DAX:  0.20 lot | Take Profit: 50 pts     | BE: 25 pts | Lock: 40 -> 30 pts")
     logger.info("  Session: 08:00 AM - 08:00 PM EAT (London + New York only)")
     logger.info("  Guidance: ForexFactory Real-Time Macro News Engine (USD & EUR)")
     logger.info("=" * 65)
 
     # 1. Send Online Startup Notification to Telegram
     startup_msg = (
-        "<b>AlphaEdge 1H Swing & News Catalyst Bot Active!</b>\n\n"
-        "<b>Assets:</b> Gold (XAUUSDm) & DAX (DE30m)\n"
-        "<b>Timeframe:</b> 1-Hour (1H) Chart\n"
-        "<b>Strategy:</b> UT Bot (Key=1.0, ATR=10)\n\n"
-        "<b>Profit & Risk Targets:</b>\n"
-        "• <b>Gold (XAUUSDm):</b> $15.00 Take Profit | BE at $4.00 | Lock $10-&gt;$8 | 0.01 Lot\n"
-        "• <b>DAX (DE30m):</b> 30 Pts Take Profit | BE at 20 pts | Lock 25-&gt;20 pts | 0.20 Lot\n\n"
+        "<b>🏛 AlphaEdge — Institutional MTF Whale Flow Swing Engine Active!</b>\n\n"
+        "<b>Assets:</b> Gold (XAUUSDm) &amp; DAX (DE30m)\n"
+        "<b>Strategy:</b> H4 Dealing Range · Liquidity Sweep · Whale Volume · Pre-Trade Backtest Gate\n\n"
+        "<b>Profit &amp; Risk Targets:</b>\n"
+        "• <b>Gold (XAUUSDm):</b> $30.00 TP | BE at $15 | Lock $25→$20 | 0.10 Lot\n"
+        "• <b>DAX (DE30m):</b> 50 Pts TP | BE at 25 pts | Lock 40→30 pts | 0.20 Lot\n\n"
+        "<b>Entry Rules:</b>\n"
+        "• Strict Discount (BUY) / Premium (SELL) zone only — never chase halfway!\n"
+        "• Requires: Liquidity Sweep OR Deep Zone + Whale Volume surge (≥1.6x avg)\n"
+        "• Pre-trade 45-day H1 backtest gate: min 55% WR &amp; 1.3 Profit Factor\n\n"
         "<b>Session Gateway:</b>\n"
         "• Active: 08:00 AM to 08:00 PM EAT (London + New York only).\n"
-        "• News shield: Entries frozen 5 min before & after high-impact events.\n\n"
-        "<b>Status:</b> Engine ready. Monitoring markets now."
+        "• News shield: Entries frozen 5 min before &amp; after high-impact events.\n\n"
+        "<b>Status:</b> 🟢 Engine ready. Hunting institutional setups now."
     )
     send_telegram_alert(startup_msg)
 

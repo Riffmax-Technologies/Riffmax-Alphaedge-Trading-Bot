@@ -1,31 +1,26 @@
 """
-scalping_gold.py — AlphaEdge 1H Stop-and-Reverse + ATR Trailing Engine (Gold & DAX)
-======================================================================================
-Strategy: Stop-and-Reverse with Dynamic ATR Trailing Stop (NO hedging)
-HPotter UT Bot (Version 6) — Exact TradingView Pine Script Replication:
-  - ATR Formula: Exact TradingView Wilder's RMA: ta.rma(tr, 10)
-  - Trailing Stop: Exact f_calcTrailingStop(prev, close, nLoss)
-  - Crossover Signals:
-      BUY:  prev_close <= prev_stop AND current_close > current_stop
-      SELL: prev_close >= prev_stop AND current_close < current_stop
-  - Execution Timeframe: 1-Hour (1H)
-  - Session Gateway: 08:00 AM to 08:00 PM EAT (London + New York only)
-
-Core Logic:
-  1. On 1H BUY crossover  -> Close any SELL -> Open BUY (NO fixed TP)
-  2. On 1H SELL crossover -> Close any BUY  -> Open SELL (NO fixed TP)
-  3. On trend-follow (no crossover, no open position) -> Enter trend direction
-  4. ATR Trailing Stop: every cycle the UT Bot stop line trails the open position
-     SL upward (BUY) or downward (SELL) — locks profits bar by bar.
-     Trade auto-closes when price violates the trail (MT5 SL hit).
-  5. Multi-TF confirmation: M15 trend must agree with 1H direction at entry.
-
-  - Lot Sizes: XAUUSDm 0.01 lot | DE30m 0.20 lot
-  - Initial SL: 1.2x ATR from entry (capped at max_sl config)
-  - TP: NONE (trade runs until opposite 1H signal OR trail is violated)
-  - News Catalyst Guidance: ForexFactory High-Impact USD & EUR live integration.
-  - Telegram Firewall: Channel (@riffexalphaedgebot) receives entry signals &
-    trade close results ONLY. All management alerts go to personal DM only.
+scalping_gold.py — AlphaEdge Institutional Multi-Timeframe & Whale Flow Swing Engine
+===================================================================================
+Replaces the legacy scalper with a high-conviction Institutional Swing Architecture:
+  - Multi-Timeframe Structure (H4 / H1 / M15):
+      * H4 Dealing Range (Premium vs Discount Zone).
+      * Strict Bottom Rule: BUY orders ONLY in Discount (< 50% Eq).
+      * Strict Top Rule: SELL orders ONLY in Premium (> 50% Eq).
+      * Refuses to chase moves halfway or buy at the top!
+  - Whale Flow & Volume Climax Detection:
+      * Liquidity Sweeps (Stop Hunts): Absorbs retail stop orders, rejects back into range.
+      * Tick Volume Surge: Volume >= 1.6x 20-period moving average on the sweep candle.
+      * Fair Value Gap (FVG) / Imbalance validation.
+  - Pre-Trade Real-Time Backtest Gate:
+      * Simulates setup expectancy over preceding 45-60 days before firing order on MT5.
+      * Rejects trades if historical win rate < 55% or profit factor < 1.3.
+  - Target & Holding Calibration:
+      * Gold (XAUUSDm, 0.10 lot): Full TP = $30.00 USD ($3.00 price expansion).
+      * Gold Stage 1 BE: Triggers at +$15.00 profit (50% to target, no premature scratches).
+      * Gold Stage 2 Profit Lock: Triggers at +$25.00 profit -> locks +$20.00.
+      * DAX (DE30m, 0.20 lot): Full TP = 50.0 pts. BE at +25.0 pts. Lock at +40.0 -> +30.0 pts.
+  - Session Gateway: 08:00 AM to 08:00 PM EAT (London + New York only).
+  - Telegram Firewall: Signals broadcast with Whale Footprint & Pre-Trade Backtest validation.
 """
 
 import os
@@ -38,6 +33,8 @@ import MetaTrader5 as mt5
 import numpy as np
 import pandas as pd
 from news_catalyst_engine import NewsCatalystEngine
+from institutional_engine import InstitutionalEngine
+from pre_trade_backtester import PreTradeBacktester
 from m15_trade_analysis_logger import (
     log_trade_opened,
     update_trade_be,
@@ -46,36 +43,45 @@ from m15_trade_analysis_logger import (
     get_performance_summary
 )
 
-logger = logging.getLogger("AlphaEdge.M15Swing")
+logger = logging.getLogger("AlphaEdge.Institutional")
 
-# Asset Configurations — Stop-and-Reverse + ATR Trailing (NO fixed TP)
+# Asset Configurations (Institutional MTF Swing Engine)
 ASSET_CONFIGS = {
     "XAUUSDm": {
         "symbol": "XAUUSDm",
-        "lot": 0.01,
+        "lot": 0.10,                      # 0.10 Lot for swing capture
         "key_mult": 1.0,
         "atr_period": 10,
-        "max_sl_dollars": 10.0,     # Max initial SL risk: $10.00
-        "sl_atr_mult": 1.2,         # Initial SL = 1.2 × ATR from entry
-        "trail_min_profit_dollars": 3.0,  # Only start trailing after $3 profit (avoids whipsaws)
+        "tp_dollars": 30.0,              # Full Target: $30.00 USD Profit (Held for full swing)
+        "tp_catalyst_dollars": 45.0,      # Expanded $45.00 Target during News Impulse
+        "be_trigger_dollars": 15.0,       # Stage 1: Move SL to Entry at $15.00 profit (no premature scratches)
+        "lock_trigger_dollars": 25.0,     # Stage 2: Trigger Profit Lock at $25.00 profit
+        "lock_amount_dollars": 20.0,      # Stage 2: Lock $20.00 profit into SL
+        "max_sl_dollars": 18.0,           # Max Initial Risk Cap: $18.00 USD
+        "sl_atr_mult": 1.2,
         "currency": "USD"
     },
     "DE30m": {
         "symbol": "DE30m",
-        "lot": 0.2,                 # 0.20 lot for good per-point profit
+        "lot": 0.20,                      # 0.20 Lot
         "key_mult": 1.0,
         "atr_period": 10,
-        "max_sl_pts": 30.0,         # Max initial SL risk: 30 pts
-        "sl_atr_mult": 1.2,         # Initial SL = 1.2 × ATR from entry
-        "trail_min_profit_pts": 10.0,  # Only start trailing after 10 pts profit
+        "tp_pts": 50.0,                   # Target: 50 pts ($10.00+ USD)
+        "tp_catalyst_pts": 80.0,          # Expanded 80 pts during News Impulse
+        "be_trigger_pts": 25.0,           # Stage 1: Move SL to Entry at 25 pts profit
+        "lock_trigger_pts": 40.0,         # Stage 2: Trigger Profit Lock at 40 pts profit
+        "lock_amount_pts": 30.0,          # Stage 2: Lock 30 pts profit into SL
+        "max_sl_pts": 30.0,               # Max Initial Risk Cap: 30 pts
+        "sl_atr_mult": 1.2,
         "currency": "EUR"
     }
 }
 
 NEWS_ENGINE = None
-# Track which tickets already have ATR trailing active (in-memory)
-ACTIVE_TRAILING = {}  # ticket -> True if trailing has started
-
+INST_ENGINE = None
+PRE_BACKTESTER = None
+ACTIVE_BE_TRACKED = {}   # ticket -> True if Stage 1 BE set
+ACTIVE_LOCK_TRACKED = {} # ticket -> True if Stage 2 Lock set
 
 # ─── Persistent Bar State (survives bot restarts — prevents re-entry on same 1H bar) ────
 _BAR_STATE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_executed_bar.json")
@@ -112,20 +118,21 @@ LAST_EXECUTED_BAR = _load_bar_state()
 
 
 def apply_ai_learned_settings():
-    """Loads dynamically tuned parameters from the AI Auto-Learning Brain.
-    Note: In the new SAR+ATR Trailing strategy, TP is dynamic (trail-based).
-    We only carry forward lot/SL parameters if present.
-    """
+    """Loads dynamically tuned parameters from the AI Auto-Learning Brain."""
     cfg_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config_learned_m15.json")
     if os.path.exists(cfg_file):
         try:
             with open(cfg_file, "r", encoding="utf-8") as f:
                 c = json.load(f)
-            # Only apply lot/SL params; TP is now trail-based (no fixed target)
-            if "gold_max_sl_dollars" in c:
-                ASSET_CONFIGS["XAUUSDm"]["max_sl_dollars"] = float(c["gold_max_sl_dollars"])
-            if "dax_max_sl_pts" in c:
-                ASSET_CONFIGS["DE30m"]["max_sl_pts"] = float(c["dax_max_sl_pts"])
+            # Gold: apply all tuned parameters (fallbacks match $30 TP swing calibration)
+            ASSET_CONFIGS["XAUUSDm"]["tp_dollars"]          = float(c.get("gold_tp_dollars", 30.0))
+            ASSET_CONFIGS["XAUUSDm"]["tp_catalyst_dollars"] = float(c.get("gold_tp_catalyst_dollars", 45.0))
+            ASSET_CONFIGS["XAUUSDm"]["be_trigger_dollars"]  = float(c.get("gold_be_trigger_dollars", 15.0))
+
+            # DAX: apply all tuned parameters
+            ASSET_CONFIGS["DE30m"]["tp_pts"]          = float(c.get("dax_tp_pts", 50.0))
+            ASSET_CONFIGS["DE30m"]["tp_catalyst_pts"] = float(c.get("dax_tp_catalyst_pts", 80.0))
+            ASSET_CONFIGS["DE30m"]["be_trigger_pts"]  = float(c.get("dax_be_trigger_pts", 25.0))
         except Exception as e:
             logger.debug(f"[Scalp] Dynamic config load skipped: {e}")
 
@@ -361,109 +368,93 @@ def compute_m15_ut_bot(symbol, key_mult=1.0, atr_period=10, n_bars=300):
     }
 
 
-# ─── ATR Trailing Stop Position Manager ────────────────────────────────────────
-def manage_open_positions(symbol, cfg, catalyst_state, ut_state=None):
-    """
-    Trails the SL of open positions using the live 1H UT Bot stop line.
-    - For BUY: moves SL up to ut_stop whenever ut_stop > current_sl (only after min profit)
-    - For SELL: moves SL down to ut_stop whenever ut_stop < current_sl (only after min profit)
-    - Pre-news: if close to news event and in profit, tighten SL to near-entry to protect.
-    """
-    global ACTIVE_TRAILING
+# ─── Position Management & Break-Even Shield ──────────────────────────────────
+def manage_open_positions(symbol, cfg, catalyst_state):
     positions = mt5.positions_get(symbol=symbol)
     if not positions:
         return
-
+        
     info = mt5.symbol_info(symbol)
-    if not info:
-        return
+    point = info.point
     contract = info.trade_contract_size
     lot = cfg['lot']
-    dollar_per_pt = contract * lot
-    decimals = 2 if symbol == "XAUUSDm" else 1
-
-    # UT Bot stop line (trailing anchor)
-    ut_stop = ut_state['stop'] if ut_state else None
-
+    dollar_per_point = contract * lot
+    
     for pos in positions:
         ticket = pos.ticket
         entry_price = pos.price_open
         current_sl = pos.sl
+        current_tp = pos.tp
         pos_type = "BUY" if pos.type == mt5.ORDER_TYPE_BUY else "SELL"
         current_price = pos.price_current
-
+        
         pts_gain = (current_price - entry_price) if pos_type == "BUY" else (entry_price - current_price)
-        dollar_gain = pts_gain * dollar_per_pt
-
-        # ── 1. Dynamic ATR Trailing Stop ─────────────────────────────────────────
-        if ut_stop is not None:
-            # Check if trade has enough profit to start trailing (avoids whipsaw on first bar)
-            trail_active = ACTIVE_TRAILING.get(ticket, False)
-            min_profit_met = False
-            if symbol == "XAUUSDm":
-                min_profit_met = dollar_gain >= cfg.get("trail_min_profit_dollars", 3.0)
-            elif symbol == "DE30m":
-                min_profit_met = pts_gain >= cfg.get("trail_min_profit_pts", 10.0)
-
-            if not trail_active and min_profit_met:
-                ACTIVE_TRAILING[ticket] = True
-                trail_active = True
-                logger.info(f"[{symbol}] ATR TRAILING ACTIVATED on #{ticket} | Gain: ${dollar_gain:.2f}")
-                _send_telegram(
-                    f"🔄 <b>[Trailing Active]</b>\n"
+        dollar_gain = pts_gain * dollar_per_point
+        
+        # 1. Stage 1: Dynamic Break-Even Shield Check ($4.00 Gold / 15 pts DAX)
+        is_be_active = ACTIVE_BE_TRACKED.get(ticket, False)
+        if not is_be_active:
+            be_condition = False
+            if symbol == "XAUUSDm" and dollar_gain >= cfg['be_trigger_dollars']:
+                be_condition = True
+            elif symbol == "DE30m" and pts_gain >= cfg['be_trigger_pts']:
+                be_condition = True
+                
+            if be_condition:
+                new_sl = entry_price + (20 * point) if pos_type == "BUY" else entry_price - (20 * point)
+                modify_sl(ticket, symbol, new_sl, current_tp)
+                ACTIVE_BE_TRACKED[ticket] = True
+                update_trade_be(ticket) # Record in dedicated trade analysis log
+                msg = (
+                    f"🛡️ <b>[Break-Even Protected]</b>\n"
                     f"Asset: <b>{symbol}</b> (#{ticket})\n"
                     f"Profit Reached: +${dollar_gain:.2f}\n"
-                    f"SL now trails UT Bot stop line. Profit protected dynamically."
+                    f"SL moved to Entry ({entry_price:.2f}). Fakeout risk eliminated!"
                 )
+                logger.info(f"[{symbol}] BREAK-EVEN LOCKED on #{ticket}! Gain: ${dollar_gain:.2f}")
+                _send_telegram(msg)
 
-            if trail_active:
-                if pos_type == "BUY":
-                    # Trail up: new SL = ut_stop, but only if it's ABOVE current SL (ratchet up)
-                    if ut_stop > current_sl:
-                        modify_sl(ticket, symbol, ut_stop, 0.0)
-                        logger.info(
-                            f"[{symbol}] TRAIL UP #{ticket}: SL {current_sl:.{decimals}f} -> {ut_stop:.{decimals}f}"
-                        )
-                elif pos_type == "SELL":
-                    # Trail down: new SL = ut_stop, but only if it's BELOW current SL (ratchet down)
-                    # For SELL, current_sl is above price; trail downward means lower value
-                    if current_sl == 0.0 or ut_stop < current_sl:
-                        modify_sl(ticket, symbol, ut_stop, 0.0)
-                        logger.info(
-                            f"[{symbol}] TRAIL DOWN #{ticket}: SL {current_sl:.{decimals}f} -> {ut_stop:.{decimals}f}"
-                        )
+        # 2. Stage 2: Advanced Profit Lock ($25.00 Gold -> Lock $20.00 / 40 pts DAX -> Lock 30 pts)
+        is_lock_active = ACTIVE_LOCK_TRACKED.get(ticket, False)
+        if not is_lock_active:
+            lock_condition = False
+            if symbol == "XAUUSDm" and dollar_gain >= cfg.get('lock_trigger_dollars', 25.0):
+                lock_condition = True
+                lock_dist = cfg.get('lock_amount_dollars', 20.0) / dollar_per_point
+            elif symbol == "DE30m" and pts_gain >= cfg.get('lock_trigger_pts', 40.0):
+                lock_condition = True
+                lock_dist = cfg.get('lock_amount_pts', 30.0)
 
-        # ── 2. Pre-News Profit Protection ────────────────────────────────────────
-        # If a high-impact news event is <5 min away and trade is in profit, tighten SL
-        if catalyst_state.get('state') == 'PRE_NEWS_FREEZE' and dollar_gain > 1.5:
-            # Tighten SL to 5 pts above/below entry (locks a small gain, avoids spike loss)
-            tight_sl_pts = 5.0
-            if pos_type == "BUY":
-                tight_sl = entry_price + tight_sl_pts
-                if tight_sl > current_sl:
-                    modify_sl(ticket, symbol, tight_sl, 0.0)
-                    logger.info(f"[{symbol}] PRE-NEWS TIGHTEN on #{ticket}: SL -> {tight_sl:.{decimals}f}")
-                    _send_telegram(
-                        f"⚠️ <b>[Pre-News Protection]</b>\n"
-                        f"Asset: <b>{symbol}</b> (#{ticket})\n"
-                        f"Event: <b>{catalyst_state.get('event')}</b> in "
-                        f"{catalyst_state.get('minutes_to_release')}m\n"
-                        f"SL tightened to protect +${dollar_gain:.2f} profit before release."
-                    )
-            else:
-                tight_sl = entry_price - tight_sl_pts
-                if current_sl == 0.0 or tight_sl < current_sl:
-                    modify_sl(ticket, symbol, tight_sl, 0.0)
-                    logger.info(f"[{symbol}] PRE-NEWS TIGHTEN on #{ticket}: SL -> {tight_sl:.{decimals}f}")
-                    _send_telegram(
-                        f"⚠️ <b>[Pre-News Protection]</b>\n"
-                        f"Asset: <b>{symbol}</b> (#{ticket})\n"
-                        f"Event: <b>{catalyst_state.get('event')}</b> in "
-                        f"{catalyst_state.get('minutes_to_release')}m\n"
-                        f"SL tightened to protect +${dollar_gain:.2f} profit before release."
-                    )
+            if lock_condition:
+                new_sl = (entry_price + lock_dist) if pos_type == "BUY" else (entry_price - lock_dist)
+                modify_sl(ticket, symbol, new_sl, current_tp)
+                ACTIVE_LOCK_TRACKED[ticket] = True
+                ACTIVE_BE_TRACKED[ticket] = True
+                locked_profit_desc = f"+${cfg.get('lock_amount_dollars', 20.0):.2f}" if symbol == "XAUUSDm" else f"+{cfg.get('lock_amount_pts', 30.0)} pts"
+                msg = (
+                    f"🔒 <b>[Profit Lock Activated]</b>\n"
+                    f"Asset: <b>{symbol}</b> (#{ticket})\n"
+                    f"Gain Reached: +${dollar_gain:.2f}\n"
+                    f"SL locked to <b>{locked_profit_desc}</b> ({new_sl:.2f}). Profit guaranteed!"
+                )
+                logger.info(f"[{symbol}] PROFIT LOCKED on #{ticket}! Gain: ${dollar_gain:.2f} -> SL: {new_sl:.2f}")
+                _send_telegram(msg)
 
-
+                
+        # 3. Pre-News Profit Protection
+        if catalyst_state.get('state') == 'PRE_NEWS_FREEZE' and dollar_gain > 1.0 and not is_be_active and not is_lock_active:
+            new_sl = entry_price + (10 * point) if pos_type == "BUY" else entry_price - (10 * point)
+            modify_sl(ticket, symbol, new_sl, current_tp)
+            ACTIVE_BE_TRACKED[ticket] = True
+            update_trade_be(ticket)
+            msg = (
+                f"⚠️ <b>[Pre-News Protection]</b>\n"
+                f"Asset: <b>{symbol}</b> (#{ticket})\n"
+                f"Event: <b>{catalyst_state.get('event')}</b> in {catalyst_state.get('minutes_to_release')}m\n"
+                f"SL tightened to entry to protect profit before release."
+            )
+            logger.info(f"[{symbol}] Pre-news protection activated on #{ticket}")
+            _send_telegram(msg)
 
 
 def modify_sl(ticket, symbol, new_sl, tp):
@@ -570,62 +561,24 @@ def close_opposite_positions(symbol, target_dir):
             )
 
 
-# ─── M15 Confirmation Helper ───────────────────────────────────────────────────
-def compute_m15_trend(symbol, key_mult=1.0, atr_period=10, n_bars=100):
-    """Compute UT Bot trend on M15 for entry confirmation. Returns 'BUY', 'SELL', or None."""
-    try:
-        mt5.symbol_select(symbol, True)
-        rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M15, 0, n_bars)
-        if rates is None or len(rates) < 20:
-            return None
-        df = pd.DataFrame(rates)
-        df['prev_close'] = df['close'].shift(1)
-        df['tr'] = df.apply(
-            lambda r: max(
-                r['high'] - r['low'],
-                abs(r['high'] - r['prev_close']) if not np.isnan(r['prev_close']) else 0,
-                abs(r['low']  - r['prev_close']) if not np.isnan(r['prev_close']) else 0,
-            ), axis=1)
-        tr_vals = df['tr'].values
-        atr_tv = np.zeros(len(df))
-        atr_tv[:atr_period] = tr_vals[:atr_period].mean()
-        for i in range(atr_period, len(df)):
-            atr_tv[i] = (tr_vals[i] + (atr_period - 1.0) * atr_tv[i-1]) / float(atr_period)
-        closes = df['close'].values
-        stops = np.zeros(len(closes))
-        for i in range(1, len(closes)):
-            nLoss = key_mult * atr_tv[i]
-            prev_stop = stops[i-1]
-            c_price = closes[i]
-            p_price = closes[i-1]
-            if c_price > prev_stop and p_price > prev_stop:
-                stops[i] = max(prev_stop, c_price - nLoss)
-            elif c_price < prev_stop and p_price < prev_stop:
-                stops[i] = min(prev_stop, c_price + nLoss)
-            elif c_price > prev_stop:
-                stops[i] = c_price - nLoss
-            else:
-                stops[i] = c_price + nLoss
-        c_close = closes[-2]
-        c_stop  = stops[-2]
-        return "BUY" if c_close > c_stop else "SELL"
-    except Exception:
-        return None
-
-
 # ─── Autonomous Scan Cycle ─────────────────────────────────────────────────────
 def run_scalping_cycle():
     """
     Called autonomously every cycle from alphaedge.py.
-    Strategy: Stop-and-Reverse + ATR Trailing Stop (NO fixed TP, NO hedging).
-      - 1H crossover BUY  -> close any SELL, open BUY (no TP, trail SL)
-      - 1H crossover SELL -> close any BUY,  open SELL (no TP, trail SL)
-      - Trend-follow: enter on 1H trend when no position open (M15 confirmation required)
-      - ATR Trail: every cycle moves SL along 1H UT Bot stop line to lock profits
+    Executes the Institutional Multi-Timeframe (MTF) & Whale Flow Swing Engine.
+    Filters:
+      1. H4 Dealing Range (Strict Discount for BUY, Strict Premium for SELL - never enters halfway!).
+      2. Liquidity Sweep / Stop Hunt (Bottom accumulation / Top distribution).
+      3. Whale Tick Volume surge >= 1.6x 20-period moving average.
+      4. Pre-Trade Real-Time Backtest Gate (validates historical expectancy before execution).
     """
-    global NEWS_ENGINE, LAST_EXECUTED_BAR
+    global NEWS_ENGINE, INST_ENGINE, PRE_BACKTESTER, LAST_EXECUTED_BAR
     if NEWS_ENGINE is None:
         NEWS_ENGINE = NewsCatalystEngine()
+    if INST_ENGINE is None:
+        INST_ENGINE = InstitutionalEngine()
+    if PRE_BACKTESTER is None:
+        PRE_BACKTESTER = PreTradeBacktester()
 
     try:
         NEWS_ENGINE.sync_calendar()
@@ -644,7 +597,7 @@ def run_scalping_cycle():
     except Exception:
         pass
 
-    # Check MT5 history deals to close any trades in analysis log that hit SL
+    # Check MT5 history deals to close any trades in analysis log that hit TP/SL
     try:
         sync_closed_trades_from_history()
     except Exception:
@@ -656,114 +609,102 @@ def run_scalping_cycle():
     for symbol, cfg in ASSET_CONFIGS.items():
         try:
             catalyst = NEWS_ENGINE.get_market_catalyst_status(symbol)
-
-            # ── Compute 1H UT Bot state first (needed for trailing + entries) ──
-            ut_state = compute_m15_ut_bot(symbol, cfg['key_mult'], cfg['atr_period'])
-            if not ut_state:
-                continue
-
-            # ── Trail SL on all open positions using live UT Bot stop ──────────
-            manage_open_positions(symbol, cfg, catalyst, ut_state)
+            manage_open_positions(symbol, cfg, catalyst)
 
             info = mt5.symbol_info(symbol)
             contract = info.trade_contract_size
             lot = cfg['lot']
             dollar_per_pt = contract * lot
 
-            # Initial SL distance from entry (1.2× ATR, capped at max risk)
-            sl_dist = cfg['sl_atr_mult'] * ut_state['atr']
-            if symbol == "XAUUSDm" and 'max_sl_dollars' in cfg:
-                sl_dist = min(sl_dist, cfg['max_sl_dollars'] / dollar_per_pt)
-            elif symbol == "DE30m" and 'max_sl_pts' in cfg:
-                sl_dist = min(sl_dist, cfg['max_sl_pts'])
+            tick = mt5.symbol_info_tick(symbol)
+            curr_price = tick.bid if tick else 0.0
+
+            # ── 1. Evaluate Institutional MTF & Whale Flow Setup ─────────────────
+            setup = INST_ENGINE.evaluate_institutional_setup(symbol)
+            deal_range = setup.get('deal_range')
+            loc_pct = f"{deal_range['location_pct']:.1f}%" if deal_range else "N/A"
+            vol_ratio = setup.get('vol_ratio', 1.0)
+            whale_str = f"WHALE {vol_ratio}x" if setup.get('whale_detected') else f"{vol_ratio}x"
 
             positions = mt5.positions_get(symbol=symbol)
             has_pos = len(positions) > 0 if positions else False
-            bar_time = ut_state['bar_time']
-
-            tick = mt5.symbol_info_tick(symbol)
-            curr_price = tick.bid if tick else 0.0
-            event_name = catalyst.get('event', 'None')
 
             logger.info(
-                f"[SAR] {symbol} | Price: {curr_price:.2f} | UT Stop: {ut_state['stop']:.2f} | "
-                f"Trend: {ut_state['trend']} | Cross↑: {ut_state['cross_up']} Cross↓: {ut_state['cross_dn']} | "
-                f"Pos: {len(positions) if positions else 0} | "
-                f"Session: {'OPEN' if session_ok else 'CLOSED'} | News: {catalyst.get('state')}"
+                f"[Institutional MTF] {symbol} | Price: {curr_price:.2f} | Range: {loc_pct} | "
+                f"Vol: {whale_str} | Pos: {len(positions) if positions else 0} | "
+                f"Setup: {setup.get('direction')} (Valid: {setup.get('valid')}) | {setup.get('reason')}"
             )
 
-            # Block new entries during PRE_NEWS_FREEZE and NEWS_SPIKE_BLOCK
+            # Block entries during high-impact news window
             news_blocks_entry = catalyst.get('state') in ('PRE_NEWS_FREEZE', 'NEWS_SPIKE_BLOCK')
 
-            # ── Case 1: 1H BUY Crossover (Stop-and-Reverse to BUY) ────────────
-            if ut_state['cross_up']:
-                # Always close any opposing SELL on crossover — no M15 filter needed here
-                close_opposite_positions(symbol, "BUY")
-                positions = mt5.positions_get(symbol=symbol)
-                has_pos = len(positions) > 0 if positions else False
+            if not setup.get('valid'):
+                # Not a valid structural bottom/top setup — strictly wait, do not chase halfway!
+                continue
 
-                if session_ok and not news_blocks_entry:
-                    if not has_pos and LAST_EXECUTED_BAR.get(symbol) != bar_time:
-                        sl = tick.ask - sl_dist
-                        # NO fixed TP — trail-based exit; tp=0 means no fixed TP in MT5
-                        logger.info(f"[SAR] {symbol} CROSSOVER BUY -> SL: {sl:.2f} | No TP (trail)")
-                        if execute_order(symbol, "BUY", cfg['lot'], sl, 0.0,
-                                         "SAR Crossover BUY", event_name,
-                                         ut_state['stop'], ut_state['atr']):
-                            LAST_EXECUTED_BAR[symbol] = bar_time
-                            _save_bar_state(LAST_EXECUTED_BAR)
+            target_dir = setup['direction']  # "BUY" or "SELL"
 
-            # ── Case 2: 1H SELL Crossover (Stop-and-Reverse to SELL) ──────────
-            elif ut_state['cross_dn']:
-                # Always close any opposing BUY on crossover — no M15 filter needed here
-                close_opposite_positions(symbol, "SELL")
-                positions = mt5.positions_get(symbol=symbol)
-                has_pos = len(positions) > 0 if positions else False
+            # Close opposite position if institutional reversal setup appears
+            close_opposite_positions(symbol, target_dir)
+            positions = mt5.positions_get(symbol=symbol)
+            has_pos = len(positions) > 0 if positions else False
 
-                if session_ok and not news_blocks_entry:
-                    if not has_pos and LAST_EXECUTED_BAR.get(symbol) != bar_time:
-                        sl = tick.bid + sl_dist
-                        # NO fixed TP — trail-based exit; tp=0 means no fixed TP in MT5
-                        logger.info(f"[SAR] {symbol} CROSSOVER SELL -> SL: {sl:.2f} | No TP (trail)")
-                        if execute_order(symbol, "SELL", cfg['lot'], sl, 0.0,
-                                         "SAR Crossover SELL", event_name,
-                                         ut_state['stop'], ut_state['atr']):
-                            LAST_EXECUTED_BAR[symbol] = bar_time
-                            _save_bar_state(LAST_EXECUTED_BAR)
+            if not session_ok or news_blocks_entry:
+                continue
 
-            # ── Case 3: Trend-Follow — no crossover but trend active, no position ──
-            # M15 must AGREE with 1H trend to avoid entering against momentum.
-            # This guard is critical — was the main failure mode (bot buying during sell).
-            else:
-                if session_ok and not news_blocks_entry:
-                    positions = mt5.positions_get(symbol=symbol)
-                    has_pos = len(positions) > 0 if positions else False
-                    if not has_pos and LAST_EXECUTED_BAR.get(symbol) != bar_time:
-                        # M15 confirmation: direction must match 1H
-                        m15_trend = compute_m15_trend(symbol, cfg['key_mult'], cfg['atr_period'])
-                        trend_1h = ut_state['trend']
+            # Check if bar already executed today
+            now_hour_ts = int(datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0).timestamp())
+            if has_pos or LAST_EXECUTED_BAR.get(symbol) == now_hour_ts:
+                continue
 
-                        if m15_trend and m15_trend != trend_1h:
-                            logger.info(
-                                f"[SAR] {symbol} Trend-Follow SKIPPED: 1H={trend_1h} but M15={m15_trend} (misaligned)"
-                            )
-                        elif trend_1h == "BUY":
-                            sl = tick.ask - sl_dist
-                            logger.info(f"[SAR] {symbol} Trend-Follow BUY | M15={m15_trend} ✓ | SL: {sl:.2f}")
-                            if execute_order(symbol, "BUY", cfg['lot'], sl, 0.0,
-                                             "1H Trend-Follow BUY", event_name,
-                                             ut_state['stop'], ut_state['atr']):
-                                LAST_EXECUTED_BAR[symbol] = bar_time
-                                _save_bar_state(LAST_EXECUTED_BAR)
-                        elif trend_1h == "SELL":
-                            sl = tick.bid + sl_dist
-                            logger.info(f"[SAR] {symbol} Trend-Follow SELL | M15={m15_trend} ✓ | SL: {sl:.2f}")
-                            if execute_order(symbol, "SELL", cfg['lot'], sl, 0.0,
-                                             "1H Trend-Follow SELL", event_name,
-                                             ut_state['stop'], ut_state['atr']):
-                                LAST_EXECUTED_BAR[symbol] = bar_time
-                                _save_bar_state(LAST_EXECUTED_BAR)
+            # ── 2. Pre-Trade Real-Time Backtest Gate ────────────────────────────
+            # Calculate intended SL and TP distances
+            sl_price = setup['sl_price']
+            tp_price = setup['tp_price']
+            sl_dist = abs(curr_price - sl_price)
+            tp_dist = abs(curr_price - tp_price)
+
+            # Cap SL risk at max_sl if configured
+            if symbol == "XAUUSDm" and 'max_sl_dollars' in cfg:
+                max_sl_dist = cfg['max_sl_dollars'] / dollar_per_pt
+                if sl_dist > max_sl_dist:
+                    sl_dist = max_sl_dist
+                    sl_price = (tick.ask - sl_dist) if target_dir == "BUY" else (tick.bid + sl_dist)
+            elif symbol == "DE30m" and 'max_sl_pts' in cfg:
+                if sl_dist > cfg['max_sl_pts']:
+                    sl_dist = cfg['max_sl_pts']
+                    sl_price = (tick.ask - sl_dist) if target_dir == "BUY" else (tick.bid + sl_dist)
+
+            # Run Pre-Trade Backtest Simulator
+            bt_val = PRE_BACKTESTER.backtest_signal_candidate(
+                symbol=symbol,
+                direction=target_dir,
+                sl_dist=sl_dist,
+                tp_dist=tp_dist,
+                volume_mult=1.5
+            )
+
+            if not bt_val.get('approved'):
+                logger.warning(
+                    f"[Pre-Trade Backtester] {symbol} {target_dir} BLOCKED — Expectancy filter failed: {bt_val.get('reason')}"
+                )
+                continue
+
+            # ── 3. Approved: Execute High-Conviction Institutional Swing Order ────
+            event_name = catalyst.get('event', 'Institutional Flow')
+            mode_desc = f"Institutional {target_dir} (WR {bt_val.get('win_rate')}%, PF {bt_val.get('profit_factor')})"
+
+            order_price = tick.ask if target_dir == "BUY" else tick.bid
+            logger.info(
+                f"[Institutional MTF] EXECUTING APPROVED {target_dir} on {symbol}! "
+                f"Price: {order_price:.2f} | SL: {sl_price:.2f} | TP: {tp_price:.2f} | "
+                f"Backtest: {bt_val.get('win_rate')}% WR, PF: {bt_val.get('profit_factor')}"
+            )
+
+            if execute_order(symbol, target_dir, cfg['lot'], sl_price, tp_price, mode_desc, event_name, setup.get('sweep_level', 0.0), 0.0):
+                LAST_EXECUTED_BAR[symbol] = now_hour_ts
+                _save_bar_state(LAST_EXECUTED_BAR)
 
         except Exception as e:
-            logger.error(f"[SAR] Error processing {symbol}: {e}\n{traceback.format_exc()}")
+            logger.error(f"[Institutional MTF] Error processing {symbol}: {e}\n{traceback.format_exc()}")
 
