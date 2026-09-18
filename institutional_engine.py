@@ -25,6 +25,28 @@ import pandas as pd
 logger = logging.getLogger("AlphaEdge.Institutional")
 
 
+def _compute_atr(df: pd.DataFrame, period: int = 14) -> float:
+    """
+    Computes Average True Range (ATR) over the last `period` completed bars.
+    True Range = max(High-Low, |High-PrevClose|, |Low-PrevClose|)
+    Returns 0.0 if data is insufficient.
+    """
+    if df is None or len(df) < period + 2:
+        return 0.0
+    highs  = df['high'].astype(float).values
+    lows   = df['low'].astype(float).values
+    closes = df['close'].astype(float).values
+    trs = []
+    for i in range(1, len(highs)):
+        hl  = highs[i] - lows[i]
+        hpc = abs(highs[i] - closes[i - 1])
+        lpc = abs(lows[i]  - closes[i - 1])
+        trs.append(max(hl, hpc, lpc))
+    # Use the last `period` TR values for a simple ATR
+    return float(np.mean(trs[-period:]))
+
+
+
 class InstitutionalEngine:
     def __init__(self, volume_multiplier: float = 1.6, lookback_h4: int = 50, lookback_swings: int = 25):
         self.volume_mult = volume_multiplier
@@ -207,8 +229,27 @@ class InstitutionalEngine:
 
         if is_discount and (has_buy_sweep or (range_info["is_deep_discount"] and has_whale_vol)):
             sweep_ref = min(h1_low, m15_low) if has_buy_sweep else range_info["range_low"]
-            sl_price = sweep_ref - (6.0 if symbol == "XAUUSDm" else 25.0)
-            tp_price = tick.ask + (15.0 if symbol == "XAUUSDm" else 35.0)
+
+            # ── ATR-Dynamic SL: sweep wick low minus 0.4 × H1 ATR ────────────
+            h1_atr = _compute_atr(df_h1, period=14)
+            is_gold = symbol == "XAUUSDm"
+            atr_sl_offset = round(h1_atr * 0.4, 5)
+            # Hard floor: minimum SL buffer regardless of ATR
+            min_sl_offset = 4.0 if is_gold else 20.0
+            sl_offset = max(atr_sl_offset, min_sl_offset)
+            sl_price = sweep_ref - sl_offset
+
+            # TP = minimum 2:1 R:R from entry, but no less than 1 ATR
+            sl_dist_from_entry = abs(tick.ask - sl_price)
+            tp_offset = max(sl_dist_from_entry * 2.0, h1_atr)
+            tp_price = tick.ask + tp_offset
+
+            logger.info(
+                f"[InstitutionalEngine] BUY SL — sweep_ref: {sweep_ref:.2f}, "
+                f"H1_ATR: {h1_atr:.4f}, offset: {sl_offset:.4f}, "
+                f"SL: {sl_price:.2f}, TP: {tp_price:.2f} (R:R {tp_offset/sl_dist_from_entry:.2f})"
+            )
+
 
             return {
                 "valid": True,
@@ -233,8 +274,25 @@ class InstitutionalEngine:
 
         if is_premium and (has_sell_sweep or (range_info["is_deep_premium"] and has_whale_vol)):
             sweep_ref = max(h1_high, m15_high) if has_sell_sweep else range_info["range_high"]
-            sl_price = sweep_ref + (6.0 if symbol == "XAUUSDm" else 25.0)
-            tp_price = tick.bid - (15.0 if symbol == "XAUUSDm" else 35.0)
+
+            # ── ATR-Dynamic SL: sweep wick high plus 0.4 × H1 ATR ────────────
+            h1_atr = _compute_atr(df_h1, period=14)
+            is_gold = symbol == "XAUUSDm"
+            atr_sl_offset = round(h1_atr * 0.4, 5)
+            min_sl_offset = 4.0 if is_gold else 20.0
+            sl_offset = max(atr_sl_offset, min_sl_offset)
+            sl_price = sweep_ref + sl_offset
+
+            # TP = minimum 2:1 R:R from entry, but no less than 1 ATR
+            sl_dist_from_entry = abs(sl_price - tick.bid)
+            tp_offset = max(sl_dist_from_entry * 2.0, h1_atr)
+            tp_price = tick.bid - tp_offset
+
+            logger.info(
+                f"[InstitutionalEngine] SELL SL — sweep_ref: {sweep_ref:.2f}, "
+                f"H1_ATR: {h1_atr:.4f}, offset: {sl_offset:.4f}, "
+                f"SL: {sl_price:.2f}, TP: {tp_price:.2f} (R:R {tp_offset/sl_dist_from_entry:.2f})"
+            )
 
             return {
                 "valid": True,

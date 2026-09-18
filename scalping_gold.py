@@ -35,6 +35,7 @@ import pandas as pd
 from news_catalyst_engine import NewsCatalystEngine
 from institutional_engine import InstitutionalEngine
 from pre_trade_backtester import PreTradeBacktester
+from structural_memory import StructuralMemory
 from m15_trade_analysis_logger import (
     log_trade_opened,
     update_trade_be,
@@ -80,6 +81,7 @@ ASSET_CONFIGS = {
 NEWS_ENGINE = None
 INST_ENGINE = None
 PRE_BACKTESTER = None
+STRUCT_MEMORY = None
 ACTIVE_BE_TRACKED = {}   # ticket -> True if Stage 1 BE set
 ACTIVE_LOCK_TRACKED = {} # ticket -> True if Stage 2 Lock set
 
@@ -586,13 +588,15 @@ def run_scalping_cycle():
       3. Whale Tick Volume surge >= 1.6x 20-period moving average.
       4. Pre-Trade Real-Time Backtest Gate (validates historical expectancy before execution).
     """
-    global NEWS_ENGINE, INST_ENGINE, PRE_BACKTESTER, LAST_EXECUTED_BAR
+    global NEWS_ENGINE, INST_ENGINE, PRE_BACKTESTER, STRUCT_MEMORY, LAST_EXECUTED_BAR
     if NEWS_ENGINE is None:
         NEWS_ENGINE = NewsCatalystEngine()
     if INST_ENGINE is None:
         INST_ENGINE = InstitutionalEngine()
     if PRE_BACKTESTER is None:
         PRE_BACKTESTER = PreTradeBacktester()
+    if STRUCT_MEMORY is None:
+        STRUCT_MEMORY = StructuralMemory()
 
     try:
         NEWS_ENGINE.sync_calendar()
@@ -624,6 +628,19 @@ def run_scalping_cycle():
         try:
             catalyst = NEWS_ENGINE.get_market_catalyst_status(symbol)
             manage_open_positions(symbol, cfg, catalyst)
+
+            # ── 0. 24/5 Structural Observation (session-agnostic) ─────────────────
+            # Structural memory updates on EVERY cycle regardless of trading session.
+            # The bot always knows the market structure even during off-hours.
+            STRUCT_MEMORY.update_structure(symbol)
+            struct_ctx = STRUCT_MEMORY.get_context(symbol)
+            logger.info(
+                f"[StructuralMemory] {symbol} | Regime: {struct_ctx.get('regime')} | "
+                f"PWH: {struct_ctx.get('pwh')} / PWL: {struct_ctx.get('pwl')} | "
+                f"PDH: {struct_ctx.get('pdh')} / PDL: {struct_ctx.get('pdl')} | "
+                f"Asia H/L: {struct_ctx.get('asia_high')} / {struct_ctx.get('asia_low')} | "
+                f"Weekly EQ: {struct_ctx.get('weekly_eq')}"
+            )
 
             info = mt5.symbol_info(symbol)
             contract = info.trade_contract_size
@@ -671,7 +688,48 @@ def run_scalping_cycle():
             if has_pos or LAST_EXECUTED_BAR.get(symbol) == now_hour_ts:
                 continue
 
-            # ── 2. Pre-Trade Real-Time Backtest Gate ────────────────────────────
+            # ── 2.5 Structural Confluence Check (Regime + Weekly EQ) ─────────────
+            # Institutional rule: only trade in the direction of the weekly regime.
+            # In EXPANSION_UP   — only take BUY setups (price in Discount zone).
+            # In EXPANSION_DOWN — only take SELL setups (price in Premium zone).
+            # In RANGE_BOUND    — both directions allowed, use weekly EQ as guide.
+            regime = struct_ctx.get('regime', 'UNKNOWN')
+            in_discount = STRUCT_MEMORY.is_in_weekly_discount(symbol, curr_price)
+            in_premium  = STRUCT_MEMORY.is_in_weekly_premium(symbol, curr_price)
+
+            regime_allows = True
+            if regime == "EXPANSION_UP" and target_dir == "SELL":
+                regime_allows = False
+                logger.info(
+                    f"[StructuralFilter] {symbol} SELL blocked — Regime is EXPANSION_UP "
+                    f"(wait for pullback to premium before shorting)."
+                )
+            elif regime == "EXPANSION_DOWN" and target_dir == "BUY":
+                regime_allows = False
+                logger.info(
+                    f"[StructuralFilter] {symbol} BUY blocked — Regime is EXPANSION_DOWN "
+                    f"(wait for bounce to discount before longing)."
+                )
+            elif regime not in ("EXPANSION_UP", "EXPANSION_DOWN"):
+                # RANGE_BOUND or UNKNOWN — use weekly equilibrium as guide
+                if target_dir == "BUY" and not in_discount:
+                    regime_allows = False
+                    logger.info(
+                        f"[StructuralFilter] {symbol} BUY blocked in RANGE — price above weekly EQ "
+                        f"({struct_ctx.get('weekly_eq')}), wait for discount."
+                    )
+                elif target_dir == "SELL" and not in_premium:
+                    regime_allows = False
+                    logger.info(
+                        f"[StructuralFilter] {symbol} SELL blocked in RANGE — price below weekly EQ "
+                        f"({struct_ctx.get('weekly_eq')}), wait for premium."
+                    )
+
+            if not regime_allows:
+                continue
+
+            # ── 3. Pre-Trade Real-Time Backtest Gate ────────────────────────────
+
             # Calculate intended SL and TP distances
             sl_price = setup['sl_price']
             tp_price = setup['tp_price']
