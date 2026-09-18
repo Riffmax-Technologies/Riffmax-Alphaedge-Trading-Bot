@@ -1,13 +1,13 @@
 {
-    "gold_tp_dollars": 25.0,
-    "gold_tp_catalyst_dollars": 40.0,
-    "gold_be_trigger_dollars": 10.0,
-    "dax_tp_pts": 40.0,
-    "dax_tp_catalyst_pts": 70.0,
-    "dax_be_trigger_pts": 20.0,
-    "regime": "USER_SET_LOTS_INSTITUTIONAL_SWING",
-    "win_rate": 0.0,
-    "total_trades": 0,
-    "net_pnl": 0.0,
-    "last_updated": "2026-09-18 13:05:49"
+    "gold_tp_dollars": 30.0,
+    "gold_tp_catalyst_dollars": 50.0,
+    "gold_be_trigger_dollars": 12.0,
+    "dax_tp_pts": 50.0,
+    "dax_tp_catalyst_pts": 85.0,
+    "dax_be_trigger_pts": 25.0,
+    "regime": "HIGH_CONVICTION_INSTITUTIONAL_SWING",
+    "win_rate": 60.2,
+    "total_trades": 83,
+    "net_pnl": 2.07,
+    "last_updated": "2026-09-18 13:35:22"
 }

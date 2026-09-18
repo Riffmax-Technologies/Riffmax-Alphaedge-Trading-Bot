@@ -151,7 +151,7 @@ _TELEGRAM_CHANNEL   = os.getenv("TELEGRAM_CHANNEL_ID", "@riffexalphaedgebot") # 
 # ─── CHANNEL SILENT MODE ────────────────────────────────────────────────────────
 # Set to True  → Channel receives NOTHING. Owner DM still works 100% normally.
 # Set to False → Channel broadcasts re-enabled (only when bot is proven profitable).
-CHANNEL_SILENT_MODE = True
+CHANNEL_SILENT_MODE = False
 # ────────────────────────────────────────────────────────────────────────────────
 
 def _is_channel_allowed(message: str) -> bool:
