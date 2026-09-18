@@ -350,13 +350,20 @@ class InstitutionalEngine:
         # M15 ATR for responsive sniper SL calculation
         m15_atr = _compute_atr(df_m15, period=14)
         is_gold = symbol == "XAUUSDm"
-        min_sl_pts = 3.5 if is_gold else 18.0
+        # DAX uses wider min SL (22 pts) to match its broader M15 ATR swing range
+        min_sl_pts = 3.5 if is_gold else 22.0
         sl_buffer = max(round(m15_atr * 0.5, 4), min_sl_pts)
 
+        # DAX Institutional Gate: Non-Gold symbols must confirm with whale volume.
+        # Gold fires freely on UT Bot signal alone (high liquidity, tight spread).
+        # DAX requires institutional volume participation to filter out noise entries.
+        dax_whale_ok = is_gold or has_whale_vol
+
         # ── BUY SETUP EVALUATION ──────────────────────────────────────────────
-        # Conditions: Macro BUY allowed AND (M15 UT Bot gives BUY OR M15 liquidity sweep with momentum)
+        # Conditions: Macro BUY allowed AND (M15 UT Bot gives BUY OR M15 sweep with momentum)
+        # AND for DAX: whale volume must confirm
         has_buy_trigger = (ut_signal_m15 == "BUY") or (m15_buy_sweep and ut_signal_h1 == "BUY")
-        if macro_buy_allowed and has_buy_trigger:
+        if macro_buy_allowed and has_buy_trigger and dax_whale_ok:
             sweep_ref = min(m15_low, h1_low) if (m15_buy_sweep or h1_buy_sweep) else (curr_price - sl_buffer)
             sl_price = sweep_ref - sl_buffer
 
@@ -387,9 +394,10 @@ class InstitutionalEngine:
                 }
 
         # ── SELL SETUP EVALUATION ─────────────────────────────────────────────
-        # Conditions: Macro SELL allowed AND (M15 UT Bot gives SELL OR M15 liquidity sweep with momentum)
+        # Conditions: Macro SELL allowed AND (M15 UT Bot gives SELL OR M15 sweep with momentum)
+        # AND for DAX: whale volume must confirm (same gate as BUY)
         has_sell_trigger = (ut_signal_m15 == "SELL") or (m15_sell_sweep and ut_signal_h1 == "SELL")
-        if macro_sell_allowed and has_sell_trigger:
+        if macro_sell_allowed and has_sell_trigger and dax_whale_ok:
             sweep_ref = max(m15_high, h1_high) if (m15_sell_sweep or h1_sell_sweep) else (curr_price + sl_buffer)
             sl_price = sweep_ref + sl_buffer
 
