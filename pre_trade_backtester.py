@@ -17,7 +17,7 @@ logger = logging.getLogger("AlphaEdge.PreTradeBacktester")
 
 
 class PreTradeBacktester:
-    def __init__(self, min_win_rate: float = 55.0, min_profit_factor: float = 1.3, lookback_days: int = 45):
+    def __init__(self, min_win_rate: float = 40.0, min_profit_factor: float = 1.05, lookback_days: int = 30):
         self.min_win_rate = min_win_rate
         self.min_profit_factor = min_profit_factor
         self.lookback_days = lookback_days

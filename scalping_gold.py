@@ -289,31 +289,33 @@ def _send_telegram(message):
 
 
 
-# ─── Session Filter (London 8:00 AM EAT to New York 8:00 PM EAT) ─────────────────
+# ─── Session Filter (24/5 Trading: All Sessions Active, Weekend Block Only) ─────
 def is_session_active():
     """
     Session Gateway:
-    Active strictly from 08:00 AM EAT (05:00 UTC) to 08:00 PM EAT (17:00 UTC).
-    Covers London Open through peak New York session.
-    Entries outside this window (Asian / overnight chop) and weekends are blocked.
+    Active 24/5 across all sessions (Asian, London, New York).
+    Allows trade execution any time market is open from Sunday evening through Friday close.
+    Blocks only weekend closure (Friday 23:55 EAT to Sunday 23:00 EAT).
     """
     now_utc = datetime.now(timezone.utc)
-    weekday = now_utc.weekday()
+    weekday = now_utc.weekday()  # Monday=0, ..., Friday=4, Saturday=5, Sunday=6
     
     # EAT is UTC+3
     now_eat = now_utc + timedelta(hours=3)
     hour_eat = now_eat.hour
+    minute_eat = now_eat.minute
 
-    # Weekend close (Friday 20:00 EAT through Sunday 20:00 EAT)
-    if weekday == 4 and hour_eat >= 20:
+    # Friday market close after 23:55 EAT
+    if weekday == 4 and (hour_eat == 23 and minute_eat >= 55):
         return False
+    # Saturday market completely closed
     if weekday == 5:
         return False
-    if weekday == 6 and hour_eat < 20:
+    # Sunday market closed before 23:00 EAT (market re-opens around 23:00 EAT)
+    if weekday == 6 and hour_eat < 23:
         return False
 
-    # Strictly 8:00 AM EAT to 8:00 PM EAT (08:00 <= hour < 20:00)
-    return 8 <= hour_eat < 20
+    return True
 
 
 # ─── Exact TradingView Pine Script Replication ─────────────────────────────────
@@ -684,9 +686,11 @@ def run_scalping_cycle():
             if not session_ok or news_blocks_entry:
                 continue
 
-            # Check if bar already executed today
-            now_hour_ts = int(datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0).timestamp())
-            if has_pos or LAST_EXECUTED_BAR.get(symbol) == now_hour_ts:
+            # Check if M15 bar already executed (allows multiple trades a day on fresh M15 setups)
+            now_dt = datetime.now(timezone.utc)
+            m15_minute = (now_dt.minute // 15) * 15
+            now_m15_ts = int(now_dt.replace(minute=m15_minute, second=0, microsecond=0).timestamp())
+            if has_pos or LAST_EXECUTED_BAR.get(symbol) == now_m15_ts:
                 continue
 
             # ── 2.5 Structural Confluence Check (Regime + Weekly EQ) ─────────────
@@ -711,20 +715,6 @@ def run_scalping_cycle():
                     f"[StructuralFilter] {symbol} BUY blocked — Regime is EXPANSION_DOWN "
                     f"(wait for bounce to discount before longing)."
                 )
-            elif regime not in ("EXPANSION_UP", "EXPANSION_DOWN"):
-                # RANGE_BOUND or UNKNOWN — use weekly equilibrium as guide
-                if target_dir == "BUY" and not in_discount:
-                    regime_allows = False
-                    logger.info(
-                        f"[StructuralFilter] {symbol} BUY blocked in RANGE — price above weekly EQ "
-                        f"({struct_ctx.get('weekly_eq')}), wait for discount."
-                    )
-                elif target_dir == "SELL" and not in_premium:
-                    regime_allows = False
-                    logger.info(
-                        f"[StructuralFilter] {symbol} SELL blocked in RANGE — price below weekly EQ "
-                        f"({struct_ctx.get('weekly_eq')}), wait for premium."
-                    )
 
             if not regime_allows:
                 continue
@@ -775,7 +765,7 @@ def run_scalping_cycle():
             )
 
             if execute_order(symbol, target_dir, cfg['lot'], sl_price, tp_price, mode_desc, event_name, setup.get('sweep_level', 0.0), 0.0):
-                LAST_EXECUTED_BAR[symbol] = now_hour_ts
+                LAST_EXECUTED_BAR[symbol] = now_m15_ts
                 _save_bar_state(LAST_EXECUTED_BAR)
 
         except Exception as e:

@@ -308,61 +308,73 @@ class InstitutionalEngine:
         df_h1 = mtf["H1"]
         df_m15 = mtf["M15"]
 
-        # 1. H4 Dealing Range Analysis
+        # 1. H4 Macro Bias & Dealing Range Analysis
         range_info = self.analyze_dealing_range(df_h4, curr_price)
         if not range_info:
             return {"valid": False, "direction": "NONE", "reason": "Dealing range calculation failed"}
 
-        # 2. Check for Bottom BUY Setup
-        is_discount = range_info["is_discount"]
-        h1_buy_sweep, h1_low = self.detect_liquidity_sweep(df_h1, "BUY")
+        # H4 Macro Structure & Trend Detection (last 4 completed H4 bars)
+        h4_highs = df_h4['high'].astype(float).values
+        h4_lows  = df_h4['low'].astype(float).values
+        h4_trend = "RANGE"
+        if len(h4_highs) >= 5:
+            if h4_highs[-2] > h4_highs[-3] > h4_highs[-4] and h4_lows[-2] > h4_lows[-3] > h4_lows[-4]:
+                h4_trend = "BULLISH"
+            elif h4_highs[-2] < h4_highs[-3] < h4_highs[-4] and h4_lows[-2] < h4_lows[-3] < h4_lows[-4]:
+                h4_trend = "BEARISH"
+
+        # Macro Bias:
+        # BUY bias if in H4 Discount (< 50%) OR if H4 Trend is BULLISH outside deep premium
+        # SELL bias if in H4 Premium (> 50%) OR if H4 Trend is BEARISH outside deep discount
+        macro_buy_allowed = range_info["is_discount"] or (h4_trend == "BULLISH" and not range_info["is_deep_premium"])
+        macro_sell_allowed = range_info["is_premium"] or (h4_trend == "BEARISH" and not range_info["is_deep_discount"])
+
+        # 2. M15 / H1 Micro Actionable Trigger Evaluation
         m15_buy_sweep, m15_low = self.detect_liquidity_sweep(df_m15, "BUY")
-        has_buy_sweep = h1_buy_sweep or m15_buy_sweep
+        m15_sell_sweep, m15_high = self.detect_liquidity_sweep(df_m15, "SELL")
+        h1_buy_sweep, h1_low = self.detect_liquidity_sweep(df_h1, "BUY")
+        h1_sell_sweep, h1_high = self.detect_liquidity_sweep(df_h1, "SELL")
 
-        h1_vol_whale, h1_ratio = self.detect_whale_volume(df_h1)
         m15_vol_whale, m15_ratio = self.detect_whale_volume(df_m15)
-        has_whale_vol = h1_vol_whale or m15_vol_whale
-        max_vol_ratio = max(h1_ratio, m15_ratio)
+        h1_vol_whale, h1_ratio = self.detect_whale_volume(df_h1)
+        has_whale_vol = m15_vol_whale or h1_vol_whale
+        max_vol_ratio = max(m15_ratio, h1_ratio)
 
-        has_buy_fvg, fvg_size = self.detect_fair_value_gap(df_h1, "BUY")
+        has_buy_fvg, _ = self.detect_fair_value_gap(df_m15, "BUY")
+        has_sell_fvg, _ = self.detect_fair_value_gap(df_m15, "SELL")
 
-        # ── UT Bot Confirmation (M15) — Gate 1.5 ─────────────────────────────
-        # Detect confirmed momentum reversal using ATR trailing stop crossover.
-        # This eliminates sweeps that don't follow through (false reversals).
+        # M15 & H1 UT Bot Momentum Signals
         ut_signal_m15 = self.compute_ut_bot_signal(df_m15, key_value=1.0, atr_period=10)
         ut_signal_h1  = self.compute_ut_bot_signal(df_h1,  key_value=1.0, atr_period=10)
-        # UT Bot passes if either M15 OR H1 agrees with the setup direction
-        # (M15 is more sensitive, H1 adds higher-timeframe confirmation)
 
-        if is_discount and (has_buy_sweep or (range_info["is_deep_discount"] and has_whale_vol)):
-            ut_confirms_buy = (ut_signal_m15 == "BUY") or (ut_signal_h1 == "BUY")
-            if ut_confirms_buy:
-                sweep_ref = min(h1_low, m15_low) if has_buy_sweep else range_info["range_low"]
+        # M15 ATR for responsive sniper SL calculation
+        m15_atr = _compute_atr(df_m15, period=14)
+        is_gold = symbol == "XAUUSDm"
+        min_sl_pts = 3.5 if is_gold else 18.0
+        sl_buffer = max(round(m15_atr * 0.5, 4), min_sl_pts)
 
-                # ── ATR-Dynamic SL: sweep wick low minus 0.4 × H1 ATR ────────────
-                h1_atr = _compute_atr(df_h1, period=14)
-                is_gold = symbol == "XAUUSDm"
-                atr_sl_offset = round(h1_atr * 0.4, 5)
-                # Hard floor: minimum SL buffer regardless of ATR
-                min_sl_offset = 4.0 if is_gold else 20.0
-                sl_offset = max(atr_sl_offset, min_sl_offset)
-                sl_price = sweep_ref - sl_offset
+        # ── BUY SETUP EVALUATION ──────────────────────────────────────────────
+        # Conditions: Macro BUY allowed AND (M15 UT Bot gives BUY OR M15 liquidity sweep with momentum)
+        has_buy_trigger = (ut_signal_m15 == "BUY") or (m15_buy_sweep and ut_signal_h1 == "BUY")
+        if macro_buy_allowed and has_buy_trigger:
+            sweep_ref = min(m15_low, h1_low) if (m15_buy_sweep or h1_buy_sweep) else (curr_price - sl_buffer)
+            sl_price = sweep_ref - sl_buffer
 
-                # TP = minimum 2:1 R:R from entry, but no less than 1 ATR
-                sl_dist_from_entry = abs(tick.ask - sl_price)
-                tp_offset = max(sl_dist_from_entry * 2.0, h1_atr)
+            # Target 1.35x - 1.5x R:R to ensure high probability hit rate
+            sl_dist = abs(tick.ask - sl_price)
+            if sl_dist > 0:
+                tp_offset = max(sl_dist * 1.4, m15_atr * 1.5)
                 tp_price = tick.ask + tp_offset
 
                 logger.info(
-                    f"[InstitutionalEngine] BUY SL — sweep_ref: {sweep_ref:.2f}, "
-                    f"H1_ATR: {h1_atr:.4f}, offset: {sl_offset:.4f}, "
-                    f"SL: {sl_price:.2f}, TP: {tp_price:.2f} (R:R {tp_offset/sl_dist_from_entry:.2f})"
+                    f"[InstitutionalEngine] BUY Triggered! {symbol} | H4: {h4_trend} ({range_info['location_pct']:.1f}%) | "
+                    f"UT M15: {ut_signal_m15} | Entry: {tick.ask:.2f} | SL: {sl_price:.2f} | TP: {tp_price:.2f} (R:R {tp_offset/sl_dist:.2f})"
                 )
 
                 return {
                     "valid": True,
                     "direction": "BUY",
-                    "reason": f"Institutional Bottom Accumulation (Discount: {range_info['location_pct']:.1f}%, Vol: {max_vol_ratio}x, Sweep: {has_buy_sweep}, UT: {ut_signal_m15}/{ut_signal_h1})",
+                    "reason": f"H4 Bias {h4_trend} ({range_info['location_pct']:.1f}%) + M15 UT Bot {ut_signal_m15} Trigger",
                     "entry_price": tick.ask,
                     "sl_price": sl_price,
                     "tp_price": tp_price,
@@ -373,47 +385,28 @@ class InstitutionalEngine:
                     "fvg_detected": has_buy_fvg,
                     "ut_bot": ut_signal_m15
                 }
-            else:
-                logger.info(
-                    f"[UT Bot] {symbol} BUY sweep detected but UT Bot not confirming "
-                    f"(M15: {ut_signal_m15}, H1: {ut_signal_h1}) — waiting for crossover."
-                )
 
-        # 3. Check for Top SELL Setup
-        is_premium = range_info["is_premium"]
-        h1_sell_sweep, h1_high = self.detect_liquidity_sweep(df_h1, "SELL")
-        m15_sell_sweep, m15_high = self.detect_liquidity_sweep(df_m15, "SELL")
-        has_sell_sweep = h1_sell_sweep or m15_sell_sweep
-        has_sell_fvg, _ = self.detect_fair_value_gap(df_h1, "SELL")
+        # ── SELL SETUP EVALUATION ─────────────────────────────────────────────
+        # Conditions: Macro SELL allowed AND (M15 UT Bot gives SELL OR M15 liquidity sweep with momentum)
+        has_sell_trigger = (ut_signal_m15 == "SELL") or (m15_sell_sweep and ut_signal_h1 == "SELL")
+        if macro_sell_allowed and has_sell_trigger:
+            sweep_ref = max(m15_high, h1_high) if (m15_sell_sweep or h1_sell_sweep) else (curr_price + sl_buffer)
+            sl_price = sweep_ref + sl_buffer
 
-        if is_premium and (has_sell_sweep or (range_info["is_deep_premium"] and has_whale_vol)):
-            ut_confirms_sell = (ut_signal_m15 == "SELL") or (ut_signal_h1 == "SELL")
-            if ut_confirms_sell:
-                sweep_ref = max(h1_high, m15_high) if has_sell_sweep else range_info["range_high"]
-
-                # ── ATR-Dynamic SL: sweep wick high plus 0.4 × H1 ATR ────────────
-                h1_atr = _compute_atr(df_h1, period=14)
-                is_gold = symbol == "XAUUSDm"
-                atr_sl_offset = round(h1_atr * 0.4, 5)
-                min_sl_offset = 4.0 if is_gold else 20.0
-                sl_offset = max(atr_sl_offset, min_sl_offset)
-                sl_price = sweep_ref + sl_offset
-
-                # TP = minimum 2:1 R:R from entry, but no less than 1 ATR
-                sl_dist_from_entry = abs(sl_price - tick.bid)
-                tp_offset = max(sl_dist_from_entry * 2.0, h1_atr)
+            sl_dist = abs(sl_price - tick.bid)
+            if sl_dist > 0:
+                tp_offset = max(sl_dist * 1.4, m15_atr * 1.5)
                 tp_price = tick.bid - tp_offset
 
                 logger.info(
-                    f"[InstitutionalEngine] SELL SL — sweep_ref: {sweep_ref:.2f}, "
-                    f"H1_ATR: {h1_atr:.4f}, offset: {sl_offset:.4f}, "
-                    f"SL: {sl_price:.2f}, TP: {tp_price:.2f} (R:R {tp_offset/sl_dist_from_entry:.2f})"
+                    f"[InstitutionalEngine] SELL Triggered! {symbol} | H4: {h4_trend} ({range_info['location_pct']:.1f}%) | "
+                    f"UT M15: {ut_signal_m15} | Entry: {tick.bid:.2f} | SL: {sl_price:.2f} | TP: {tp_price:.2f} (R:R {tp_offset/sl_dist:.2f})"
                 )
 
                 return {
                     "valid": True,
                     "direction": "SELL",
-                    "reason": f"Institutional Top Distribution (Premium: {range_info['location_pct']:.1f}%, Vol: {max_vol_ratio}x, Sweep: {has_sell_sweep}, UT: {ut_signal_m15}/{ut_signal_h1})",
+                    "reason": f"H4 Bias {h4_trend} ({range_info['location_pct']:.1f}%) + M15 UT Bot {ut_signal_m15} Trigger",
                     "entry_price": tick.bid,
                     "sl_price": sl_price,
                     "tp_price": tp_price,
@@ -424,21 +417,11 @@ class InstitutionalEngine:
                     "fvg_detected": has_sell_fvg,
                     "ut_bot": ut_signal_m15
                 }
-            else:
-                logger.info(
-                    f"[UT Bot] {symbol} SELL sweep detected but UT Bot not confirming "
-                    f"(M15: {ut_signal_m15}, H1: {ut_signal_h1}) — waiting for crossover."
-                )
 
-        skip_reason = "Waiting. "
-        if not is_discount and not is_premium:
-            skip_reason += f"Price at Equilibrium ({range_info['location_pct']:.1f}%). Refusing entry halfway."
-        elif is_discount and not has_buy_sweep:
-            skip_reason += f"In Discount ({range_info['location_pct']:.1f}%), waiting for bottom liquidity sweep/whale surge."
-        elif is_premium and not has_sell_sweep:
-            skip_reason += f"In Premium ({range_info['location_pct']:.1f}%), waiting for top liquidity sweep/whale surge."
-        else:
-            skip_reason += f"Sweep detected but UT Bot confirms no momentum yet (M15: {ut_signal_m15}, H1: {ut_signal_h1})."
+        skip_reason = (
+            f"Waiting for alignment. H4: {h4_trend} (Eq: {range_info['location_pct']:.1f}%), "
+            f"M15 UT: {ut_signal_m15}, Sweeps: B={m15_buy_sweep}/S={m15_sell_sweep}."
+        )
 
         return {
             "valid": False,
