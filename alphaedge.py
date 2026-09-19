@@ -1862,6 +1862,7 @@ if __name__ == "__main__":
     last_daily_report_date = None
     last_weekly_report_date = None
     _session_open_alert_sent = False
+    _ai_run_state = {}   # tracks last AI auto-learning run to avoid re-running same minute
     nf = NewsFilter()
 
     _start_telegram_command_listener()
@@ -1970,8 +1971,8 @@ if __name__ == "__main__":
                         logger.error(f"Failed to send weekly report: {e}")
 
             # ── Periodic AI Auto-Learning Brain (Every 30 Minutes) ──────────
-            if now.minute in [0, 30] and getattr(run_scalping_cycle, "_ai_run_minute", None) != (now.hour, now.minute):
-                run_scalping_cycle._ai_run_minute = (now.hour, now.minute)
+            if now.minute in [0, 30] and _ai_run_state.get("last_run") != (now.hour, now.minute):
+                _ai_run_state["last_run"] = (now.hour, now.minute)
                 try:
                     from ai_learning import AutoLearner
                     logger.info("Executing periodic AI Auto-Learning evaluation...")
