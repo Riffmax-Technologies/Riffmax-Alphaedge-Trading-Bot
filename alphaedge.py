@@ -1813,28 +1813,30 @@ if __name__ == "__main__":
 
     logger.info("=" * 65)
     logger.info("  ALPHAEDGE — INSTITUTIONAL MTF WHALE FLOW SWING ENGINE")
-    logger.info("  Assets: XAUUSDm (Gold) & DE30m (DAX)")
+    logger.info("  Assets: Gold (XAUUSDm), DAX (DE30m), Bitcoin (BTCUSDm)")
     logger.info("  Strategy: H4 Dealing Range | Liquidity Sweep | Whale Volume | Pre-Trade BT")
-    logger.info("  Gold: 0.02 lot | Take Profit: $25.00 USD | BE: $10.00 | Lock: $18 -> $12")
-    logger.info("  DAX:  0.10 lot | Take Profit: 40 pts     | BE: 20 pts  | Lock: 30 -> 20 pts")
-    logger.info("  Session: 08:00 AM - 08:00 PM EAT (London + New York only)")
+    logger.info("  Gold: 0.02 lot | Take Profit: $25.00 USD | BE: $10.00 | Lock: $18 -> $12 (24/5)")
+    logger.info("  DAX:  0.10 lot | Take Profit: 40 pts     | BE: 20 pts  | Lock: 30 -> 20 pts (24/5)")
+    logger.info("  BTC:  0.01 lot | Take Profit: $25.00 USD | BE: $10.00 | Lock: $18 -> $12 (24/7)")
+    logger.info("  Session: 24/5 for Forex/Indices | 24/7 for Bitcoin (BTCUSDm)")
     logger.info("  Guidance: ForexFactory Real-Time Macro News Engine (USD & EUR)")
     logger.info("=" * 65)
 
     # 1. Send Online Startup Notification to Telegram
     startup_msg = (
         "<b>🏛 AlphaEdge — Institutional MTF Whale Flow Engine Active</b>\n\n"
-        "<b>Assets:</b> Gold (XAUUSDm) &amp; DAX (DE30m)\n"
+        "<b>Assets:</b> Gold (XAUUSDm), DAX (DE30m), Bitcoin (BTCUSDm)\n"
         "<b>Strategy:</b> H4 Dealing Range · Liquidity Sweep · Whale Volume · Pre-Trade Backtest Gate\n\n"
         "<b>Profit &amp; Risk Targets:</b>\n"
-        "• <b>Gold (XAUUSDm):</b> $25.00 TP | BE at $10.00 | Lock $18→$12 | <b>0.02 Lot</b>\n"
-        "• <b>DAX (DE30m):</b> 40 Pts TP | BE at 20 pts | Lock 30→20 pts | <b>0.10 Lot</b>\n\n"
+        "• <b>Gold (XAUUSDm):</b> $25.00 TP | BE at $10.00 | Lock $18→$12 | <b>0.02 Lot</b> (24/5)\n"
+        "• <b>DAX (DE30m):</b> 40 Pts TP | BE at 20 pts | Lock 30→20 pts | <b>0.10 Lot</b> (24/5)\n"
+        "• <b>Bitcoin (BTCUSDm):</b> $25.00 TP | BE at $10.00 | Lock $18→$12 | <b>0.01 Lot</b> (24/7)\n\n"
         "<b>Entry Rules:</b>\n"
         "• Strict Discount (BUY) / Premium (SELL) zone only — never chase halfway!\n"
         "• Requires: Liquidity Sweep OR Deep Zone + Whale Volume surge (≥1.6x avg)\n"
-        "• Pre-trade 45-day H1 backtest gate: min 55% WR &amp; 1.3 Profit Factor\n\n"
+        "• Pre-trade 30-day backtest gate: min 40% WR &amp; 1.05 Profit Factor\n\n"
         "<b>Session Gateway:</b>\n"
-        "• Active: 08:00 AM to 08:00 PM EAT (London + New York only).\n"
+        "• Active: 24/5 for Forex/Indices, 24/7 for Bitcoin (BTCUSDm).\n"
         "• News shield: Entries frozen 5 min before &amp; after high-impact events.\n\n"
         "<b>Status:</b> 🟢 Engine ready. Hunting institutional setups now."
     )
@@ -1879,14 +1881,7 @@ if __name__ == "__main__":
             state_file = Path("bot_state.txt")
             if state_file.exists() and state_file.read_text().strip().upper() == "STOPPED":
                 logger.info("Scanner is PAUSED via Telegram (/start_scanner to resume). Skipping scan.")
-            elif not is_trading_session_active():
-                logger.info("[Weekend Gate] Market is closed for the weekend. Bot will resume Sunday 22:00 UTC.")
-
-
-
-
             else:
-                # ── Autonomous M1 Gold Scalper (Macro Engine Disabled) ──
                 try:
                     from scalping_gold import run_scalping_cycle
                     run_scalping_cycle()

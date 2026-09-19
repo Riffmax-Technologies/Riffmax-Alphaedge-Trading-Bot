@@ -75,6 +75,21 @@ ASSET_CONFIGS = {
         "max_sl_pts": 25.0,               # Max Initial Risk Cap: 25 pts (~2.50 EUR max risk)
         "sl_atr_mult": 1.2,
         "currency": "EUR"
+    },
+    "BTCUSDm": {
+        "symbol": "BTCUSDm",
+        "lot": 0.01,                      # 0.01 Micro Lot (~$810 position value)
+        "key_mult": 1.0,
+        "atr_period": 10,
+        "tp_pts": 2500.0,                 # Target: 2,500 pts ($25.00 USD profit at 0.01 lot)
+        "tp_catalyst_pts": 4000.0,        # Expanded 4,000 pts during High Volatility
+        "be_trigger_pts": 1000.0,         # Stage 1: Move SL to Entry at $1,000 price move ($10.00 profit)
+        "lock_trigger_pts": 1800.0,       # Stage 2: Trigger Profit Lock at $1,800 move ($18.00 profit)
+        "lock_amount_pts": 1200.0,        # Stage 2: Lock $12.00 profit into SL
+        "max_sl_pts": 1600.0,             # Max Initial Risk Cap: 1,600 pts ($16.00 USD risk)
+        "sl_atr_mult": 1.2,
+        "currency": "USD",
+        "is_24_7": True
     }
 }
 
@@ -289,14 +304,16 @@ def _send_telegram(message):
 
 
 
-# ─── Session Filter (24/5 Trading: All Sessions Active, Weekend Block Only) ─────
-def is_session_active():
+# ─── Session Filter (24/5 Trading for Forex/Indices, 24/7 for Crypto) ─────
+def is_session_active(symbol=None):
     """
     Session Gateway:
-    Active 24/5 across all sessions (Asian, London, New York).
-    Allows trade execution any time market is open from Sunday evening through Friday close.
-    Blocks only weekend closure (Friday 23:55 EAT to Sunday 23:00 EAT).
+    Crypto (BTCUSDm) is 24/7 active continuously with no weekend pause.
+    Forex & Indices (XAUUSDm, DE30m) are active 24/5 from Sunday 23:00 EAT through Friday 23:55 EAT.
     """
+    if symbol == "BTCUSDm":
+        return True
+
     now_utc = datetime.now(timezone.utc)
     weekday = now_utc.weekday()  # Monday=0, ..., Friday=4, Saturday=5, Sunday=6
     
@@ -308,10 +325,10 @@ def is_session_active():
     # Friday market close after 23:55 EAT
     if weekday == 4 and (hour_eat == 23 and minute_eat >= 55):
         return False
-    # Saturday market completely closed
+    # Saturday market completely closed for Forex/Indices
     if weekday == 5:
         return False
-    # Sunday market closed before 23:00 EAT (market re-opens around 23:00 EAT)
+    # Sunday market closed before 23:00 EAT for Forex/Indices
     if weekday == 6 and hour_eat < 23:
         return False
 
@@ -683,7 +700,8 @@ def run_scalping_cycle():
             positions = mt5.positions_get(symbol=symbol)
             has_pos = len(positions) > 0 if positions else False
 
-            if not session_ok or news_blocks_entry:
+            sym_session_ok = is_session_active(symbol)
+            if not sym_session_ok or news_blocks_entry:
                 continue
 
             # Check if M15 bar already executed (allows multiple trades a day on fresh M15 setups)
@@ -733,7 +751,7 @@ def run_scalping_cycle():
                 if sl_dist > max_sl_dist:
                     sl_dist = max_sl_dist
                     sl_price = (tick.ask - sl_dist) if target_dir == "BUY" else (tick.bid + sl_dist)
-            elif symbol == "DE30m" and 'max_sl_pts' in cfg:
+            elif 'max_sl_pts' in cfg:
                 if sl_dist > cfg['max_sl_pts']:
                     sl_dist = cfg['max_sl_pts']
                     sl_price = (tick.ask - sl_dist) if target_dir == "BUY" else (tick.bid + sl_dist)
