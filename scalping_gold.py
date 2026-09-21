@@ -99,9 +99,11 @@ PRE_BACKTESTER = None
 STRUCT_MEMORY = None
 ACTIVE_BE_TRACKED = {}   # ticket -> True if Stage 1 BE set
 ACTIVE_LOCK_TRACKED = {} # ticket -> True if Stage 2 Lock set
+WAS_OPEN_TRACKED = {}    # symbol -> True if position was open in previous cycle
 
-# ─── Persistent Bar State (survives bot restarts — prevents re-entry on same 1H bar) ────
+# ─── Persistent Bar & Closure State (survives bot restarts) ────────────────────
 _BAR_STATE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_executed_bar.json")
+_CLOSED_TIME_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_closed_time.json")
 
 def _load_bar_state():
     """Load LAST_EXECUTED_BAR from disk. Returns dict of {symbol: bar_time (int)}."""
@@ -109,7 +111,6 @@ def _load_bar_state():
         if os.path.exists(_BAR_STATE_FILE):
             with open(_BAR_STATE_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            # Only keep bars from the current trading day — stale days are cleared
             now_utc = datetime.now(timezone.utc)
             today_date = now_utc.date()
             filtered = {}
@@ -130,8 +131,26 @@ def _save_bar_state(bar_dict):
     except Exception:
         pass
 
-# Load on startup — populated with today's already-executed bars (if any)
+def _load_closed_time():
+    """Load LAST_CLOSED_TIME from disk."""
+    try:
+        if os.path.exists(_CLOSED_TIME_FILE):
+            with open(_CLOSED_TIME_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+    except Exception:
+        pass
+    return {}
+
+def _save_closed_time(closed_dict):
+    """Persist LAST_CLOSED_TIME to disk."""
+    try:
+        with open(_CLOSED_TIME_FILE, "w", encoding="utf-8") as f:
+            json.dump(closed_dict, f)
+    except Exception:
+        pass
+
 LAST_EXECUTED_BAR = _load_bar_state()
+LAST_CLOSED_TIME  = _load_closed_time()
 
 
 def apply_ai_learned_settings():
@@ -700,18 +719,31 @@ def run_scalping_cycle():
             positions = mt5.positions_get(symbol=symbol)
             has_pos = len(positions) > 0 if positions else False
 
+            # Detect position closure (whether closed manually by user or automatically by TP/SL)
+            was_open = WAS_OPEN_TRACKED.get(symbol, False)
+            if was_open and not has_pos:
+                now_closure_ts = int(datetime.now(timezone.utc).timestamp())
+                LAST_CLOSED_TIME[symbol] = now_closure_ts
+                _save_closed_time(LAST_CLOSED_TIME)
+                logger.info(
+                    f"[{symbol}] Position closure detected! 60-Minute Post-Closure Cooldown activated. "
+                    f"No re-entry until {datetime.fromtimestamp(now_closure_ts + 3600, tz=timezone.utc).strftime('%H:%M:%S')} UTC."
+                )
+            WAS_OPEN_TRACKED[symbol] = has_pos
+
             sym_session_ok = is_session_active(symbol)
             if not sym_session_ok or news_blocks_entry:
                 continue
 
-            # Check position state and enforce 1-Hour Post-Trade Cooldown (3600 seconds)
-            # Prevents immediate re-entry chasing after a trade closes!
+            # Check position state and enforce 60-Minute Cooldown from BOTH last execution AND last closure!
             now_dt = datetime.now(timezone.utc)
+            now_ts = int(now_dt.timestamp())
             m15_minute = (now_dt.minute // 15) * 15
             now_m15_ts = int(now_dt.replace(minute=m15_minute, second=0, microsecond=0).timestamp())
             last_exec_ts = LAST_EXECUTED_BAR.get(symbol, 0)
-            
-            if has_pos or (now_m15_ts - last_exec_ts < 3600):
+            last_closed_ts = LAST_CLOSED_TIME.get(symbol, 0)
+
+            if has_pos or (now_ts - last_exec_ts < 3600) or (now_ts - last_closed_ts < 3600):
                 continue
 
             # ── 2.5 Structural Confluence Check (Regime + Weekly EQ) ─────────────
