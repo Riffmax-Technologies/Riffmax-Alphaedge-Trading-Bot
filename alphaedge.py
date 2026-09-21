@@ -1854,13 +1854,11 @@ if __name__ == "__main__":
     from performance_report import generate_performance_report
     from datetime import timedelta
     from pathlib import Path
-    from news_filter import NewsFilter
 
     last_daily_report_date = None
     last_weekly_report_date = None
     _session_open_alert_sent = False
     _ai_run_state = {}   # tracks last AI auto-learning run to avoid re-running same minute
-    nf = NewsFilter()
 
     _start_telegram_command_listener()
 
