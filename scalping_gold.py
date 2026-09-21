@@ -154,21 +154,15 @@ LAST_CLOSED_TIME  = _load_closed_time()
 
 
 def apply_ai_learned_settings():
-    """Loads dynamically tuned parameters from the AI Auto-Learning Brain."""
+    """Loads dynamically tuned parameters from the AI Auto-Learning Brain, strictly preserving institutional swing thresholds."""
     cfg_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config_learned_m15.json")
     if os.path.exists(cfg_file):
         try:
             with open(cfg_file, "r", encoding="utf-8") as f:
                 c = json.load(f)
-            # Gold: apply all tuned parameters (fallbacks match 0.02 lot calibration)
-            ASSET_CONFIGS["XAUUSDm"]["tp_dollars"]          = float(c.get("gold_tp_dollars", 25.0))
-            ASSET_CONFIGS["XAUUSDm"]["tp_catalyst_dollars"] = float(c.get("gold_tp_catalyst_dollars", 40.0))
-            ASSET_CONFIGS["XAUUSDm"]["be_trigger_dollars"]  = float(c.get("gold_be_trigger_dollars", 10.0))
-
-            # DAX: apply all tuned parameters
-            ASSET_CONFIGS["DE30m"]["tp_pts"]          = float(c.get("dax_tp_pts", 40.0))
-            ASSET_CONFIGS["DE30m"]["tp_catalyst_pts"] = float(c.get("dax_tp_catalyst_pts", 70.0))
-            ASSET_CONFIGS["DE30m"]["be_trigger_pts"]  = float(c.get("dax_be_trigger_pts", 20.0))
+            # Retain institutional parameters ($40 Gold TP, 150pt DAX TP, 2500pt BTC TP)
+            # Do NOT allow dynamic AI brain to shrink targets down to scalping levels.
+            pass
         except Exception as e:
             logger.debug(f"[Scalp] Dynamic config load skipped: {e}")
 
@@ -445,17 +439,22 @@ def manage_open_positions(symbol, cfg, catalyst_state):
         pts_gain = (current_price - entry_price) if pos_type == "BUY" else (entry_price - current_price)
         dollar_gain = pts_gain * dollar_per_point
         
-        # 1. Stage 1: Dynamic Break-Even Shield Check ($4.00 Gold / 15 pts DAX)
+        # 1. Stage 1: Dynamic Break-Even Shield Check (Gold +$15.00 / DAX +60 pts / BTC +1,000 pts)
         is_be_active = ACTIVE_BE_TRACKED.get(ticket, False)
         if not is_be_active:
             be_condition = False
-            if symbol == "XAUUSDm" and dollar_gain >= cfg['be_trigger_dollars']:
+            if symbol == "XAUUSDm" and dollar_gain >= cfg.get('be_trigger_dollars', 15.0):
                 be_condition = True
-            elif symbol == "DE30m" and pts_gain >= cfg['be_trigger_pts']:
+                be_buffer = 0.5  # Lock +0.5 pt ($1.00 USD) on Gold to cover spread
+            elif symbol == "DE30m" and pts_gain >= cfg.get('be_trigger_pts', 60.0):
                 be_condition = True
+                be_buffer = 10.0  # Lock +10 pts on DAX to cover spread
+            elif symbol == "BTCUSDm" and pts_gain >= cfg.get('be_trigger_pts', 1000.0):
+                be_condition = True
+                be_buffer = 50.0  # Lock +50 pts on BTC to cover spread
                 
             if be_condition:
-                new_sl = entry_price + (20 * point) if pos_type == "BUY" else entry_price - (20 * point)
+                new_sl = entry_price + be_buffer if pos_type == "BUY" else entry_price - be_buffer
                 modify_sl(ticket, symbol, new_sl, current_tp)
                 ACTIVE_BE_TRACKED[ticket] = True
                 update_trade_be(ticket) # Record in dedicated trade analysis log
@@ -463,28 +462,33 @@ def manage_open_positions(symbol, cfg, catalyst_state):
                     f"🛡️ <b>[Break-Even Protected]</b>\n"
                     f"Asset: <b>{symbol}</b> (#{ticket})\n"
                     f"Profit Reached: +${dollar_gain:.2f}\n"
-                    f"SL moved to Entry ({entry_price:.2f}). Fakeout risk eliminated!"
+                    f"SL moved to Entry + Buffer ({new_sl:.2f}). Fakeout risk eliminated!"
                 )
-                logger.info(f"[{symbol}] BREAK-EVEN LOCKED on #{ticket}! Gain: ${dollar_gain:.2f}")
+                logger.info(f"[{symbol}] BREAK-EVEN LOCKED on #{ticket}! Gain: ${dollar_gain:.2f} -> SL: {new_sl:.2f}")
                 _send_telegram(msg)
 
-        # 2. Stage 2: Advanced Profit Lock ($18.00 Gold -> Lock $12.00 / 30 pts DAX -> Lock 20 pts)
+        # 2. Stage 2: Advanced Profit Lock (Gold $25 -> lock $18 / DAX 100 pts -> lock 80 pts / BTC 1800 pts -> lock 1200 pts)
         is_lock_active = ACTIVE_LOCK_TRACKED.get(ticket, False)
         if not is_lock_active:
             lock_condition = False
-            if symbol == "XAUUSDm" and dollar_gain >= cfg.get('lock_trigger_dollars', 18.0):
+            if symbol == "XAUUSDm" and dollar_gain >= cfg.get('lock_trigger_dollars', 25.0):
                 lock_condition = True
-                lock_dist = cfg.get('lock_amount_dollars', 12.0) / dollar_per_point
-            elif symbol == "DE30m" and pts_gain >= cfg.get('lock_trigger_pts', 30.0):
+                lock_dist = cfg.get('lock_amount_dollars', 18.0) / dollar_per_point
+                locked_profit_desc = f"+${cfg.get('lock_amount_dollars', 18.0):.2f}"
+            elif symbol == "DE30m" and pts_gain >= cfg.get('lock_trigger_pts', 100.0):
                 lock_condition = True
-                lock_dist = cfg.get('lock_amount_pts', 20.0)
+                lock_dist = cfg.get('lock_amount_pts', 80.0)
+                locked_profit_desc = f"+{lock_dist:.1f} pts"
+            elif symbol == "BTCUSDm" and pts_gain >= cfg.get('lock_trigger_pts', 1800.0):
+                lock_condition = True
+                lock_dist = cfg.get('lock_amount_pts', 1200.0)
+                locked_profit_desc = f"+{lock_dist:.1f} pts"
 
             if lock_condition:
                 new_sl = (entry_price + lock_dist) if pos_type == "BUY" else (entry_price - lock_dist)
                 modify_sl(ticket, symbol, new_sl, current_tp)
                 ACTIVE_LOCK_TRACKED[ticket] = True
                 ACTIVE_BE_TRACKED[ticket] = True
-                locked_profit_desc = f"+${cfg.get('lock_amount_dollars', 12.0):.2f}" if symbol == "XAUUSDm" else f"+{cfg.get('lock_amount_pts', 20.0)} pts"
                 msg = (
                     f"🔒 <b>[Profit Lock Activated]</b>\n"
                     f"Asset: <b>{symbol}</b> (#{ticket})\n"
@@ -705,17 +709,6 @@ def run_scalping_cycle():
                 f"Setup: {setup.get('direction')} (Valid: {setup.get('valid')}) | {setup.get('reason')}"
             )
 
-            # Block entries during high-impact news window
-            news_blocks_entry = catalyst.get('state') in ('PRE_NEWS_FREEZE', 'NEWS_SPIKE_BLOCK')
-
-            if not setup.get('valid'):
-                # Not a valid structural bottom/top setup — strictly wait, do not chase halfway!
-                continue
-
-            target_dir = setup['direction']  # "BUY" or "SELL"
-
-            # Close opposite position if institutional reversal setup appears
-            close_opposite_positions(symbol, target_dir)
             positions = mt5.positions_get(symbol=symbol)
             has_pos = len(positions) > 0 if positions else False
 
@@ -731,6 +724,8 @@ def run_scalping_cycle():
                 )
             WAS_OPEN_TRACKED[symbol] = has_pos
 
+            # Block entries during high-impact news window
+            news_blocks_entry = catalyst.get('state') in ('PRE_NEWS_FREEZE', 'NEWS_SPIKE_BLOCK')
             sym_session_ok = is_session_active(symbol)
             if not sym_session_ok or news_blocks_entry:
                 continue
@@ -745,6 +740,12 @@ def run_scalping_cycle():
 
             if has_pos or (now_ts - last_exec_ts < 3600) or (now_ts - last_closed_ts < 3600):
                 continue
+
+            if not setup.get('valid'):
+                # Not a valid structural bottom/top setup — strictly wait, do not chase halfway!
+                continue
+
+            target_dir = setup['direction']  # "BUY" or "SELL"
 
             # ── 2.5 Structural Confluence Check (Regime + Weekly EQ) ─────────────
             # Institutional rule: only trade in the direction of the weekly regime.
