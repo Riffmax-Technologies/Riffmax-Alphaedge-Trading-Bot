@@ -266,27 +266,11 @@ class InstitutionalEngine:
         curr_close = closes[i]
         curr_stop  = stops[i]
         
-        # Recent cross within last 3 bars
-        has_cross_buy = False
-        has_cross_sell = False
-        for offset in [0, 1, 2]:
-            idx = i - offset
-            if idx > 0:
-                if closes[idx - 1] <= stops[idx - 1] and closes[idx] > stops[idx]:
-                    has_cross_buy = True
-                if closes[idx - 1] >= stops[idx - 1] and closes[idx] < stops[idx]:
-                    has_cross_sell = True
-
-        # If a fresh cross occurred within last 3 bars, prioritize that
-        if has_cross_buy and not has_cross_sell:
+        # Detect fresh crossover on the latest completed bar (index -2)
+        # Prevents re-entering into an already established trend after a trade closes!
+        if closes[i - 1] <= stops[i - 1] and closes[i] > stops[i]:
             return "BUY"
-        if has_cross_sell and not has_cross_buy:
-            return "SELL"
-
-        # Otherwise follow the sustained trend if price is cleanly on that side
-        if curr_close > curr_stop:
-            return "BUY"
-        elif curr_close < curr_stop:
+        elif closes[i - 1] >= stops[i - 1] and closes[i] < stops[i]:
             return "SELL"
 
         return "NONE"

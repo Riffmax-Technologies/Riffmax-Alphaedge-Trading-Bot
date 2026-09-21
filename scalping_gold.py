@@ -704,11 +704,14 @@ def run_scalping_cycle():
             if not sym_session_ok or news_blocks_entry:
                 continue
 
-            # Check if M15 bar already executed (allows multiple trades a day on fresh M15 setups)
+            # Check position state and enforce 1-Hour Post-Trade Cooldown (3600 seconds)
+            # Prevents immediate re-entry chasing after a trade closes!
             now_dt = datetime.now(timezone.utc)
             m15_minute = (now_dt.minute // 15) * 15
             now_m15_ts = int(now_dt.replace(minute=m15_minute, second=0, microsecond=0).timestamp())
-            if has_pos or LAST_EXECUTED_BAR.get(symbol) == now_m15_ts:
+            last_exec_ts = LAST_EXECUTED_BAR.get(symbol, 0)
+            
+            if has_pos or (now_m15_ts - last_exec_ts < 3600):
                 continue
 
             # ── 2.5 Structural Confluence Check (Regime + Weekly EQ) ─────────────
