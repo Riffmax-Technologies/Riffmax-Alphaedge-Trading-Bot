@@ -1813,32 +1813,27 @@ if __name__ == "__main__":
 
     logger.info("=" * 65)
     logger.info("  ALPHAEDGE — INSTITUTIONAL MTF WHALE FLOW SWING ENGINE")
-    logger.info("  Assets: Gold (XAUUSDm), DAX (DE30m), Bitcoin (BTCUSDm)")
-    logger.info("  Strategy: H4 Dealing Range | Liquidity Sweep | Whale Volume | Pre-Trade BT")
-    logger.info("  Gold: 0.02 lot | Take Profit: $25.00 USD | BE: $10.00 | Lock: $18 -> $12 (24/5)")
-    logger.info("  DAX:  0.10 lot | Take Profit: 40 pts     | BE: 20 pts  | Lock: 30 -> 20 pts (24/5)")
-    logger.info("  BTC:  0.01 lot | Take Profit: $25.00 USD | BE: $10.00 | Lock: $18 -> $12 (24/7)")
-    logger.info("  Session: 24/5 for Forex/Indices | 24/7 for Bitcoin (BTCUSDm)")
+    logger.info("  Assets: Gold (XAUUSDm), DAX (DE30m)")
+    logger.info("  Strategy: H4 Dealing Range | Liquidity Sweep | Whale Volume | UT Bot Fresh Signals")
+    logger.info("  Gold: 0.02 lot | Take Profit: $40.00 USD | Max SL: $24.00 | BE: +$15.00 | Lock: $25 -> $18")
+    logger.info("  DAX:  0.30 lot | Take Profit: 150 pts    | Max SL: 80 pts  | BE: +60 pts  | Lock: 100 -> 80 pts")
+    logger.info("  Session: 24/5 for Forex & Indices (Sunday 23:00 EAT to Friday 23:55 EAT)")
     logger.info("  Guidance: ForexFactory Real-Time Macro News Engine (USD & EUR)")
     logger.info("=" * 65)
 
     # 1. Send Online Startup Notification to Telegram
     startup_msg = (
         "<b>🏛 AlphaEdge — Institutional MTF Whale Flow Engine Active</b>\n\n"
-        "<b>Assets:</b> Gold (XAUUSDm), DAX (DE30m), Bitcoin (BTCUSDm)\n"
-        "<b>Strategy:</b> H4 Dealing Range · Liquidity Sweep · Whale Volume · Pre-Trade Backtest Gate\n\n"
+        "<b>Assets:</b> Gold (XAUUSDm), DAX (DE30m)\n"
+        "<b>Strategy:</b> H4 Dealing Range · Liquidity Sweep · Whale Volume · Strict 60-Min Cooldown Shield\n\n"
         "<b>Profit &amp; Risk Targets:</b>\n"
-        "• <b>Gold (XAUUSDm):</b> $25.00 TP | BE at $10.00 | Lock $18→$12 | <b>0.02 Lot</b> (24/5)\n"
-        "• <b>DAX (DE30m):</b> 40 Pts TP | BE at 20 pts | Lock 30→20 pts | <b>0.10 Lot</b> (24/5)\n"
-        "• <b>Bitcoin (BTCUSDm):</b> $25.00 TP | BE at $10.00 | Lock $18→$12 | <b>0.01 Lot</b> (24/7)\n\n"
+        "• <b>Gold (XAUUSDm):</b> $40.00 TP | $24.00 SL | BE at +$15 | Lock $25→$18 | <b>0.02 Lot</b> (24/5)\n"
+        "• <b>DAX (DE30m):</b> 150 Pts TP | 80 Pts SL | BE at +60 pts | Lock 100→80 pts | <b>0.30 Lot</b> (24/5)\n\n"
         "<b>Entry Rules:</b>\n"
         "• Strict Discount (BUY) / Premium (SELL) zone only — never chase halfway!\n"
-        "• Requires: Liquidity Sweep OR Deep Zone + Whale Volume surge (≥1.6x avg)\n"
-        "• Pre-trade 30-day backtest gate: min 40% WR &amp; 1.05 Profit Factor\n\n"
-        "<b>Session Gateway:</b>\n"
-        "• Active: 24/5 for Forex/Indices, 24/7 for Bitcoin (BTCUSDm).\n"
-        "• News shield: Entries frozen 5 min before &amp; after high-impact events.\n\n"
-        "<b>Status:</b> 🟢 Engine ready. Hunting institutional setups now."
+        "• Requires: Liquidity Sweep Wick Rejection OR Fresh M15 UT Bot crossover\n"
+        "• 60-Minute Cooldown Shield enforced after every trade closure\n\n"
+        "<b>Status:</b> 🟢 Engine ready. Hunting institutional setups on Gold &amp; DAX."
     )
     send_telegram_alert(startup_msg)
 

@@ -335,27 +335,21 @@ class InstitutionalEngine:
         # M15 ATR for responsive sniper SL calculation
         m15_atr = _compute_atr(df_m15, period=14)
         is_gold = symbol == "XAUUSDm"
-        is_btc  = symbol == "BTCUSDm"
         if is_gold:
             min_sl_pts = 8.0    # 8.0 pts structural buffer on Gold (prevents premature noise stopouts)
-        elif is_btc:
-            min_sl_pts = 150.0  # BTC M15 ATR price room ($150 buffer)
         else:
             min_sl_pts = 22.0   # DAX 22.0 pts
         sl_buffer = max(round(m15_atr * 0.75, 4), min_sl_pts)
 
-        # Institutional Volume Gate: Gold and BTC fire freely on UT Bot signal alone (high liquidity).
+        # Institutional Volume Gate: Gold fires freely on UT Bot signal alone (high liquidity).
         # DAX requires institutional volume participation to filter out noise entries.
-        whale_gate_ok = is_gold or is_btc or has_whale_vol
+        whale_gate_ok = is_gold or has_whale_vol
 
         # Minimum TP distance target for institutional swing expansion:
         # Gold: 20.0 pts ($40.00 USD at 0.02 lot)
-        # BTC: 2500.0 pts ($50.00 USD at 0.02 lot)
         # DAX: 150.0 pts ($45.00 USD at 0.30 lot)
         if is_gold:
             min_tp_pts = 20.0
-        elif is_btc:
-            min_tp_pts = 2500.0
         else:
             min_tp_pts = 150.0
 

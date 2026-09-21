@@ -75,21 +75,6 @@ ASSET_CONFIGS = {
         "max_sl_pts": 80.0,               # Max Initial Risk Cap: 80 pts ($24.00 USD structural risk room)
         "sl_atr_mult": 1.5,
         "currency": "EUR"
-    },
-    "BTCUSDm": {
-        "symbol": "BTCUSDm",
-        "lot": 0.02,                      # 0.02 Lot (Matching Gold risk allocation)
-        "key_mult": 1.0,
-        "atr_period": 10,
-        "tp_pts": 2500.0,                 # Target: 2,500 pts ($50.00 USD profit at 0.02 lot)
-        "tp_catalyst_pts": 4000.0,        # Expanded 4,000 pts during High Volatility
-        "be_trigger_pts": 1000.0,         # Stage 1: Move SL to Entry at $1,000 price move ($20.00 profit)
-        "lock_trigger_pts": 1800.0,       # Stage 2: Trigger Profit Lock at $1,800 move ($36.00 profit)
-        "lock_amount_pts": 1200.0,        # Stage 2: Lock $24.00 profit into SL
-        "max_sl_pts": 1600.0,             # Max Initial Risk Cap: 1,600 pts ($32.00 USD max risk)
-        "sl_atr_mult": 1.2,
-        "currency": "USD",
-        "is_24_7": True
     }
 }
 
@@ -317,15 +302,12 @@ def _send_telegram(message):
 
 
 
-# ─── Session Filter (24/5 Trading for Forex/Indices, 24/7 for Crypto) ─────
+# ─── Session Filter (24/5 Trading for Forex & Indices: Gold & DAX) ────────
 def is_session_active(symbol=None):
     """
     Session Gateway:
-    Crypto (BTCUSDm) is 24/7 active continuously with no weekend pause.
     Forex & Indices (XAUUSDm, DE30m) are active 24/5 from Sunday 23:00 EAT through Friday 23:55 EAT.
     """
-    if symbol == "BTCUSDm":
-        return True
 
     now_utc = datetime.now(timezone.utc)
     weekday = now_utc.weekday()  # Monday=0, ..., Friday=4, Saturday=5, Sunday=6
@@ -449,9 +431,6 @@ def manage_open_positions(symbol, cfg, catalyst_state):
             elif symbol == "DE30m" and pts_gain >= cfg.get('be_trigger_pts', 60.0):
                 be_condition = True
                 be_buffer = 10.0  # Lock +10 pts on DAX to cover spread
-            elif symbol == "BTCUSDm" and pts_gain >= cfg.get('be_trigger_pts', 1000.0):
-                be_condition = True
-                be_buffer = 50.0  # Lock +50 pts on BTC to cover spread
                 
             if be_condition:
                 new_sl = entry_price + be_buffer if pos_type == "BUY" else entry_price - be_buffer
@@ -467,7 +446,7 @@ def manage_open_positions(symbol, cfg, catalyst_state):
                 logger.info(f"[{symbol}] BREAK-EVEN LOCKED on #{ticket}! Gain: ${dollar_gain:.2f} -> SL: {new_sl:.2f}")
                 _send_telegram(msg)
 
-        # 2. Stage 2: Advanced Profit Lock (Gold $25 -> lock $18 / DAX 100 pts -> lock 80 pts / BTC 1800 pts -> lock 1200 pts)
+        # 2. Stage 2: Advanced Profit Lock (Gold $25 -> lock $18 / DAX 100 pts -> lock 80 pts)
         is_lock_active = ACTIVE_LOCK_TRACKED.get(ticket, False)
         if not is_lock_active:
             lock_condition = False
@@ -478,10 +457,6 @@ def manage_open_positions(symbol, cfg, catalyst_state):
             elif symbol == "DE30m" and pts_gain >= cfg.get('lock_trigger_pts', 100.0):
                 lock_condition = True
                 lock_dist = cfg.get('lock_amount_pts', 80.0)
-                locked_profit_desc = f"+{lock_dist:.1f} pts"
-            elif symbol == "BTCUSDm" and pts_gain >= cfg.get('lock_trigger_pts', 1800.0):
-                lock_condition = True
-                lock_dist = cfg.get('lock_amount_pts', 1200.0)
                 locked_profit_desc = f"+{lock_dist:.1f} pts"
 
             if lock_condition:
