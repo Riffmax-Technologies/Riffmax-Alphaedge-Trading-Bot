@@ -55,11 +55,11 @@ ASSET_CONFIGS = {
         "atr_period": 10,
         "tp_dollars": 40.0,              # Institutional Target: $40.00 USD Profit (20.0 pts move with 0.02 lot)
         "tp_catalyst_dollars": 60.0,      # Expanded $60.00 Target during High Momentum
-        "be_trigger_dollars": 15.0,       # Stage 1: Move SL to Entry at $15.00 profit (7.5 pts)
-        "lock_trigger_dollars": 25.0,     # Stage 2: Trigger Profit Lock at $25.00 profit
-        "lock_amount_dollars": 18.0,      # Stage 2: Lock $18.00 profit into SL
-        "max_sl_dollars": 24.0,           # Max Initial Risk Cap: $24.00 USD (gives 12.0 pts structural price room)
-        "sl_atr_mult": 1.5,
+        "be_trigger_dollars": 12.0,       # Stage 1: Move SL to Entry at $12.00 profit (6.0 pts)
+        "lock_trigger_dollars": 20.0,     # Stage 2: Trigger Profit Lock at $20.00 profit
+        "lock_amount_dollars": 15.0,      # Stage 2: Lock $15.00 profit into SL
+        "max_sl_dollars": 15.0,           # Max Initial Risk Cap: $15.00 USD (7.5 pts price room with 0.02 lot)
+        "sl_atr_mult": 1.2,
         "currency": "USD"
     },
     "DE30m": {
