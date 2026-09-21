@@ -353,39 +353,52 @@ class InstitutionalEngine:
         is_gold = symbol == "XAUUSDm"
         is_btc  = symbol == "BTCUSDm"
         if is_gold:
-            min_sl_pts = 3.5
+            min_sl_pts = 8.0    # 8.0 pts structural buffer on Gold (prevents premature noise stopouts)
         elif is_btc:
             min_sl_pts = 150.0  # BTC M15 ATR price room ($150 buffer)
         else:
             min_sl_pts = 22.0   # DAX 22.0 pts
-        sl_buffer = max(round(m15_atr * 0.5, 4), min_sl_pts)
+        sl_buffer = max(round(m15_atr * 0.75, 4), min_sl_pts)
 
         # Institutional Volume Gate: Gold and BTC fire freely on UT Bot signal alone (high liquidity).
         # DAX requires institutional volume participation to filter out noise entries.
         whale_gate_ok = is_gold or is_btc or has_whale_vol
 
+        # Minimum TP distance target for institutional swing expansion:
+        # Gold: 20.0 pts ($40.00 USD at 0.02 lot)
+        # BTC: 2500.0 pts ($50.00 USD at 0.02 lot)
+        # DAX: 150.0 pts ($45.00 USD at 0.30 lot)
+        if is_gold:
+            min_tp_pts = 20.0
+        elif is_btc:
+            min_tp_pts = 2500.0
+        else:
+            min_tp_pts = 150.0
+
         # ── BUY SETUP EVALUATION ──────────────────────────────────────────────
-        # Conditions: Macro BUY allowed AND (M15 UT Bot gives BUY OR M15 sweep with momentum)
-        has_buy_trigger = (ut_signal_m15 == "BUY") or (m15_buy_sweep and ut_signal_h1 == "BUY")
+        # Conditions: Macro BUY allowed AND (M15/H1 Liquidity Sweep Wick Rejection OR M15 UT Bot BUY)
+        has_buy_trigger = (m15_buy_sweep or h1_buy_sweep or ut_signal_m15 == "BUY")
         if macro_buy_allowed and has_buy_trigger and whale_gate_ok:
             sweep_ref = min(m15_low, h1_low) if (m15_buy_sweep or h1_buy_sweep) else (curr_price - sl_buffer)
+            # SL is anchored BEYOND the lowest wick point of the sweep
             sl_price = sweep_ref - sl_buffer
 
-            # Target 1.35x - 1.5x R:R to ensure high probability hit rate
+            # Target 1.5x R:R or full institutional swing target
             sl_dist = abs(tick.ask - sl_price)
             if sl_dist > 0:
-                tp_offset = max(sl_dist * 1.4, m15_atr * 1.5)
+                tp_offset = max(sl_dist * 1.5, min_tp_pts)
                 tp_price = tick.ask + tp_offset
 
+                trigger_type = "Liquidity Sweep Wick Rejection" if (m15_buy_sweep or h1_buy_sweep) else f"M15 UT Bot {ut_signal_m15}"
                 logger.info(
                     f"[InstitutionalEngine] BUY Triggered! {symbol} | H4: {h4_trend} ({range_info['location_pct']:.1f}%) | "
-                    f"UT M15: {ut_signal_m15} | Entry: {tick.ask:.2f} | SL: {sl_price:.2f} | TP: {tp_price:.2f} (R:R {tp_offset/sl_dist:.2f})"
+                    f"Trigger: {trigger_type} | Entry: {tick.ask:.2f} | SL: {sl_price:.2f} | TP: {tp_price:.2f} (R:R {tp_offset/sl_dist:.2f})"
                 )
 
                 return {
                     "valid": True,
                     "direction": "BUY",
-                    "reason": f"H4 Bias {h4_trend} ({range_info['location_pct']:.1f}%) + M15 UT Bot {ut_signal_m15} Trigger",
+                    "reason": f"H4 Bias {h4_trend} ({range_info['location_pct']:.1f}%) + {trigger_type}",
                     "entry_price": tick.ask,
                     "sl_price": sl_price,
                     "tp_price": tp_price,
@@ -398,20 +411,22 @@ class InstitutionalEngine:
                 }
 
         # ── SELL SETUP EVALUATION ─────────────────────────────────────────────
-        # Conditions: Macro SELL allowed AND (M15 UT Bot gives SELL OR M15 sweep with momentum)
-        has_sell_trigger = (ut_signal_m15 == "SELL") or (m15_sell_sweep and ut_signal_h1 == "SELL")
+        # Conditions: Macro SELL allowed AND (M15/H1 Liquidity Sweep Wick Rejection OR M15 UT Bot SELL)
+        has_sell_trigger = (m15_sell_sweep or h1_sell_sweep or ut_signal_m15 == "SELL")
         if macro_sell_allowed and has_sell_trigger and whale_gate_ok:
             sweep_ref = max(m15_high, h1_high) if (m15_sell_sweep or h1_sell_sweep) else (curr_price + sl_buffer)
+            # SL is anchored BEYOND the highest wick point of the sweep
             sl_price = sweep_ref + sl_buffer
 
             sl_dist = abs(sl_price - tick.bid)
             if sl_dist > 0:
-                tp_offset = max(sl_dist * 1.4, m15_atr * 1.5)
+                tp_offset = max(sl_dist * 1.5, min_tp_pts)
                 tp_price = tick.bid - tp_offset
 
+                trigger_type = "Liquidity Sweep Wick Rejection" if (m15_sell_sweep or h1_sell_sweep) else f"M15 UT Bot {ut_signal_m15}"
                 logger.info(
                     f"[InstitutionalEngine] SELL Triggered! {symbol} | H4: {h4_trend} ({range_info['location_pct']:.1f}%) | "
-                    f"UT M15: {ut_signal_m15} | Entry: {tick.bid:.2f} | SL: {sl_price:.2f} | TP: {tp_price:.2f} (R:R {tp_offset/sl_dist:.2f})"
+                    f"Trigger: {trigger_type} | Entry: {tick.bid:.2f} | SL: {sl_price:.2f} | TP: {tp_price:.2f} (R:R {tp_offset/sl_dist:.2f})"
                 )
 
                 return {

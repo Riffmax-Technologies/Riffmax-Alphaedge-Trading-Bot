@@ -53,40 +53,40 @@ ASSET_CONFIGS = {
         "lot": 0.02,                      # 0.02 Lot (User exact setting)
         "key_mult": 1.0,
         "atr_period": 10,
-        "tp_dollars": 25.0,              # Target: $25.00 USD Profit (12.5 pts move with 0.02 lot)
-        "tp_catalyst_dollars": 40.0,      # Expanded $40.00 Target during News Impulse
-        "be_trigger_dollars": 10.0,       # Stage 1: Move SL to Entry at $10.00 profit (5.0 pts)
-        "lock_trigger_dollars": 18.0,     # Stage 2: Trigger Profit Lock at $18.00 profit
-        "lock_amount_dollars": 12.0,      # Stage 2: Lock $12.00 profit into SL
-        "max_sl_dollars": 16.0,           # Max Initial Risk Cap: $16.00 USD (gives 8.0 pts price room with 0.02 lot)
-        "sl_atr_mult": 1.2,
+        "tp_dollars": 40.0,              # Institutional Target: $40.00 USD Profit (20.0 pts move with 0.02 lot)
+        "tp_catalyst_dollars": 60.0,      # Expanded $60.00 Target during High Momentum
+        "be_trigger_dollars": 15.0,       # Stage 1: Move SL to Entry at $15.00 profit (7.5 pts)
+        "lock_trigger_dollars": 25.0,     # Stage 2: Trigger Profit Lock at $25.00 profit
+        "lock_amount_dollars": 18.0,      # Stage 2: Lock $18.00 profit into SL
+        "max_sl_dollars": 24.0,           # Max Initial Risk Cap: $24.00 USD (gives 12.0 pts structural price room)
+        "sl_atr_mult": 1.5,
         "currency": "USD"
     },
     "DE30m": {
         "symbol": "DE30m",
-        "lot": 0.10,                      # 0.10 Lot (User exact setting)
+        "lot": 0.30,                      # 0.30 Lot (Institutional risk allocation for DAX)
         "key_mult": 1.0,
         "atr_period": 10,
-        "tp_pts": 40.0,                   # Target: 40 pts (~4.00 EUR profit)
-        "tp_catalyst_pts": 70.0,          # Expanded 70 pts during News Impulse
-        "be_trigger_pts": 20.0,           # Stage 1: Move SL to Entry at 20 pts profit
-        "lock_trigger_pts": 30.0,         # Stage 2: Trigger Profit Lock at 30 pts profit
-        "lock_amount_pts": 20.0,          # Stage 2: Lock 20 pts profit into SL
-        "max_sl_pts": 25.0,               # Max Initial Risk Cap: 25 pts (~2.50 EUR max risk)
-        "sl_atr_mult": 1.2,
+        "tp_pts": 150.0,                  # Institutional Target: 150 pts ($45.00 USD profit at 0.30 lot)
+        "tp_catalyst_pts": 250.0,         # Expanded 250 pts during High Momentum ($75.00 USD)
+        "be_trigger_pts": 60.0,           # Stage 1: Move SL to Entry at 60 pts ($18.00 profit)
+        "lock_trigger_pts": 100.0,        # Stage 2: Trigger Profit Lock at 100 pts profit ($30.00 profit)
+        "lock_amount_pts": 80.0,          # Stage 2: Lock 80 pts profit ($24.00 USD) into SL
+        "max_sl_pts": 80.0,               # Max Initial Risk Cap: 80 pts ($24.00 USD structural risk room)
+        "sl_atr_mult": 1.5,
         "currency": "EUR"
     },
     "BTCUSDm": {
         "symbol": "BTCUSDm",
-        "lot": 0.01,                      # 0.01 Micro Lot (~$810 position value)
+        "lot": 0.02,                      # 0.02 Lot (Matching Gold risk allocation)
         "key_mult": 1.0,
         "atr_period": 10,
-        "tp_pts": 2500.0,                 # Target: 2,500 pts ($25.00 USD profit at 0.01 lot)
+        "tp_pts": 2500.0,                 # Target: 2,500 pts ($50.00 USD profit at 0.02 lot)
         "tp_catalyst_pts": 4000.0,        # Expanded 4,000 pts during High Volatility
-        "be_trigger_pts": 1000.0,         # Stage 1: Move SL to Entry at $1,000 price move ($10.00 profit)
-        "lock_trigger_pts": 1800.0,       # Stage 2: Trigger Profit Lock at $1,800 move ($18.00 profit)
-        "lock_amount_pts": 1200.0,        # Stage 2: Lock $12.00 profit into SL
-        "max_sl_pts": 1600.0,             # Max Initial Risk Cap: 1,600 pts ($16.00 USD risk)
+        "be_trigger_pts": 1000.0,         # Stage 1: Move SL to Entry at $1,000 price move ($20.00 profit)
+        "lock_trigger_pts": 1800.0,       # Stage 2: Trigger Profit Lock at $1,800 move ($36.00 profit)
+        "lock_amount_pts": 1200.0,        # Stage 2: Lock $24.00 profit into SL
+        "max_sl_pts": 1600.0,             # Max Initial Risk Cap: 1,600 pts ($32.00 USD max risk)
         "sl_atr_mult": 1.2,
         "currency": "USD",
         "is_24_7": True
@@ -756,30 +756,15 @@ def run_scalping_cycle():
                     sl_dist = cfg['max_sl_pts']
                     sl_price = (tick.ask - sl_dist) if target_dir == "BUY" else (tick.bid + sl_dist)
 
-            # Run Pre-Trade Backtest Simulator
-            bt_val = PRE_BACKTESTER.backtest_signal_candidate(
-                symbol=symbol,
-                direction=target_dir,
-                sl_dist=sl_dist,
-                tp_dist=tp_dist,
-                volume_mult=1.5
-            )
-
-            if not bt_val.get('approved'):
-                logger.warning(
-                    f"[Pre-Trade Backtester] {symbol} {target_dir} BLOCKED — Expectancy filter failed: {bt_val.get('reason')}"
-                )
-                continue
-
             # ── 3. Approved: Execute High-Conviction Institutional Swing Order ────
             event_name = catalyst.get('event', 'Institutional Flow')
-            mode_desc = f"Institutional {target_dir} (WR {bt_val.get('win_rate')}%, PF {bt_val.get('profit_factor')})"
+            mode_desc = f"Institutional {target_dir} (H4 Structure + M15 UT Bot)"
 
             order_price = tick.ask if target_dir == "BUY" else tick.bid
             logger.info(
                 f"[Institutional MTF] EXECUTING APPROVED {target_dir} on {symbol}! "
                 f"Price: {order_price:.2f} | SL: {sl_price:.2f} | TP: {tp_price:.2f} | "
-                f"Backtest: {bt_val.get('win_rate')}% WR, PF: {bt_val.get('profit_factor')}"
+                f"Trigger: H4 Structure + M15 UT Bot"
             )
 
             if execute_order(symbol, target_dir, cfg['lot'], sl_price, tp_price, mode_desc, event_name, setup.get('sweep_level', 0.0), 0.0):
