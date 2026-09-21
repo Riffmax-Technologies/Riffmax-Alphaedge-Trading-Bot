@@ -11,3 +11,7 @@ __pycache__/
 
 *.csv
 *.xlsx
+
+last_closed_time.json
+last_executed_bar.json
+structural_memory_state.json
