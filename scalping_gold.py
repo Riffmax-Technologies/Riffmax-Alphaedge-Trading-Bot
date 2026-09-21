@@ -739,22 +739,21 @@ def run_scalping_cycle():
 
             # ── 3. Pre-Trade Real-Time Backtest Gate ────────────────────────────
 
-            # Calculate intended SL and TP distances
-            sl_price = setup['sl_price']
-            tp_price = setup['tp_price']
-            sl_dist = abs(curr_price - sl_price)
-            tp_dist = abs(curr_price - tp_price)
+            # Enforce structural SL room and $40+ TP expansion targets
+            if symbol == "XAUUSDm":
+                target_tp_dist = cfg.get('tp_dollars', 40.0) / dollar_per_pt  # 20.0 pts = $40 USD
+                target_sl_dist = max(abs(curr_price - setup['sl_price']), cfg.get('max_sl_dollars', 24.0) / dollar_per_pt)  # 12.0 pts = $24 USD
+            else:
+                target_tp_dist = cfg.get('tp_pts', 150.0)
+                target_sl_dist = max(abs(curr_price - setup['sl_price']), cfg.get('max_sl_pts', 80.0))
 
-            # Cap SL risk at max_sl if configured
-            if symbol == "XAUUSDm" and 'max_sl_dollars' in cfg:
-                max_sl_dist = cfg['max_sl_dollars'] / dollar_per_pt
-                if sl_dist > max_sl_dist:
-                    sl_dist = max_sl_dist
-                    sl_price = (tick.ask - sl_dist) if target_dir == "BUY" else (tick.bid + sl_dist)
-            elif 'max_sl_pts' in cfg:
-                if sl_dist > cfg['max_sl_pts']:
-                    sl_dist = cfg['max_sl_pts']
-                    sl_price = (tick.ask - sl_dist) if target_dir == "BUY" else (tick.bid + sl_dist)
+            order_price = tick.ask if target_dir == "BUY" else tick.bid
+            if target_dir == "BUY":
+                sl_price = order_price - target_sl_dist
+                tp_price = order_price + target_tp_dist
+            else:
+                sl_price = order_price + target_sl_dist
+                tp_price = order_price - target_tp_dist
 
             # ── 3. Approved: Execute High-Conviction Institutional Swing Order ────
             event_name = catalyst.get('event', 'Institutional Flow')
