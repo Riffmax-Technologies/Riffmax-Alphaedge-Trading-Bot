@@ -1750,12 +1750,15 @@ def process_tv_signals():
                 
                 logger.info("Processing TV Webhook: " + action + " for " + symbol)
                 
-                from news_filter import NewsFilter
-                nf = NewsFilter()
-                safe, reason = nf.is_safe_to_trade(symbol)
-                if not safe:
-                    logger.warning("Ignored TV Webhook for " + symbol + " due to News: " + reason)
-                    continue
+                try:
+                    from news_catalyst_engine import NewsCatalystEngine
+                    nce = NewsCatalystEngine()
+                    status = nce.get_market_catalyst_status(symbol)
+                    if status.get('state') in ('PRE_NEWS_FREEZE', 'NEWS_SPIKE_BLOCK'):
+                        logger.warning(f"Ignored TV Webhook for {symbol} due to News: {status.get('event')}")
+                        continue
+                except Exception:
+                    pass
                     
                 rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M15, 0, 15)
                 if rates is None or len(rates) == 0:

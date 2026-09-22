@@ -64,16 +64,31 @@ ASSET_CONFIGS = {
         "lot": 0.30,                      # 0.30 Lot (Institutional risk allocation for DAX)
         "key_mult": 1.0,
         "atr_period": 10,
-        "tp_pts": 150.0,                  # Institutional Target: 150 pts ($45.00 USD profit at 0.30 lot)
-        "tp_catalyst_pts": 250.0,         # Expanded 250 pts during High Momentum ($75.00 USD)
-        "be_trigger_pts": 60.0,           # Stage 1: Move SL to Entry at 60 pts ($18.00 profit)
-        "lock_trigger_pts": 100.0,        # Stage 2: Trigger Profit Lock at 100 pts profit ($30.00 profit)
-        "lock_amount_pts": 80.0,          # Stage 2: Lock 80 pts profit ($24.00 USD) into SL
-        "max_sl_pts": 80.0,               # Max Initial Risk Cap: 80 pts ($24.00 USD structural risk room)
+        "tp_dollars": 25.0,               # Target: EXACT $25.00 USD Profit (calculated purely in dollar value)
+        "tp_catalyst_dollars": 40.0,      # Expanded $40.00 Target during High Momentum
+        "be_trigger_dollars": 12.0,       # Stage 1: Move SL to Entry at $12.00 profit (50% to target)
+        "lock_trigger_dollars": 18.0,     # Stage 2: Trigger Profit Lock at $18.00 profit
+        "lock_amount_dollars": 12.0,      # Stage 2: Lock $12.00 profit into SL
+        "max_sl_dollars": 30.0,           # Max Initial Risk Cap: $30.00 USD (wide structural SL placed beyond reach of noise)
         "sl_atr_mult": 1.5,
         "currency": "EUR"
     }
 }
+
+def get_dollar_per_pt(symbol, lot):
+    """Accurately computes USD value of 1.0 price point for any symbol and volume."""
+    try:
+        info = mt5.symbol_info(symbol)
+        if not info:
+            return 1.0 * lot
+        tick_val = info.trade_tick_value
+        tick_size = info.trade_tick_size
+        if tick_size > 0:
+            return (tick_val / tick_size) * lot
+        return info.trade_contract_size * lot
+    except Exception:
+        return 1.0 * lot
+
 
 NEWS_ENGINE = None
 INST_ENGINE = None
@@ -403,9 +418,8 @@ def manage_open_positions(symbol, cfg, catalyst_state):
         
     info = mt5.symbol_info(symbol)
     point = info.point
-    contract = info.trade_contract_size
     lot = cfg['lot']
-    dollar_per_point = contract * lot
+    dollar_per_point = get_dollar_per_pt(symbol, lot)
     
     for pos in positions:
         ticket = pos.ticket
@@ -416,18 +430,18 @@ def manage_open_positions(symbol, cfg, catalyst_state):
         current_price = pos.price_current
         
         pts_gain = (current_price - entry_price) if pos_type == "BUY" else (entry_price - current_price)
+        # Accurate real-time profit in USD dollars
         dollar_gain = pts_gain * dollar_per_point
         
-        # 1. Stage 1: Dynamic Break-Even Shield Check (Gold +$15.00 / DAX +60 pts / BTC +1,000 pts)
+        # 1. Stage 1: Dynamic Break-Even Shield Check (Pure Dollar Calculation for Gold & DAX)
         is_be_active = ACTIVE_BE_TRACKED.get(ticket, False)
         if not is_be_active:
             be_condition = False
-            if symbol == "XAUUSDm" and dollar_gain >= cfg.get('be_trigger_dollars', 15.0):
+            be_target_usd = cfg.get('be_trigger_dollars', 15.0 if symbol == "XAUUSDm" else 12.0)
+            if dollar_gain >= be_target_usd:
                 be_condition = True
-                be_buffer = 0.5  # Lock +0.5 pt ($1.00 USD) on Gold to cover spread
-            elif symbol == "DE30m" and pts_gain >= cfg.get('be_trigger_pts', 60.0):
-                be_condition = True
-                be_buffer = 10.0  # Lock +10 pts on DAX to cover spread
+                # Buffer to guarantee positive exit covering spread
+                be_buffer = 0.5 if symbol == "XAUUSDm" else (3.0 / dollar_per_point if dollar_per_point > 0 else 10.0)
                 
             if be_condition:
                 new_sl = entry_price + be_buffer if pos_type == "BUY" else entry_price - be_buffer
@@ -443,18 +457,16 @@ def manage_open_positions(symbol, cfg, catalyst_state):
                 logger.info(f"[{symbol}] BREAK-EVEN LOCKED on #{ticket}! Gain: ${dollar_gain:.2f} -> SL: {new_sl:.2f}")
                 _send_telegram(msg)
 
-        # 2. Stage 2: Advanced Profit Lock (Gold $25 -> lock $18 / DAX 100 pts -> lock 80 pts)
+        # 2. Stage 2: Advanced Profit Lock (Gold $25 -> lock $18 / DAX $18 -> lock $12)
         is_lock_active = ACTIVE_LOCK_TRACKED.get(ticket, False)
         if not is_lock_active:
             lock_condition = False
-            if symbol == "XAUUSDm" and dollar_gain >= cfg.get('lock_trigger_dollars', 25.0):
+            lock_target_usd = cfg.get('lock_trigger_dollars', 25.0 if symbol == "XAUUSDm" else 18.0)
+            lock_amount_usd = cfg.get('lock_amount_dollars', 18.0 if symbol == "XAUUSDm" else 12.0)
+            if dollar_gain >= lock_target_usd:
                 lock_condition = True
-                lock_dist = cfg.get('lock_amount_dollars', 18.0) / dollar_per_point
-                locked_profit_desc = f"+${cfg.get('lock_amount_dollars', 18.0):.2f}"
-            elif symbol == "DE30m" and pts_gain >= cfg.get('lock_trigger_pts', 100.0):
-                lock_condition = True
-                lock_dist = cfg.get('lock_amount_pts', 80.0)
-                locked_profit_desc = f"+{lock_dist:.1f} pts"
+                lock_dist = lock_amount_usd / dollar_per_point if dollar_per_point > 0 else 20.0
+                locked_profit_desc = f"+${lock_amount_usd:.2f}"
 
             if lock_condition:
                 new_sl = (entry_price + lock_dist) if pos_type == "BUY" else (entry_price - lock_dist)
@@ -616,10 +628,8 @@ def run_institutional_cycle():
                 f"Weekly EQ: {struct_ctx.get('weekly_eq')}"
             )
 
-            info = mt5.symbol_info(symbol)
-            contract = info.trade_contract_size
             lot = cfg['lot']
-            dollar_per_pt = contract * lot
+            dollar_per_pt = get_dollar_per_pt(symbol, lot)
 
             tick = mt5.symbol_info_tick(symbol)
             curr_price = tick.bid if tick else 0.0
@@ -707,13 +717,14 @@ def run_institutional_cycle():
 
             # ── 3. Pre-Trade Real-Time Backtest Gate ────────────────────────────
 
-            # Enforce structural SL room and $40+ TP expansion targets
-            if symbol == "XAUUSDm":
-                target_tp_dist = cfg.get('tp_dollars', 40.0) / dollar_per_pt  # 20.0 pts = $40 USD
-                target_sl_dist = max(abs(curr_price - setup['sl_price']), cfg.get('max_sl_dollars', 24.0) / dollar_per_pt)  # 12.0 pts = $24 USD
-            else:
-                target_tp_dist = cfg.get('tp_pts', 150.0)
-                target_sl_dist = max(abs(curr_price - setup['sl_price']), cfg.get('max_sl_pts', 80.0))
+            # Enforce structural SL room and dollar profit expansion targets
+            dollar_per_pt = get_dollar_per_pt(symbol, cfg['lot'])
+            tp_target_usd = cfg.get('tp_dollars', 40.0 if symbol == "XAUUSDm" else 25.0)
+            max_sl_usd = cfg.get('max_sl_dollars', 24.0 if symbol == "XAUUSDm" else 30.0)
+            
+            target_tp_dist = tp_target_usd / dollar_per_pt if dollar_per_pt > 0 else 20.0
+            # Place SL beyond reach of noise using structural swing level with wide dollar buffer
+            target_sl_dist = max(abs(curr_price - setup['sl_price']), max_sl_usd / dollar_per_pt if dollar_per_pt > 0 else 30.0)
 
             order_price = tick.ask if target_dir == "BUY" else tick.bid
             if target_dir == "BUY":

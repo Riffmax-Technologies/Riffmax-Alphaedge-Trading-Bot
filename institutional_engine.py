@@ -336,22 +336,16 @@ class InstitutionalEngine:
         m15_atr = _compute_atr(df_m15, period=14)
         is_gold = symbol == "XAUUSDm"
         if is_gold:
-            min_sl_pts = 8.0    # 8.0 pts structural buffer on Gold (prevents premature noise stopouts)
+            min_sl_pts = 12.0   # 12.0 pts ($24 USD at 0.02 lot) structural buffer on Gold
+            min_tp_pts = 20.0   # 20.0 pts ($40 USD at 0.02 lot)
         else:
-            min_sl_pts = 22.0   # DAX 22.0 pts
-        sl_buffer = max(round(m15_atr * 0.75, 4), min_sl_pts)
+            min_sl_pts = 80.0   # 80.0 pts ($27.50 USD at 0.30 lot) wide structural SL beyond noise reach
+            min_tp_pts = 72.0   # 72.0 pts ($25.00 USD at 0.30 lot) institutional target
+        sl_buffer = max(round(m15_atr * 1.5, 4), min_sl_pts)
 
         # Institutional Volume Gate: Gold fires freely on UT Bot signal alone (high liquidity).
         # DAX requires institutional volume participation to filter out noise entries.
         whale_gate_ok = is_gold or has_whale_vol
-
-        # Minimum TP distance target for institutional swing expansion:
-        # Gold: 20.0 pts ($40.00 USD at 0.02 lot)
-        # DAX: 150.0 pts ($45.00 USD at 0.30 lot)
-        if is_gold:
-            min_tp_pts = 20.0
-        else:
-            min_tp_pts = 150.0
 
         # ── BUY SETUP EVALUATION ──────────────────────────────────────────────
         # Conditions: Macro BUY allowed AND (M15/H1 Liquidity Sweep Wick Rejection OR M15 UT Bot BUY)
