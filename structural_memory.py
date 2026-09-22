@@ -127,18 +127,27 @@ class StructuralMemory:
 
     def _compute_regime(self, symbol):
         try:
-            h4_bars = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H4, 0, 5)
-            if h4_bars is None or len(h4_bars) < 4:
+            h4_bars = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H4, 0, 50)
+            if h4_bars is None or len(h4_bars) < 20:
                 return "UNKNOWN"
-            highs = [float(b["high"]) for b in h4_bars]
-            lows  = [float(b["low"])  for b in h4_bars]
-            hh = highs[-2] > highs[-3] > highs[-4]
-            hl = lows[-2]  > lows[-3]  > lows[-4]
-            ll = lows[-2]  < lows[-3]  < lows[-4]
-            lh = highs[-2] < highs[-3] < highs[-4]
-            if hh and hl:
+            import pandas as pd
+            df = pd.DataFrame(h4_bars)
+            closes = df['close'].astype(float).values
+            highs  = df['high'].astype(float).values
+            lows   = df['low'].astype(float).values
+            
+            ema20 = pd.Series(closes).ewm(span=20).mean().iloc[-1]
+            ema50 = pd.Series(closes).ewm(span=50).mean().iloc[-1]
+            curr_c = closes[-1]
+            
+            hh = highs[-2] > highs[-4]
+            hl = lows[-2] > lows[-4]
+            ll = lows[-2] < lows[-4]
+            lh = highs[-2] < highs[-4]
+            
+            if (curr_c > ema50 and ema20 >= ema50) or (hh and hl):
                 return "EXPANSION_UP"
-            elif ll and lh:
+            elif (curr_c < ema50 and ema20 <= ema50) or (ll and lh):
                 return "EXPANSION_DOWN"
             else:
                 return "RANGE_BOUND"

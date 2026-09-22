@@ -298,21 +298,49 @@ class InstitutionalEngine:
         if not range_info:
             return {"valid": False, "direction": "NONE", "reason": "Dealing range calculation failed"}
 
-        # H4 Macro Structure & Trend Detection (last 4 completed H4 bars)
+        # H4 Macro Trend & Momentum Filter (EMAs + Price Action Structure)
+        h4_closes = df_h4['close'].astype(float).values
         h4_highs = df_h4['high'].astype(float).values
         h4_lows  = df_h4['low'].astype(float).values
-        h4_trend = "RANGE"
-        if len(h4_highs) >= 5:
-            if h4_highs[-2] > h4_highs[-3] > h4_highs[-4] and h4_lows[-2] > h4_lows[-3] > h4_lows[-4]:
-                h4_trend = "BULLISH"
-            elif h4_highs[-2] < h4_highs[-3] < h4_highs[-4] and h4_lows[-2] < h4_lows[-3] < h4_lows[-4]:
-                h4_trend = "BEARISH"
+        
+        # Calculate H4 EMAs (EMA 20 & EMA 50)
+        ema20_h4 = pd.Series(h4_closes).ewm(span=20).mean().iloc[-1]
+        ema50_h4 = pd.Series(h4_closes).ewm(span=50).mean().iloc[-1]
+        
+        # Calculate H1 EMAs for micro-structure confirmation
+        h1_closes = df_h1['close'].astype(float).values
+        ema20_h1 = pd.Series(h1_closes).ewm(span=20).mean().iloc[-1]
+        ema50_h1 = pd.Series(h1_closes).ewm(span=50).mean().iloc[-1]
 
-        # Macro Bias:
-        # BUY bias if in H4 Discount (< 50%) OR if H4 Trend is BULLISH outside deep premium
-        # SELL bias if in H4 Premium (> 50%) OR if H4 Trend is BEARISH outside deep discount
-        macro_buy_allowed = range_info["is_discount"] or (h4_trend == "BULLISH" and not range_info["is_deep_premium"])
-        macro_sell_allowed = range_info["is_premium"] or (h4_trend == "BEARISH" and not range_info["is_deep_discount"])
+        # Multi-bar swing structure
+        is_higher_highs = h4_highs[-2] > h4_highs[-4] and h4_lows[-2] > h4_lows[-4]
+        is_lower_lows = h4_highs[-2] < h4_highs[-4] and h4_lows[-2] < h4_lows[-4]
+
+        # Pure Trend Bias:
+        # BULLISH if price > EMA50 and EMA20 >= EMA50 (or clean higher highs/lows)
+        # BEARISH if price < EMA50 and EMA20 <= EMA50 (or clean lower highs/lows)
+        if (curr_price > ema50_h4 and ema20_h4 >= ema50_h4) or is_higher_highs:
+            h4_trend = "BULLISH"
+        elif (curr_price < ema50_h4 and ema20_h4 <= ema50_h4) or is_lower_lows:
+            h4_trend = "BEARISH"
+        else:
+            h4_trend = "RANGE"
+
+        # STRICT TREND & PRICE ACTION RULE:
+        # Never trade counter-trend!
+        # When H4 trend is BULLISH -> ONLY BUY orders are allowed (even if price is at premium, we ride the trend or buy pullbacks). SELL is STRICTLY FORBIDDEN!
+        # When H4 trend is BEARISH -> ONLY SELL orders are allowed. BUY is STRICTLY FORBIDDEN!
+        # When H4 is in a neutral RANGE -> Use Dealing Range (BUY in discount <50%, SELL in premium >50%).
+        if h4_trend == "BULLISH":
+            macro_buy_allowed = True
+            macro_sell_allowed = False
+        elif h4_trend == "BEARISH":
+            macro_buy_allowed = False
+            macro_sell_allowed = True
+        else:
+            # RANGE_BOUND: Only trade at extremes of the range
+            macro_buy_allowed = range_info["is_discount"]
+            macro_sell_allowed = range_info["is_premium"]
 
         # 2. M15 / H1 Micro Actionable Trigger Evaluation
         m15_buy_sweep, m15_low = self.detect_liquidity_sweep(df_m15, "BUY")
