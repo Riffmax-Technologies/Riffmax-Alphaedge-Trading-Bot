@@ -42,16 +42,16 @@ except Exception as e:
     print("ERR ai_learning:", e)
     errors.append(str(e))
 
-# ── 4. Scalping Gold ─────────────────────────────────────────────────────────
+# ── 4. Institutional Trader ────────────────────────────────────────────────
 try:
-    import scalping_gold
-    gold = scalping_gold.ASSET_CONFIGS["XAUUSDm"]
-    dax  = scalping_gold.ASSET_CONFIGS["DE30m"]
-    print("OK  scalping_gold")
+    import institutional_trader
+    gold = institutional_trader.ASSET_CONFIGS["XAUUSDm"]
+    dax  = institutional_trader.ASSET_CONFIGS["DE30m"]
+    print("OK  institutional_trader")
     print(f"    Gold: lot={gold['lot']}  tp=${gold['tp_dollars']}  be=${gold['be_trigger_dollars']}  catalyst_tp=${gold['tp_catalyst_dollars']}")
     print(f"    DAX:  lot={dax['lot']}   tp={dax['tp_pts']}pts  be={dax['be_trigger_pts']}pts  catalyst_tp={dax['tp_catalyst_pts']}pts")
 except Exception as e:
-    print("ERR scalping_gold:", e)
+    print("ERR institutional_trader:", e)
     errors.append(str(e))
 
 # ── 5. Session Filter Boundary Check ─────────────────────────────────────────
@@ -135,7 +135,7 @@ print(f"  Channel : {channel}")
 # ── 8. Public Channel Firewall Verification ──────────────────────────────────
 print()
 print("--- Channel Firewall Security Test ---")
-from scalping_gold import _is_channel_allowed
+from institutional_trader import _is_channel_allowed
 
 firewall_test_cases = [
     ("🚀 <b>[AlphaEdge Signal]</b>\nAsset: XAUUSDm\nAction: BUY", True, "Trade Entry Signal"),

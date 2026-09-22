@@ -1876,11 +1876,11 @@ if __name__ == "__main__":
                 logger.info("Scanner is PAUSED via Telegram (/start_scanner to resume). Skipping scan.")
             else:
                 try:
-                    from scalping_gold import run_scalping_cycle
-                    run_scalping_cycle()
-                except Exception as scalp_err:
+                    from institutional_trader import run_scalping_cycle as run_institutional_cycle
+                    run_institutional_cycle()
+                except Exception as inst_err:
                     import traceback
-                    logger.error(f"[Scalp] Cycle error:\n{traceback.format_exc()}")
+                    logger.error(f"[Institutional] Cycle error:\n{traceback.format_exc()}")
 
 
             # ── End-of-Day Pre-Close Gold Market Analysis (20:45 UTC) ──────────────

@@ -98,8 +98,9 @@ python alphaedge.py
 ## 📂 Project Architecture
 
 * `alphaedge.py` — Master bot entrypoint, session manager, Telegram bot listener, and reporting scheduler.
-* `scalping_gold.py` — The core M15 execution engine, Pine Script mathematical calculations, and Break-Even management for Gold & DAX.
+* `institutional_trader.py` — Core Institutional MTF execution engine. H4 Dealing Range, Liquidity Sweep detection, Whale Volume gate, BE/Lock management for Gold & DAX.
+* `institutional_engine.py` — Evaluates institutional setups: H4 structure analysis, UT Bot signals, sweep detection, and trade direction logic.
 * `news_catalyst_engine.py` — Real-time ForexFactory institutional news tracker with disk persistence.
 * `economic_calendar_cache.json` — Persistent local cache for economic calendar events.
-* `config_learned_scalp.json` — Parameters dynamically calibrated by the AI Auto-Learning Brain.
+* `config_learned_m15.json` — Parameters locked to institutional targets (Gold TP=$40, DAX TP=150pts).
 * `ut_bot_strategy.pine` — Reference TradingView Pine Script (`@version=6`) for visual chart comparison.

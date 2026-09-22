@@ -193,7 +193,7 @@ def sync_closed_trades_from_history():
         # Broadcast each trade result (Win/Loss) to both channel and personal DM
         for item in closed_notifications:
             try:
-                from scalping_gold import send_trade_close_broadcast
+                from institutional_trader import send_trade_close_broadcast
                 send_trade_close_broadcast(
                     symbol=item["symbol"],
                     direction=item["direction"],

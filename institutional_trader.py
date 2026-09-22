@@ -1,5 +1,5 @@
 """
-scalping_gold.py — AlphaEdge Institutional Multi-Timeframe & Whale Flow Swing Engine
+institutional_trader.py — AlphaEdge Institutional Multi-Timeframe & Whale Flow Swing Engine
 ===================================================================================
 Replaces the legacy scalper with a high-conviction Institutional Swing Architecture:
   - Multi-Timeframe Structure (H4 / H1 / M15):
@@ -11,16 +11,13 @@ Replaces the legacy scalper with a high-conviction Institutional Swing Architect
       * Liquidity Sweeps (Stop Hunts): Absorbs retail stop orders, rejects back into range.
       * Tick Volume Surge: Volume >= 1.6x 20-period moving average on the sweep candle.
       * Fair Value Gap (FVG) / Imbalance validation.
-  - Pre-Trade Real-Time Backtest Gate:
-      * Simulates setup expectancy over preceding 45-60 days before firing order on MT5.
-      * Rejects trades if historical win rate < 55% or profit factor < 1.3.
   - Target & Holding Calibration:
-      * Gold (XAUUSDm, 0.10 lot): Full TP = $30.00 USD ($3.00 price expansion).
-      * Gold Stage 1 BE: Triggers at +$15.00 profit (50% to target, no premature scratches).
-      * Gold Stage 2 Profit Lock: Triggers at +$25.00 profit -> locks +$20.00.
-      * DAX (DE30m, 0.20 lot): Full TP = 50.0 pts. BE at +25.0 pts. Lock at +40.0 -> +30.0 pts.
-  - Session Gateway: 08:00 AM to 08:00 PM EAT (London + New York only).
-  - Telegram Firewall: Signals broadcast with Whale Footprint & Pre-Trade Backtest validation.
+      * Gold (XAUUSDm, 0.02 lot): Full TP = $40.00 USD ($20.00 price expansion). Max SL = $24.00 USD (12.0 pts).
+      * Gold Stage 1 BE: Triggers at +$15.00 profit.
+      * Gold Stage 2 Profit Lock: Triggers at +$25.00 profit -> locks +$18.00.
+      * DAX (DE30m, 0.30 lot): Full TP = 150.0 pts. Max SL = 80.0 pts. BE at +60.0 pts. Lock at +100.0 -> +80.0 pts.
+  - Session Gateway: 24/5 (Sunday 23:00 EAT to Friday 23:55 EAT).
+  - Strict 60-Minute Post-Closure Cooldown Shield: Prevents premature re-entries.
 """
 
 import os
@@ -554,48 +551,8 @@ def execute_order(symbol, order_type, lot, sl, tp, catalyst_desc="Standard", new
         return None
 
 
-def close_opposite_positions(symbol, target_dir):
-    positions = mt5.positions_get(symbol=symbol)
-    if not positions:
-        return
-    info = mt5.symbol_info(symbol)
-    contract = info.trade_contract_size if info else 100.0
-    for pos in positions:
-        pos_dir = "BUY" if pos.type == mt5.ORDER_TYPE_BUY else "SELL"
-        if pos_dir != target_dir:
-            tick = mt5.symbol_info_tick(symbol)
-            c_price = tick.bid if pos_dir == "BUY" else tick.ask
-            c_type = mt5.ORDER_TYPE_SELL if pos_dir == "BUY" else mt5.ORDER_TYPE_BUY
-            req = {
-                "action": mt5.TRADE_ACTION_DEAL,
-                "position": pos.ticket,
-                "symbol": symbol,
-                "volume": pos.volume,
-                "type": c_type,
-                "price": c_price,
-                "deviation": 20,
-                "magic": 20250831,
-                "comment": "REVERSAL_CLOSE",
-                "type_time": mt5.ORDER_TIME_GTC,
-                "type_filling": mt5.ORDER_FILLING_IOC,
-            }
-            res = mt5.order_send(req)
-            pts = (c_price - pos.price_open) if pos_dir == "BUY" else (pos.price_open - c_price)
-            pnl_usd = pts * contract * pos.volume
-            log_trade_closed(pos.ticket, c_price, pnl_usd, "REVERSAL")
-            logger.info(f"[{symbol}] REVERSAL: Closed opposite {pos_dir} #{pos.ticket} at {c_price:.2f}")
-            send_trade_close_broadcast(
-                symbol=symbol,
-                direction=pos_dir,
-                open_price=f"{pos.price_open:.2f}",
-                close_price=f"{c_price:.2f}",
-                pnl_usd=round(pnl_usd, 2),
-                reason="REVERSAL"
-            )
-
-
 # ─── Autonomous Scan Cycle ─────────────────────────────────────────────────────
-def run_scalping_cycle():
+def run_institutional_cycle():
     """
     Called autonomously every cycle from alphaedge.py.
     Executes the Institutional Multi-Timeframe (MTF) & Whale Flow Swing Engine.
@@ -784,3 +741,6 @@ def run_scalping_cycle():
         except Exception as e:
             logger.error(f"[Institutional MTF] Error processing {symbol}: {e}\n{traceback.format_exc()}")
 
+
+# Backward-compatibility alias (run_scalping_cycle -> run_institutional_cycle)
+run_scalping_cycle = run_institutional_cycle

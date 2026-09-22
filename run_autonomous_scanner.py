@@ -58,7 +58,7 @@ def main():
                 logger.info("Scanner is PAUSED via Telegram. Skipping scan.")
             else:
                 try:
-                    from scalping_gold import run_scalping_cycle
+                    from institutional_trader import run_scalping_cycle
                     run_scalping_cycle()
                 except Exception as e:
                     logger.error(f"Error executing Autonomous M1 Scalper: {e}")
