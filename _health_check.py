@@ -24,7 +24,7 @@ try:
     engine = NewsCatalystEngine()
     print("OK  news_catalyst_engine")
     print(f"    Events loaded: {len(engine.events)}")
-    for sym in ["XAUUSDm", "DE30m"]:
+    for sym in ["XAUUSDm"]:
         s = engine.get_market_catalyst_status(sym)
         print(f"    {sym} now: state={s['state']}  action={s['action']}")
 except Exception as e:
@@ -37,7 +37,7 @@ try:
     learner = AutoLearner()
     cfg = learner.load_config()
     print("OK  ai_learning")
-    print(f"    gold_tp_dollars={cfg.get('gold_tp_dollars')}  dax_tp_pts={cfg.get('dax_tp_pts')}  regime={cfg.get('regime')}")
+    print(f"    gold_tp_dollars={cfg.get('gold_tp_dollars')}  regime={cfg.get('regime')}")
 except Exception as e:
     print("ERR ai_learning:", e)
     errors.append(str(e))
@@ -46,10 +46,8 @@ except Exception as e:
 try:
     import institutional_trader
     gold = institutional_trader.ASSET_CONFIGS["XAUUSDm"]
-    dax  = institutional_trader.ASSET_CONFIGS["DE30m"]
     print("OK  institutional_trader")
     print(f"    Gold: lot={gold['lot']}  tp=${gold['tp_dollars']}  be=${gold['be_trigger_dollars']}  catalyst_tp=${gold['tp_catalyst_dollars']}")
-    print(f"    DAX:  lot={dax['lot']}   tp={dax['tp_pts']}pts  be={dax['be_trigger_pts']}pts  catalyst_tp={dax['tp_catalyst_pts']}pts")
 except Exception as e:
     print("ERR institutional_trader:", e)
     errors.append(str(e))

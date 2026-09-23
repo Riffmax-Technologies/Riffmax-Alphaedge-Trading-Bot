@@ -51,7 +51,6 @@ MT5_CONFIG = {
 
 ASSET_CONFIG = {
     "XAUUSDm": {"strategies": ["h1_swing"], "timeframes": [mt5.TIMEFRAME_H1], "sessions": ["London", "NY"]},
-    "DE30m":   {"strategies": ["h1_swing"], "timeframes": [mt5.TIMEFRAME_H1], "sessions": ["London", "NY"]},
 }
 SYMBOLS = list(ASSET_CONFIG.keys())
 
@@ -1816,27 +1815,25 @@ if __name__ == "__main__":
 
     logger.info("=" * 65)
     logger.info("  ALPHAEDGE — INSTITUTIONAL MTF WHALE FLOW SWING ENGINE")
-    logger.info("  Assets: Gold (XAUUSDm), DAX (DE30m)")
+    logger.info("  Assets: Gold (XAUUSDm) ONLY")
     logger.info("  Strategy: H4 Dealing Range | Liquidity Sweep | Whale Volume | UT Bot Fresh Signals")
     logger.info("  Gold: 0.02 lot | Take Profit: $40.00 USD | Max SL: $24.00 | BE: +$15.00 | Lock: $25 -> $18")
-    logger.info("  DAX:  0.30 lot | Take Profit: 150 pts    | Max SL: 80 pts  | BE: +60 pts  | Lock: 100 -> 80 pts")
-    logger.info("  Session: 24/5 for Forex & Indices (Sunday 23:00 EAT to Friday 23:55 EAT)")
-    logger.info("  Guidance: ForexFactory Real-Time Macro News Engine (USD & EUR)")
+    logger.info("  Session: 24/5 for Gold (Sunday 23:00 EAT to Friday 23:55 EAT)")
+    logger.info("  Guidance: ForexFactory Real-Time Macro News Engine (USD)")
     logger.info("=" * 65)
 
     # 1. Send Online Startup Notification to Telegram
     startup_msg = (
         "<b>🏛 AlphaEdge — Institutional MTF Whale Flow Engine Active</b>\n\n"
-        "<b>Assets:</b> Gold (XAUUSDm), DAX (DE30m)\n"
+        "<b>Assets:</b> Gold (XAUUSDm) ONLY\n"
         "<b>Strategy:</b> H4 Dealing Range · Liquidity Sweep · Whale Volume · Strict 60-Min Cooldown Shield\n\n"
         "<b>Profit &amp; Risk Targets:</b>\n"
-        "• <b>Gold (XAUUSDm):</b> $40.00 TP | $24.00 SL | BE at +$15 | Lock $25→$18 | <b>0.02 Lot</b> (24/5)\n"
-        "• <b>DAX (DE30m):</b> 150 Pts TP | 80 Pts SL | BE at +60 pts | Lock 100→80 pts | <b>0.30 Lot</b> (24/5)\n\n"
+        "• <b>Gold (XAUUSDm):</b> $40.00 TP | $24.00 SL | BE at +$15 | Lock $25→$18 | <b>0.02 Lot</b> (24/5)\n\n"
         "<b>Entry Rules:</b>\n"
         "• Strict Discount (BUY) / Premium (SELL) zone only — never chase halfway!\n"
         "• Requires: Liquidity Sweep Wick Rejection OR Fresh M15 UT Bot crossover\n"
         "• 60-Minute Cooldown Shield enforced after every trade closure\n\n"
-        "<b>Status:</b> 🟢 Engine ready. Hunting institutional setups on Gold &amp; DAX."
+        "<b>Status:</b> 🟢 Engine ready. Hunting institutional setups on Gold (XAUUSDm)."
     )
     send_telegram_alert(startup_msg)
 

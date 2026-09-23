@@ -2,12 +2,11 @@
 backtest_institutional.py
 =========================
 Historical Backtester simulating the EXACT institutional strategy currently deployed:
-- Assets: Gold (XAUUSDm) & DAX (DE30m)
-- Multi-Timeframe Structure: H4 Dealing Range (Discount / Premium) + Trend
+- Asset: Gold (XAUUSDm) ONLY
+- Multi-Timeframe Structure: H4 EMA trend (EMA20/EMA50) + M15 micro trigger
 - Micro Trigger: M15 UT Bot Crossover & Liquidity Sweeps
 - SL & TP: Pure Dollar Values
     * Gold (0.02 lot): Target $40.00 TP, $24.00 SL (12 pts room), BE at $15, Lock $18 at $25
-    * DAX (0.30 lot): Target $25.00 TP, $30.00 SL (87 pts room), BE at $12, Lock $12 at $18
 - Cooldown: 60-minute post-trade cooldown
 - No midway entry: only enter on fresh crossover/sweep alignment
 """
@@ -275,4 +274,3 @@ def run_simulation(symbol, lookback_bars=2500):
 
 if __name__ == "__main__":
     run_simulation("XAUUSDm", lookback_bars=3000)
-    run_simulation("DE30m", lookback_bars=3000)

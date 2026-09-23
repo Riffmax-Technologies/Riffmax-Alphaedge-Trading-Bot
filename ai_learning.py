@@ -10,9 +10,8 @@ Evaluates performance metrics over the last 24-72 hours:
 - News Catalyst response performance
 
 Dynamically tunes swing parameters:
-- Gold TP: Strict $8.00 (Standard) to $10.00 / $16.00 (Trending/Catalyst)
-- Gold Break-Even Trigger: $5.00 to $6.50 (Calibrated to market volatility)
-- DAX TP: 30 to 45 Points | DAX BE Trigger: 15 to 25 Points
+- Gold TP: Strict $25.00 (Standard) to $40.00 / $50.00 (Trending/Catalyst)
+- Gold Break-Even Trigger: $10.00 to $12.00 (Calibrated to market volatility)
 - Persists optimal settings to 'config_learned_m15.json' and 'config_learned_scalp.json'.
 """
 
@@ -67,12 +66,9 @@ class AutoLearner:
             except Exception as e:
                 logger.error(f"Error loading {self.config_path}: {e}")
         return {
-            "gold_tp_dollars": 10.0,
-            "gold_tp_catalyst_dollars": 16.0,
-            "gold_be_trigger_dollars": 6.0,
-            "dax_tp_pts": 30.0,
-            "dax_tp_catalyst_pts": 60.0,
-            "dax_be_trigger_pts": 20.0,
+            "gold_tp_dollars": 25.0,
+            "gold_tp_catalyst_dollars": 40.0,
+            "gold_be_trigger_dollars": 10.0,
             "regime": "BALANCED_SWING",
             "win_rate": 50.0,
             "total_trades": 0,
@@ -104,13 +100,10 @@ class AutoLearner:
         date_to   = datetime.now()
         deals = mt5.history_deals_get(date_from, date_to)
 
-        # Baseline Defaults (Institutional MTF Swing Engine - 0.02 Gold / 0.10 DAX Targets)
+        # Baseline Defaults (Institutional MTF Swing Engine - 0.02 Gold)
         gold_tp = 25.0
         gold_tp_catalyst = 40.0
         gold_be = 10.0
-        dax_tp = 40.0
-        dax_tp_catalyst = 70.0
-        dax_be = 20.0
         regime = "BALANCED_INSTITUTIONAL_SWING"
 
         total_trades = 0
@@ -160,43 +153,28 @@ class AutoLearner:
                 gold_tp = 30.0
                 gold_tp_catalyst = 50.0
                 gold_be = 12.0
-                dax_tp = 50.0
-                dax_tp_catalyst = 85.0
-                dax_be = 25.0
             elif win_rate < 50.0:
                 # Defensive mode: tighten slightly but hold swing character
                 regime = "DEFENSIVE_INSTITUTIONAL_SWING"
                 gold_tp = 20.0
                 gold_tp_catalyst = 30.0
                 gold_be = 8.0
-                dax_tp = 30.0
-                dax_tp_catalyst = 50.0
-                dax_be = 16.0
             else:
                 regime = "BALANCED_INSTITUTIONAL_SWING"
                 gold_tp = 25.0
                 gold_tp_catalyst = 40.0
                 gold_be = 10.0
-                dax_tp = 40.0
-                dax_tp_catalyst = 70.0
-                dax_be = 20.0
         else:
             regime = "INITIAL_INSTITUTIONAL_SWING"
             gold_tp = 25.0
             gold_tp_catalyst = 40.0
             gold_be = 10.0
-            dax_tp = 40.0
-            dax_tp_catalyst = 70.0
-            dax_be = 20.0
 
         old_config = self.load_config()
         new_config = {
             "gold_tp_dollars": gold_tp,
             "gold_tp_catalyst_dollars": gold_tp_catalyst,
             "gold_be_trigger_dollars": gold_be,
-            "dax_tp_pts": dax_tp,
-            "dax_tp_catalyst_pts": dax_tp_catalyst,
-            "dax_be_trigger_pts": dax_be,
             "regime": regime,
             "win_rate": win_rate,
             "total_trades": total_trades,
@@ -220,8 +198,7 @@ class AutoLearner:
                 f"• <b>Win Rate:</b> {win_rate}%\n"
                 f"• <b>Net PnL:</b> ${net_pnl:+.2f}\n"
                 f"• <b>Gold Target:</b> ${gold_tp:.2f} TP (BE Lock at ${gold_be:.2f})\n"
-                f"• <b>DAX Target:</b> {dax_tp:.0f} pts TP (BE Lock at {dax_be:.0f} pts)\n"
-                f"• <b>News Catalyst Target:</b> Gold ${gold_tp_catalyst:.2f} / DAX {dax_tp_catalyst:.0f} pts\n"
+                f"• <b>News Catalyst Target:</b> Gold ${gold_tp_catalyst:.2f}\n"
                 f"• <b>Status:</b> Dynamic optimization applied."
             )
             send_telegram(msg)

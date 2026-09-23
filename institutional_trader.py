@@ -15,8 +15,7 @@ Replaces the legacy scalper with a high-conviction Institutional Swing Architect
       * Gold (XAUUSDm, 0.02 lot): Full TP = $40.00 USD ($20.00 price expansion). Max SL = $24.00 USD (12.0 pts).
       * Gold Stage 1 BE: Triggers at +$15.00 profit.
       * Gold Stage 2 Profit Lock: Triggers at +$25.00 profit -> locks +$18.00.
-      * DAX (DE30m, 0.30 lot): Full TP = 150.0 pts. Max SL = 80.0 pts. BE at +60.0 pts. Lock at +100.0 -> +80.0 pts.
-  - Session Gateway: 24/5 (Sunday 23:00 EAT to Friday 23:55 EAT).
+  - Session Gateway: 24/5 for Gold (Sunday 23:00 EAT to Friday 23:55 EAT).
   - Strict 60-Minute Post-Closure Cooldown Shield: Prevents premature re-entries.
 """
 
@@ -58,20 +57,6 @@ ASSET_CONFIGS = {
         "max_sl_dollars": 24.0,           # Max Initial Risk Cap: $24.00 USD (gives 12.0 pts structural price room)
         "sl_atr_mult": 1.5,
         "currency": "USD"
-    },
-    "DE30m": {
-        "symbol": "DE30m",
-        "lot": 0.30,                      # 0.30 Lot (Institutional risk allocation for DAX)
-        "key_mult": 1.0,
-        "atr_period": 10,
-        "tp_dollars": 25.0,               # Target: EXACT $25.00 USD Profit (calculated purely in dollar value)
-        "tp_catalyst_dollars": 40.0,      # Expanded $40.00 Target during High Momentum
-        "be_trigger_dollars": 12.0,       # Stage 1: Move SL to Entry at $12.00 profit (50% to target)
-        "lock_trigger_dollars": 18.0,     # Stage 2: Trigger Profit Lock at $18.00 profit
-        "lock_amount_dollars": 12.0,      # Stage 2: Lock $12.00 profit into SL
-        "max_sl_dollars": 30.0,           # Max Initial Risk Cap: $30.00 USD (wide structural SL placed beyond reach of noise)
-        "sl_atr_mult": 1.5,
-        "currency": "EUR"
     }
 }
 
@@ -433,15 +418,14 @@ def manage_open_positions(symbol, cfg, catalyst_state):
         # Accurate real-time profit in USD dollars
         dollar_gain = pts_gain * dollar_per_point
         
-        # 1. Stage 1: Dynamic Break-Even Shield Check (Pure Dollar Calculation for Gold & DAX)
+        # 1. Stage 1: Dynamic Break-Even Shield Check (Pure Dollar Calculation for Gold)
         is_be_active = ACTIVE_BE_TRACKED.get(ticket, False)
         if not is_be_active:
             be_condition = False
-            be_target_usd = cfg.get('be_trigger_dollars', 15.0 if symbol == "XAUUSDm" else 12.0)
+            be_target_usd = cfg.get('be_trigger_dollars', 15.0)
             if dollar_gain >= be_target_usd:
                 be_condition = True
-                # Buffer to guarantee positive exit covering spread
-                be_buffer = 0.5 if symbol == "XAUUSDm" else (3.0 / dollar_per_point if dollar_per_point > 0 else 10.0)
+                be_buffer = 0.5  # Lock +0.5 pt ($1.00 USD) on Gold to cover spread
                 
             if be_condition:
                 new_sl = entry_price + be_buffer if pos_type == "BUY" else entry_price - be_buffer
@@ -457,15 +441,15 @@ def manage_open_positions(symbol, cfg, catalyst_state):
                 logger.info(f"[{symbol}] BREAK-EVEN LOCKED on #{ticket}! Gain: ${dollar_gain:.2f} -> SL: {new_sl:.2f}")
                 _send_telegram(msg)
 
-        # 2. Stage 2: Advanced Profit Lock (Gold $25 -> lock $18 / DAX $18 -> lock $12)
+        # 2. Stage 2: Advanced Profit Lock (Gold $25 -> lock $18)
         is_lock_active = ACTIVE_LOCK_TRACKED.get(ticket, False)
         if not is_lock_active:
             lock_condition = False
-            lock_target_usd = cfg.get('lock_trigger_dollars', 25.0 if symbol == "XAUUSDm" else 18.0)
-            lock_amount_usd = cfg.get('lock_amount_dollars', 18.0 if symbol == "XAUUSDm" else 12.0)
+            lock_target_usd = cfg.get('lock_trigger_dollars', 25.0)
+            lock_amount_usd = cfg.get('lock_amount_dollars', 18.0)
             if dollar_gain >= lock_target_usd:
                 lock_condition = True
-                lock_dist = lock_amount_usd / dollar_per_point if dollar_per_point > 0 else 20.0
+                lock_dist = lock_amount_usd / dollar_per_point if dollar_per_point > 0 else 9.0
                 locked_profit_desc = f"+${lock_amount_usd:.2f}"
 
             if lock_condition:
@@ -719,12 +703,12 @@ def run_institutional_cycle():
 
             # Enforce structural SL room and dollar profit expansion targets
             dollar_per_pt = get_dollar_per_pt(symbol, cfg['lot'])
-            tp_target_usd = cfg.get('tp_dollars', 40.0 if symbol == "XAUUSDm" else 25.0)
-            max_sl_usd = cfg.get('max_sl_dollars', 24.0 if symbol == "XAUUSDm" else 30.0)
+            tp_target_usd = cfg.get('tp_dollars', 40.0)
+            max_sl_usd = cfg.get('max_sl_dollars', 24.0)
             
             target_tp_dist = tp_target_usd / dollar_per_pt if dollar_per_pt > 0 else 20.0
             # Place SL beyond reach of noise using structural swing level with wide dollar buffer
-            target_sl_dist = max(abs(curr_price - setup['sl_price']), max_sl_usd / dollar_per_pt if dollar_per_pt > 0 else 30.0)
+            target_sl_dist = max(abs(curr_price - setup['sl_price']), max_sl_usd / dollar_per_pt if dollar_per_pt > 0 else 12.0)
 
             order_price = tick.ask if target_dir == "BUY" else tick.bid
             if target_dir == "BUY":
