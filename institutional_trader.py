@@ -49,12 +49,12 @@ ASSET_CONFIGS = {
         "lot": 0.02,                      # 0.02 Lot (User exact setting)
         "key_mult": 1.0,
         "atr_period": 10,
-        "tp_dollars": 40.0,              # Institutional Target: $40.00 USD Profit (20.0 pts move with 0.02 lot)
-        "tp_catalyst_dollars": 60.0,      # Expanded $60.00 Target during High Momentum
-        "be_trigger_dollars": 15.0,       # Stage 1: Move SL to Entry at $15.00 profit (7.5 pts)
-        "lock_trigger_dollars": 25.0,     # Stage 2: Trigger Profit Lock at $25.00 profit
-        "lock_amount_dollars": 18.0,      # Stage 2: Lock $18.00 profit into SL
-        "max_sl_dollars": 24.0,           # Max Initial Risk Cap: $24.00 USD (gives 12.0 pts structural price room)
+        "tp_dollars": 60.0,              # Institutional Target: $60.00 USD Profit (30.0 pts move with 0.02 lot)
+        "tp_catalyst_dollars": 80.0,      # Expanded $80.00 Target during High Momentum
+        "be_trigger_dollars": 20.0,       # Stage 1: Move SL to Entry at +$20.00 profit (10.0 pts)
+        "lock_trigger_dollars": 35.0,     # Stage 2: Trigger Profit Lock at +$35.00 profit (17.5 pts)
+        "lock_amount_dollars": 25.0,      # Stage 2: Lock $25.00 profit into SL (12.5 pts)
+        "max_sl_dollars": 36.0,           # Max Initial Risk Cap: $36.00 USD (gives 18.0 pts room, beyond H1 ATR of 17 pts)
         "sl_atr_mult": 1.5,
         "currency": "USD"
     }

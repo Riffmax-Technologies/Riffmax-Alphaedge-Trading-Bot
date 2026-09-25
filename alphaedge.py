@@ -1818,7 +1818,7 @@ if __name__ == "__main__":
     logger.info("  ALPHAEDGE — INSTITUTIONAL MTF WHALE FLOW SWING ENGINE")
     logger.info("  Assets: Gold (XAUUSDm) ONLY")
     logger.info("  Strategy: H4 Dealing Range | Liquidity Sweep | Whale Volume | UT Bot Fresh Signals")
-    logger.info("  Gold: 0.02 lot | Take Profit: $40.00 USD | Max SL: $24.00 | BE: +$15.00 | Lock: $25 -> $18")
+    logger.info("  Gold: 0.02 lot | Take Profit: $60.00 USD | Max SL: $36.00 (18 pts) | BE: +$20.00 | Lock: $35 -> $25")
     logger.info("  Session: 8:00 AM - 8:00 PM EAT (Monday to Friday) | Overnight Gate Protected")
     logger.info("  Guidance: ForexFactory Real-Time Macro News Engine (USD)")
     logger.info("=" * 65)
@@ -1829,7 +1829,7 @@ if __name__ == "__main__":
         "<b>Assets:</b> Gold (XAUUSDm) ONLY\n"
         "<b>Strategy:</b> H4 Dealing Range · Liquidity Sweep · Whale Volume · Strict 60-Min Cooldown Shield\n\n"
         "<b>Profit &amp; Risk Targets:</b>\n"
-        "• <b>Gold (XAUUSDm):</b> $40.00 TP | $24.00 SL | BE at +$15 | Lock $25→$18 | <b>0.02 Lot</b>\n"
+        "• <b>Gold (XAUUSDm):</b> $60.00 TP | $36.00 SL (18 pts room) | BE at +$20 | Lock $35→$25 | <b>0.02 Lot</b>\n"
         "• <b>Trading Window:</b> 8:00 AM – 8:00 PM EAT (Strict Overnight Protection)\n\n"
         "<b>Entry Rules:</b>\n"
         "• Strict Discount (BUY) / Premium (SELL) zone only — never chase halfway!\n"

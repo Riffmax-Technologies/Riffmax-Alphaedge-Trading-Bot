@@ -362,8 +362,8 @@ class InstitutionalEngine:
 
         # M15 ATR for responsive sniper SL calculation
         m15_atr = _compute_atr(df_m15, period=14)
-        min_sl_pts = 12.0   # 12.0 pts ($24 USD at 0.02 lot) structural buffer on Gold
-        min_tp_pts = 20.0   # 20.0 pts ($40 USD at 0.02 lot)
+        min_sl_pts = 18.0   # 18.0 pts ($36 USD at 0.02 lot) buffer beyond H1 ATR of 17 pts
+        min_tp_pts = 30.0   # 30.0 pts ($60 USD at 0.02 lot)
         sl_buffer = max(round(m15_atr * 1.5, 4), min_sl_pts)
 
         # Institutional Volume Gate: Gold fires on UT Bot signal or sweep (high liquidity).

@@ -6,7 +6,7 @@ Historical Backtester simulating the EXACT institutional strategy currently depl
 - Multi-Timeframe Structure: H4 EMA trend (EMA20/EMA50) + M15 micro trigger
 - Micro Trigger: M15 UT Bot Crossover & Liquidity Sweeps
 - SL & TP: Pure Dollar Values
-    * Gold (0.02 lot): Target $40.00 TP, $24.00 SL (12 pts room), BE at $15, Lock $18 at $25
+    * Gold (0.02 lot): Target $60.00 TP, $36.00 SL (18 pts room), BE at $20, Lock $25 at $35
 - Cooldown: 60-minute post-trade cooldown
 - No midway entry: only enter on fresh crossover/sweep alignment
 """
