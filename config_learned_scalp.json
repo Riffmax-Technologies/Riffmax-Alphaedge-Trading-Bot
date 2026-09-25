@@ -1,10 +1,10 @@
 {
-    "gold_tp_dollars": 40.0,
-    "gold_tp_catalyst_dollars": 60.0,
-    "gold_be_trigger_dollars": 15.0,
-    "regime": "INSTITUTIONAL_SWING_H4",
-    "win_rate": 63.8,
-    "total_trades": 138,
-    "net_pnl": 0.0,
-    "last_updated": "2026-09-23 20:25:00"
+    "gold_tp_dollars": 25.0,
+    "gold_tp_catalyst_dollars": 40.0,
+    "gold_be_trigger_dollars": 10.0,
+    "regime": "BALANCED_INSTITUTIONAL_SWING",
+    "win_rate": 57.4,
+    "total_trades": 176,
+    "net_pnl": -300.81,
+    "last_updated": "2026-09-25 08:30:24"
 }

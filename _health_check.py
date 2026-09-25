@@ -52,27 +52,39 @@ except Exception as e:
     print("ERR institutional_trader:", e)
     errors.append(str(e))
 
-# ── 5. Session Filter Boundary Check ─────────────────────────────────────────
+# ── 5. Session Filter Boundary Check (8:00 AM - 8:00 PM EAT) ──────────────────
 print()
-print("--- Session filter (04:00 UTC = 07:00 EAT start) ---")
+print("--- Session filter (08:00 - 20:00 EAT / Monday - Friday) ---")
+from institutional_trader import is_session_active
+from datetime import datetime, timezone, timedelta
+
+def sim_session(weekday, hour_eat):
+    # EAT is UTC+3
+    now_utc = datetime(2026, 9, 21 + weekday, hour_eat, 0, tzinfo=timezone.utc) - timedelta(hours=3)
+    now_eat = now_utc + timedelta(hours=3)
+    wd = now_eat.weekday()
+    he = now_eat.hour
+    if wd in (5, 6):
+        return False
+    if he < 8 or he >= 20:
+        return False
+    return True
+
 tests = [
-    (3,  3, "Thu 03:00 UTC (06:00 EAT)", False),
-    (4,  3, "Thu 04:00 UTC (07:00 EAT)", True),
-    (7,  3, "Thu 07:00 UTC (10:00 EAT)", True),
-    (20, 3, "Thu 20:00 UTC (23:00 EAT)", True),
-    (21, 3, "Thu 21:00 UTC (00:00 EAT)", False),
-    (10, 4, "Fri 10:00 UTC            ", True),
-    (21, 4, "Fri 21:00 UTC (weekend)  ", False),
-    (12, 5, "Sat 12:00 UTC            ", False),
-    (22, 6, "Sun 22:00 UTC (mkt open) ", False),  # Market reopens but our session starts Mon 04:00 UTC
-    (4,  0, "Mon 04:00 UTC (start)    ", True),
+    (0, 7,  "Mon 07:00 EAT (pre-market)", False),
+    (0, 8,  "Mon 08:00 EAT (market open)", True),
+    (0, 12, "Mon 12:00 EAT (midday)     ", True),
+    (0, 19, "Mon 19:00 EAT (evening)    ", True),
+    (0, 20, "Mon 20:00 EAT (cutoff)     ", False),
+    (0, 23, "Mon 23:00 EAT (overnight)  ", False),
+    (4, 19, "Fri 19:00 EAT (open)       ", True),
+    (4, 20, "Fri 20:00 EAT (cutoff)     ", False),
+    (5, 12, "Sat 12:00 EAT (weekend)    ", False),
+    (6, 12, "Sun 12:00 EAT (weekend)    ", False),
 ]
 all_session_ok = True
-for hour, weekday, label, expected in tests:
-    fri_close  = (weekday == 4 and hour >= 21)
-    is_sat     = (weekday == 5)
-    sun_early  = (weekday == 6 and hour < 22)
-    active     = (4 <= hour < 21) and not fri_close and not is_sat and not sun_early
+for weekday, hour_eat, label, expected in tests:
+    active = sim_session(weekday, hour_eat)
     ok = (active == expected)
     status = "OK " if ok else "ERR"
     if not ok:

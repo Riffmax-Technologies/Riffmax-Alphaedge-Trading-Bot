@@ -213,12 +213,10 @@ def run_simulation(symbol, lookback_bars=2500):
             if ut_signal == "SELL" and curr_close < eq:
                 continue
 
-            # 3. For DAX, check volume participation (volume >= 1.2x SMA20)
-            if symbol == "DE30m":
-                vols = df['tick_volume'].values
-                vol_sma = np.mean(vols[max(0, i-20): i])
-                if vols[i] < 1.2 * vol_sma:
-                    continue
+            # Session filter: strictly 8:00 AM to 8:00 PM EAT (Monday - Friday)
+            eat_hour = (curr_time.hour + 3) % 24
+            if curr_time.weekday() in (5, 6) or eat_hour < 8 or eat_hour >= 20:
+                continue
 
             # Valid setup found! Enter at next bar open or current close
             entry_price = curr_close

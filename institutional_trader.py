@@ -299,29 +299,26 @@ def _send_telegram(message):
 
 
 
-# ─── Session Filter (24/5 Trading for Forex & Indices: Gold & DAX) ────────
+# ─── Session Filter (8:00 AM - 8:00 PM EAT / Monday - Friday) ───────────────────
 def is_session_active(symbol=None):
     """
     Session Gateway:
-    Forex & Indices (XAUUSDm, DE30m) are active 24/5 from Sunday 23:00 EAT through Friday 23:55 EAT.
+    Trading window is strictly 8:00 AM to 8:00 PM EAT (Monday to Friday).
+    Once it hits 8:00 PM (20:00) EAT, no new trades are opened.
+    Overnight trading (8:00 PM to 8:00 AM EAT) and weekends are completely blocked.
     """
-
     now_utc = datetime.now(timezone.utc)
-    weekday = now_utc.weekday()  # Monday=0, ..., Friday=4, Saturday=5, Sunday=6
-    
     # EAT is UTC+3
     now_eat = now_utc + timedelta(hours=3)
+    weekday = now_eat.weekday()  # Monday=0, ..., Friday=4, Saturday=5, Sunday=6
     hour_eat = now_eat.hour
-    minute_eat = now_eat.minute
 
-    # Friday market close after 23:55 EAT
-    if weekday == 4 and (hour_eat == 23 and minute_eat >= 55):
+    # Closed on weekends (Saturday & Sunday)
+    if weekday in (5, 6):
         return False
-    # Saturday market completely closed for Forex/Indices
-    if weekday == 5:
-        return False
-    # Sunday market closed before 23:00 EAT for Forex/Indices
-    if weekday == 6 and hour_eat < 23:
+
+    # Strictly 8:00 AM to 8:00 PM EAT (08:00 <= hour < 20:00)
+    if hour_eat < 8 or hour_eat >= 20:
         return False
 
     return True
@@ -628,10 +625,13 @@ def run_institutional_cycle():
             positions = mt5.positions_get(symbol=symbol)
             has_pos = len(positions) > 0 if positions else False
 
+            sym_session_ok = is_session_active(symbol)
+            session_tag = "ACTIVE (8am-8pm EAT)" if sym_session_ok else "CLOSED (8pm-8am Window Gate)"
             ut_tag = f" | UT: {setup.get('ut_bot', 'NONE')}" if setup.get('ut_bot') else ""
             logger.info(
                 f"[Institutional MTF] {symbol} | Price: {curr_price:.2f} | Range: {loc_pct} | "
                 f"Vol: {whale_str} | Pos: {len(positions) if positions else 0}{ut_tag} | "
+                f"Session: {session_tag} | "
                 f"Setup: {setup.get('direction')} (Valid: {setup.get('valid')}) | {setup.get('reason')}"
             )
 
@@ -707,8 +707,8 @@ def run_institutional_cycle():
             max_sl_usd = cfg.get('max_sl_dollars', 24.0)
             
             target_tp_dist = tp_target_usd / dollar_per_pt if dollar_per_pt > 0 else 20.0
-            # Place SL beyond reach of noise using structural swing level with wide dollar buffer
-            target_sl_dist = max(abs(curr_price - setup['sl_price']), max_sl_usd / dollar_per_pt if dollar_per_pt > 0 else 12.0)
+            # Strict dollar risk: exactly max_sl_dollars ($24.00 = 12.0 pts at 0.02 lot), never exceed or balloon
+            target_sl_dist = max_sl_usd / dollar_per_pt if dollar_per_pt > 0 else 12.0
 
             order_price = tick.ask if target_dir == "BUY" else tick.bid
             if target_dir == "BUY":

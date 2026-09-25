@@ -220,19 +220,20 @@ def _start_telegram_command_listener():
 
 def is_trading_session_active() -> bool:
     """
-    All-Day & Overnight 24/5 Trading Mode:
-    Runs continuously throughout Asian, Frankfurt, London, and NY sessions.
-    Only pauses over the weekend when the market is closed (Friday 21:00 UTC to Sunday 22:00 UTC).
+    Day Trading Session Gate:
+    Trading window is strictly 8:00 AM to 8:00 PM EAT (Monday to Friday).
+    Once it hits 8:00 PM (20:00) EAT, no new trades are opened.
+    Overnight trading (8:00 PM to 8:00 AM EAT) and weekends are completely blocked.
     """
-    from datetime import datetime, timezone
+    from datetime import datetime, timezone, timedelta
     now_utc = datetime.now(timezone.utc)
-    weekday = now_utc.weekday()
-    hour = now_utc.hour
-    if weekday == 4 and hour >= 21:
+    now_eat = now_utc + timedelta(hours=3)
+    weekday = now_eat.weekday()
+    hour_eat = now_eat.hour
+
+    if weekday in (5, 6):
         return False
-    if weekday == 5:
-        return False
-    if weekday == 6 and hour < 22:
+    if hour_eat < 8 or hour_eat >= 20:
         return False
     return True
 
@@ -1818,7 +1819,7 @@ if __name__ == "__main__":
     logger.info("  Assets: Gold (XAUUSDm) ONLY")
     logger.info("  Strategy: H4 Dealing Range | Liquidity Sweep | Whale Volume | UT Bot Fresh Signals")
     logger.info("  Gold: 0.02 lot | Take Profit: $40.00 USD | Max SL: $24.00 | BE: +$15.00 | Lock: $25 -> $18")
-    logger.info("  Session: 24/5 for Gold (Sunday 23:00 EAT to Friday 23:55 EAT)")
+    logger.info("  Session: 8:00 AM - 8:00 PM EAT (Monday to Friday) | Overnight Gate Protected")
     logger.info("  Guidance: ForexFactory Real-Time Macro News Engine (USD)")
     logger.info("=" * 65)
 
@@ -1828,7 +1829,8 @@ if __name__ == "__main__":
         "<b>Assets:</b> Gold (XAUUSDm) ONLY\n"
         "<b>Strategy:</b> H4 Dealing Range · Liquidity Sweep · Whale Volume · Strict 60-Min Cooldown Shield\n\n"
         "<b>Profit &amp; Risk Targets:</b>\n"
-        "• <b>Gold (XAUUSDm):</b> $40.00 TP | $24.00 SL | BE at +$15 | Lock $25→$18 | <b>0.02 Lot</b> (24/5)\n\n"
+        "• <b>Gold (XAUUSDm):</b> $40.00 TP | $24.00 SL | BE at +$15 | Lock $25→$18 | <b>0.02 Lot</b>\n"
+        "• <b>Trading Window:</b> 8:00 AM – 8:00 PM EAT (Strict Overnight Protection)\n\n"
         "<b>Entry Rules:</b>\n"
         "• Strict Discount (BUY) / Premium (SELL) zone only — never chase halfway!\n"
         "• Requires: Liquidity Sweep Wick Rejection OR Fresh M15 UT Bot crossover\n"
