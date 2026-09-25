@@ -182,22 +182,31 @@ def process_telegram_commands():
 
                 elif cmd in ["/help", "/start"]:
                     help_reply = (
-                        "<b>🤖 AlphaEdge Gold Scalper Telegram Commands</b>\n\n"
+                        "<b>🤖 AlphaEdge Institutional Engine Telegram Commands</b>\n\n"
                         "• /status — View live bot health, balance, and open position count\n"
                         "• /pnl — View account balance, equity, and floating PnL\n"
-                        "• /stop_scanner — Pause the scalping scanner\n"
-                        "• /start_scanner — Resume the scalping scanner\n"
+                        "• /shadow — View Shadow Tracking performance on EUR/USD, Oil & US30\n"
+                        "• /stop_scanner — Pause the scanner\n"
+                        "• /start_scanner — Resume the scanner\n"
                         "• /help — Display command menu"
                     )
                     send_telegram_alert(help_reply)
 
+                elif cmd in ["/shadow", "/shadow_report"]:
+                    try:
+                        from shadow_tracker import generate_shadow_report
+                        shadow_rep = generate_shadow_report()
+                        send_telegram_alert(shadow_rep)
+                    except Exception as shadow_err:
+                        send_telegram_alert(f"⚠️ Shadow Report Error: {shadow_err}")
+
                 elif cmd == "/stop_scanner":
                     Path("bot_state.txt").write_text("STOPPED")
-                    send_telegram_alert("🛑 <b>Scalper Paused</b>\nScanner is now paused. Send /start_scanner to resume.")
+                    send_telegram_alert("🛑 <b>Scanner Paused</b>\nScanner is now paused. Send /start_scanner to resume.")
 
                 elif cmd == "/start_scanner":
                     Path("bot_state.txt").write_text("RUNNING")
-                    send_telegram_alert("🟢 <b>Scalper Resumed</b>\nScanner is actively monitoring Gold for setups.")
+                    send_telegram_alert("🟢 <b>Scanner Resumed</b>\nScanner is actively monitoring Gold for setups.")
 
     except Exception as err:
         logger.debug(f"Telegram command check error: {err}")
@@ -1884,6 +1893,14 @@ if __name__ == "__main__":
                     import traceback
                     logger.error(f"[Institutional] Cycle error:\n{traceback.format_exc()}")
 
+                # ── 1.5 Shadow Observation Scan (EURUSDm, USOILm, US30m) ───────────
+                # Completely non-trading paper observation mode. Never calls order_send.
+                try:
+                    import shadow_tracker
+                    shadow_tracker.run_shadow_cycle()
+                except Exception as shadow_err:
+                    logger.debug(f"[ShadowTracker] Observation error: {shadow_err}")
+
 
             # ── End-of-Day Pre-Close Gold Market Analysis (20:45 UTC) ──────────────
             # Gold market closes at 21:00 UTC. We fire at 20:45 UTC to give a
@@ -1935,6 +1952,15 @@ if __name__ == "__main__":
                         )
                         send_telegram_alert(eod_msg)
                         logger.info("[Scalp] End-of-Day daily analysis sent to Telegram.")
+
+                        # Send Shadow Tracking Daily Summary to Telegram
+                        try:
+                            from shadow_tracker import generate_shadow_report
+                            shadow_report_msg = generate_shadow_report()
+                            send_telegram_alert(shadow_report_msg)
+                            logger.info("[ShadowTracker] EOD Shadow report sent to Telegram.")
+                        except Exception as s_err:
+                            logger.debug(f"[ShadowTracker] EOD report send error: {s_err}")
                     except Exception as eod_err:
                         logger.error(f"[Scalp] EOD report error: {eod_err}")
 

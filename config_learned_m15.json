@@ -3,8 +3,8 @@
     "gold_tp_catalyst_dollars": 40.0,
     "gold_be_trigger_dollars": 10.0,
     "regime": "BALANCED_INSTITUTIONAL_SWING",
-    "win_rate": 57.4,
-    "total_trades": 176,
-    "net_pnl": -300.81,
-    "last_updated": "2026-09-25 08:30:24"
+    "win_rate": 57.6,
+    "total_trades": 177,
+    "net_pnl": -240.33,
+    "last_updated": "2026-09-25 15:00:27"
 }
