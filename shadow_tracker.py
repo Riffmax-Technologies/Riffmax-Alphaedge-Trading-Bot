@@ -2,10 +2,11 @@
 shadow_tracker.py
 =================
 Shadow Tracking Engine ("Paper Observation Mode")
-Monitors secondary assets (EURUSDm, USOILm, US30m) without placing live MT5 orders.
+Monitors secondary assets (EURUSDm, US30m) without placing live MT5 orders.
 Simulates theoretical entries, SL/TP execution, break-even, and profit locks.
 Feeds virtual performance data into the AI Learning Engine and Telegram daily reports.
-100% isolated from Gold (XAUUSDm) live execution.
+100% isolated from live execution (XAUUSDm, USOILm).
+NOTE: USOILm was promoted to live trading on 2026-09-29 and removed from shadow.
 """
 
 import os
@@ -20,6 +21,7 @@ from institutional_engine import InstitutionalEngine
 logger = logging.getLogger("AlphaEdge.ShadowTracker")
 
 # ─── Shadow Asset Configurations (Matched to Gold Option B Risk: $36 SL / $60 TP) ─
+# NOTE: EURUSDm and US30m only. USOILm was promoted to live trading on 2026-09-29.
 SHADOW_CONFIGS = {
     "EURUSDm": {
         "symbol": "EURUSDm",
@@ -31,17 +33,6 @@ SHADOW_CONFIGS = {
         "lock_trigger_dollars": 35.0,    # Trigger lock at +$35.00 (35 pips)
         "lock_amount_dollars": 25.0,     # Lock +$25.00 profit into SL (25 pips)
         "pip_size": 0.00010
-    },
-    "USOILm": {
-        "symbol": "USOILm",
-        "name": "Crude Oil (WTI)",
-        "lot": 0.05,                     # 0.05 Lot ($50.00 per $1.00 move)
-        "tp_dollars": 60.0,              # Target: $60.00 USD Profit ($1.20 move)
-        "max_sl_dollars": 36.0,          # Risk Cap: $36.00 USD ($0.72 move)
-        "be_trigger_dollars": 20.0,      # BE at +$20.00 ($0.40 move)
-        "lock_trigger_dollars": 35.0,    # Trigger lock at +$35.00 ($0.70 move)
-        "lock_amount_dollars": 25.0,     # Lock +$25.00 profit into SL ($0.50 move)
-        "pip_size": 0.01
     },
     "US30m": {
         "symbol": "US30m",

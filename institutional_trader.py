@@ -57,6 +57,20 @@ ASSET_CONFIGS = {
         "max_sl_dollars": 36.0,           # Max Initial Risk Cap: $36.00 USD (gives 18.0 pts room, beyond H1 ATR of 17 pts)
         "sl_atr_mult": 1.5,
         "currency": "USD"
+    },
+    "USOILm": {
+        "symbol": "USOILm",
+        "lot": 0.05,                      # 0.05 Lot ($50.00 per $1.00 move, matching Gold risk)
+        "key_mult": 1.0,
+        "atr_period": 10,
+        "tp_dollars": 60.0,              # Target: $60.00 USD ($1.20 move)
+        "tp_catalyst_dollars": 80.0,      # Expanded $80.00 Target ($1.60 move)
+        "be_trigger_dollars": 20.0,       # Stage 1: Move SL to Entry at +$20.00 profit ($0.40 move)
+        "lock_trigger_dollars": 35.0,     # Stage 2: Trigger Profit Lock at +$35.00 profit ($0.70 move)
+        "lock_amount_dollars": 25.0,      # Stage 2: Lock $25.00 profit into SL ($0.50 move)
+        "max_sl_dollars": 36.0,           # Max Initial Risk: $36.00 USD ($0.72 move)
+        "sl_atr_mult": 1.5,
+        "currency": "USD"
     }
 }
 
@@ -480,13 +494,20 @@ def manage_open_positions(symbol, cfg, catalyst_state):
             _send_telegram(msg)
 
 
+def _sym_digits(symbol):
+    """Returns the number of decimal places for price rounding for a given symbol."""
+    info = mt5.symbol_info(symbol)
+    return info.digits if info else 2
+
+
 def modify_sl(ticket, symbol, new_sl, tp):
+    dp = _sym_digits(symbol)
     req = {
         "action": mt5.TRADE_ACTION_SLTP,
         "position": ticket,
         "symbol": symbol,
-        "sl": round(new_sl, 2 if symbol == "XAUUSDm" else 1),
-        "tp": round(tp, 2 if symbol == "XAUUSDm" else 1)
+        "sl": round(new_sl, dp),
+        "tp": round(tp, dp)
     }
     res = mt5.order_send(req)
     if res.retcode != mt5.TRADE_RETCODE_DONE:
@@ -494,18 +515,19 @@ def modify_sl(ticket, symbol, new_sl, tp):
 
 
 def execute_order(symbol, order_type, lot, sl, tp, catalyst_desc="Standard", news_name="None", ut_stop=0.0, atr=0.0):
+    dp = _sym_digits(symbol)
     tick = mt5.symbol_info_tick(symbol)
     price = tick.ask if order_type == "BUY" else tick.bid
     o_type = mt5.ORDER_TYPE_BUY if order_type == "BUY" else mt5.ORDER_TYPE_SELL
-    
+
     req = {
         "action": mt5.TRADE_ACTION_DEAL,
         "symbol": symbol,
         "volume": float(lot),
         "type": o_type,
         "price": price,
-        "sl": round(sl, 2 if symbol == "XAUUSDm" else 1),
-        "tp": round(tp, 2 if symbol == "XAUUSDm" else 1),
+        "sl": round(sl, dp),
+        "tp": round(tp, dp),
         "deviation": 20,
         "magic": 20250831,
         "comment": "M15_UT_SWING",

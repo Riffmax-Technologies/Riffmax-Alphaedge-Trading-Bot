@@ -1825,9 +1825,10 @@ if __name__ == "__main__":
 
     logger.info("=" * 65)
     logger.info("  ALPHAEDGE — INSTITUTIONAL MTF WHALE FLOW SWING ENGINE")
-    logger.info("  Assets: Gold (XAUUSDm) ONLY")
+    logger.info("  Live Assets: Gold (XAUUSDm) | Crude Oil (USOILm)")
     logger.info("  Strategy: H4 Dealing Range | Liquidity Sweep | Whale Volume | UT Bot Fresh Signals")
-    logger.info("  Gold: 0.02 lot | Take Profit: $60.00 USD | Max SL: $36.00 (18 pts) | BE: +$20.00 | Lock: $35 -> $25")
+    logger.info("  Gold:  0.02 lot | TP: $60.00 | Max SL: $36.00 (18 pts)  | BE: +$20 | Lock: $35->$25")
+    logger.info("  Oil:   0.05 lot | TP: $60.00 | Max SL: $36.00 ($0.72)   | BE: +$20 | Lock: $35->$25")
     logger.info("  Session: 8:00 AM - 8:00 PM EAT (Monday to Friday) | Overnight Gate Protected")
     logger.info("  Guidance: ForexFactory Real-Time Macro News Engine (USD)")
     logger.info("=" * 65)
@@ -1835,16 +1836,17 @@ if __name__ == "__main__":
     # 1. Send Online Startup Notification to Telegram
     startup_msg = (
         "<b>🏛 AlphaEdge — Institutional MTF Whale Flow Engine Active</b>\n\n"
-        "<b>Assets:</b> Gold (XAUUSDm) ONLY\n"
+        "<b>Live Trading Assets:</b>\n"
+        "• <b>Gold (XAUUSDm):</b> $60.00 TP | $36.00 SL (18 pts) | BE at +$20 | Lock $35→$25 | <b>0.02 Lot</b>\n"
+        "• <b>Crude Oil (USOILm):</b> $60.00 TP | $36.00 SL ($0.72) | BE at +$20 | Lock $35→$25 | <b>0.05 Lot</b>\n\n"
+        "<b>Shadow Observation:</b> EURUSDm · US30m (paper mode)\n\n"
         "<b>Strategy:</b> H4 Dealing Range · Liquidity Sweep · Whale Volume · Strict 60-Min Cooldown Shield\n\n"
-        "<b>Profit &amp; Risk Targets:</b>\n"
-        "• <b>Gold (XAUUSDm):</b> $60.00 TP | $36.00 SL (18 pts room) | BE at +$20 | Lock $35→$25 | <b>0.02 Lot</b>\n"
-        "• <b>Trading Window:</b> 8:00 AM – 8:00 PM EAT (Strict Overnight Protection)\n\n"
-        "<b>Entry Rules:</b>\n"
-        "• Strict Discount (BUY) / Premium (SELL) zone only — never chase halfway!\n"
-        "• Requires: Liquidity Sweep Wick Rejection OR Fresh M15 UT Bot crossover\n"
-        "• 60-Minute Cooldown Shield enforced after every trade closure\n\n"
-        "<b>Status:</b> 🟢 Engine ready. Hunting institutional setups on Gold (XAUUSDm)."
+        "<b>New Guard Rails (2026-09-29):</b>\n"
+        "• Strict Discount (≤35%) gate — SELL in deep discount is FORBIDDEN\n"
+        "• Strict Premium (≥65%) gate — BUY in deep premium is FORBIDDEN\n"
+        "• UT Bot momentum alignment required — no counter-trend sweep entries\n\n"
+        "<b>Trading Window:</b> 8:00 AM – 8:00 PM EAT (Strict Overnight Protection)\n\n"
+        "<b>Status:</b> 🟢 Engine ready. Hunting institutional setups on Gold &amp; Crude Oil."
     )
     send_telegram_alert(startup_msg)
 
