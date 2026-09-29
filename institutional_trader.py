@@ -696,6 +696,21 @@ def run_institutional_cycle():
                     f"(wait for bounce to discount before longing)."
                 )
 
+            # Strict Institutional Safeguard: Never SELL in Deep Discount (< 35%) or BUY in Deep Premium (> 65%)
+            loc_pct_val = setup.get('deal_range', {}).get('location_pct', 50.0)
+            if target_dir == "SELL" and loc_pct_val < 35.0:
+                regime_allows = False
+                logger.info(
+                    f"[StructuralFilter] {symbol} SELL blocked — Dealing Range is in Deep Discount ({loc_pct_val:.1f}% < 35%). "
+                    f"Selling the swing bottom is strictly prohibited."
+                )
+            elif target_dir == "BUY" and loc_pct_val > 65.0:
+                regime_allows = False
+                logger.info(
+                    f"[StructuralFilter] {symbol} BUY blocked — Dealing Range is in Deep Premium ({loc_pct_val:.1f}% > 65%). "
+                    f"Buying the swing top is strictly prohibited."
+                )
+
             if not regime_allows:
                 continue
 

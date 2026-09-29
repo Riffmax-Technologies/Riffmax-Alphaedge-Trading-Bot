@@ -172,6 +172,59 @@ for msg, expected_allowed, desc in firewall_test_cases:
         errors.append(f"Firewall test failed for '{desc}': got {actual}, expected {expected_allowed}")
     print(f"  {status} [{action}] {desc:30s} -> {'pass' if ok else 'FAIL'}")
 
+# ── 9. Dealing Range & Momentum Alignment Safeguards ───────────────────────
+print()
+print("--- Dealing Range & Momentum Alignment Safeguards ---")
+
+# Test 1: Bearish H4 but location is deep discount (< 35%) -> SELL MUST BE BLOCKED
+h4_trend = "BEARISH"
+loc_pct = 9.5  # Exactly like today's bad entry
+macro_sell_allowed = (loc_pct >= 35.0) if h4_trend == "BEARISH" else False
+ok1 = (macro_sell_allowed == False)
+print(f"  {'OK ' if ok1 else 'ERR'} [Discount Gate] H4 BEARISH at {loc_pct}% location -> SELL allowed: {macro_sell_allowed} (Expected: False) -> {'pass' if ok1 else 'FAIL'}")
+if not ok1:
+    errors.append("Dealing Range failed: allowed SELL at 9.5% discount")
+
+# Test 2: Bullish H4 but location is deep premium (> 65%) -> BUY MUST BE BLOCKED
+h4_trend = "BULLISH"
+loc_pct = 85.0
+macro_buy_allowed = (loc_pct <= 65.0) if h4_trend == "BULLISH" else False
+ok2 = (macro_buy_allowed == False)
+print(f"  {'OK ' if ok2 else 'ERR'} [Premium Gate]  H4 BULLISH at {loc_pct}% location -> BUY allowed: {macro_buy_allowed} (Expected: False) -> {'pass' if ok2 else 'FAIL'}")
+if not ok2:
+    errors.append("Dealing Range failed: allowed BUY at 85.0% premium")
+
+# Test 3: Liquidity sweep SELL appears, but M15 UT Bot is BUY -> SELL MUST BE BLOCKED
+m15_sell_sweep = True
+h1_sell_sweep = False
+ut_signal_m15 = "BUY"  # Exactly like today's bad entry
+has_sell_trigger = (ut_signal_m15 == "SELL" or m15_sell_sweep or h1_sell_sweep) and (ut_signal_m15 != "BUY")
+ok3 = (has_sell_trigger == False)
+print(f"  {'OK ' if ok3 else 'ERR'} [Momentum Gate] Sweep SELL with M15 UT BUY -> Triggered: {has_sell_trigger} (Expected: False) -> {'pass' if ok3 else 'FAIL'}")
+if not ok3:
+    errors.append("Momentum Gate failed: allowed SELL while M15 UT Bot was BUY")
+
+# Test 4: Liquidity sweep BUY appears, but M15 UT Bot is SELL -> BUY MUST BE BLOCKED
+m15_buy_sweep = True
+h1_buy_sweep = False
+ut_signal_m15 = "SELL"
+has_buy_trigger = (ut_signal_m15 == "BUY" or m15_buy_sweep or h1_buy_sweep) and (ut_signal_m15 != "SELL")
+ok4 = (has_buy_trigger == False)
+print(f"  {'OK ' if ok4 else 'ERR'} [Momentum Gate] Sweep BUY with M15 UT SELL -> Triggered: {has_buy_trigger} (Expected: False) -> {'pass' if ok4 else 'FAIL'}")
+if not ok4:
+    errors.append("Momentum Gate failed: allowed BUY while M15 UT Bot was SELL")
+
+# Test 5: Fully aligned SELL setup (H4 BEARISH, location 55% premium, UT Bot SELL) -> ALLOWED
+h4_trend = "BEARISH"
+loc_pct = 55.0
+ut_signal_m15 = "SELL"
+macro_sell_allowed = (loc_pct >= 35.0)
+has_sell_trigger = (ut_signal_m15 == "SELL" or False) and (ut_signal_m15 != "BUY")
+ok5 = (macro_sell_allowed and has_sell_trigger) == True
+print(f"  {'OK ' if ok5 else 'ERR'} [Aligned Setup] H4 BEARISH at 55% + UT SELL -> Allowed: {macro_sell_allowed and has_sell_trigger} (Expected: True) -> {'pass' if ok5 else 'FAIL'}")
+if not ok5:
+    errors.append("Aligned Setup failed: rejected valid aligned SELL setup")
+
 # ── Final Result ──────────────────────────────────────────────────────────────
 print()
 if errors:

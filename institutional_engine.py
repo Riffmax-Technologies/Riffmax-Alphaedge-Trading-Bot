@@ -326,21 +326,23 @@ class InstitutionalEngine:
         else:
             h4_trend = "RANGE"
 
+        loc_pct = range_info.get("location_pct", 50.0)
+
         # STRICT TREND & PRICE ACTION RULE:
-        # Never trade counter-trend!
-        # When H4 trend is BULLISH -> ONLY BUY orders are allowed (even if price is at premium, we ride the trend or buy pullbacks). SELL is STRICTLY FORBIDDEN!
-        # When H4 trend is BEARISH -> ONLY SELL orders are allowed. BUY is STRICTLY FORBIDDEN!
-        # When H4 is in a neutral RANGE -> Use Dealing Range (BUY in discount <50%, SELL in premium >50%).
+        # Never trade counter-trend, and NEVER buy deep premium or sell deep discount!
+        # When H4 trend is BULLISH -> ONLY BUY orders are allowed, BUT price must NOT be in deep premium (loc_pct <= 65.0%).
+        # When H4 trend is BEARISH -> ONLY SELL orders are allowed, BUT price must NOT be in deep discount (loc_pct >= 35.0%).
+        # When H4 is in a neutral RANGE -> Use Dealing Range (BUY in discount <= 45.0%, SELL in premium >= 55.0%).
         if h4_trend == "BULLISH":
-            macro_buy_allowed = True
+            macro_buy_allowed = loc_pct <= 65.0
             macro_sell_allowed = False
         elif h4_trend == "BEARISH":
             macro_buy_allowed = False
-            macro_sell_allowed = True
+            macro_sell_allowed = loc_pct >= 35.0
         else:
             # RANGE_BOUND: Only trade at extremes of the range
-            macro_buy_allowed = range_info["is_discount"]
-            macro_sell_allowed = range_info["is_premium"]
+            macro_buy_allowed = range_info["is_discount"] and loc_pct <= 45.0
+            macro_sell_allowed = range_info["is_premium"] and loc_pct >= 55.0
 
         # 2. M15 / H1 Micro Actionable Trigger Evaluation
         m15_buy_sweep, m15_low = self.detect_liquidity_sweep(df_m15, "BUY")
@@ -370,8 +372,8 @@ class InstitutionalEngine:
         whale_gate_ok = True
 
         # ── BUY SETUP EVALUATION ──────────────────────────────────────────────
-        # Conditions: Macro BUY allowed AND (M15/H1 Liquidity Sweep Wick Rejection OR M15 UT Bot BUY)
-        has_buy_trigger = (m15_buy_sweep or h1_buy_sweep or ut_signal_m15 == "BUY")
+        # Conditions: Macro BUY allowed AND (M15 UT Bot BUY OR M15/H1 Liquidity Sweep) AND M15 UT Bot NOT counter-trend (not SELL)
+        has_buy_trigger = (ut_signal_m15 == "BUY" or m15_buy_sweep or h1_buy_sweep) and (ut_signal_m15 != "SELL")
         if macro_buy_allowed and has_buy_trigger and whale_gate_ok:
             sweep_ref = min(m15_low, h1_low) if (m15_buy_sweep or h1_buy_sweep) else (curr_price - sl_buffer)
             # SL is anchored BEYOND the lowest wick point of the sweep
@@ -405,8 +407,8 @@ class InstitutionalEngine:
                 }
 
         # ── SELL SETUP EVALUATION ─────────────────────────────────────────────
-        # Conditions: Macro SELL allowed AND (M15/H1 Liquidity Sweep Wick Rejection OR M15 UT Bot SELL)
-        has_sell_trigger = (m15_sell_sweep or h1_sell_sweep or ut_signal_m15 == "SELL")
+        # Conditions: Macro SELL allowed AND (M15 UT Bot SELL OR M15/H1 Liquidity Sweep) AND M15 UT Bot NOT counter-trend (not BUY)
+        has_sell_trigger = (ut_signal_m15 == "SELL" or m15_sell_sweep or h1_sell_sweep) and (ut_signal_m15 != "BUY")
         if macro_sell_allowed and has_sell_trigger and whale_gate_ok:
             sweep_ref = max(m15_high, h1_high) if (m15_sell_sweep or h1_sell_sweep) else (curr_price + sl_buffer)
             # SL is anchored BEYOND the highest wick point of the sweep
@@ -426,7 +428,7 @@ class InstitutionalEngine:
                 return {
                     "valid": True,
                     "direction": "SELL",
-                    "reason": f"H4 Bias {h4_trend} ({range_info['location_pct']:.1f}%) + M15 UT Bot {ut_signal_m15} Trigger",
+                    "reason": f"H4 Bias {h4_trend} ({range_info['location_pct']:.1f}%) + {trigger_type}",
                     "entry_price": tick.bid,
                     "sl_price": sl_price,
                     "tp_price": tp_price,
@@ -438,8 +440,18 @@ class InstitutionalEngine:
                     "ut_bot": ut_signal_m15
                 }
 
+        block_note = ""
+        if h4_trend == "BEARISH" and loc_pct < 35.0:
+            block_note = f" (SELL blocked: deep discount {loc_pct:.1f}% < 35%)"
+        elif h4_trend == "BULLISH" and loc_pct > 65.0:
+            block_note = f" (BUY blocked: deep premium {loc_pct:.1f}% > 65%)"
+        elif ut_signal_m15 == "BUY" and (m15_sell_sweep or h1_sell_sweep):
+            block_note = " (SELL sweep blocked: M15 UT Bot is BUY)"
+        elif ut_signal_m15 == "SELL" and (m15_buy_sweep or h1_buy_sweep):
+            block_note = " (BUY sweep blocked: M15 UT Bot is SELL)"
+
         skip_reason = (
-            f"Waiting for alignment. H4: {h4_trend} (Eq: {range_info['location_pct']:.1f}%), "
+            f"Waiting for alignment. H4: {h4_trend} (Loc: {loc_pct:.1f}%){block_note}, "
             f"M15 UT: {ut_signal_m15}, Sweeps: B={m15_buy_sweep}/S={m15_sell_sweep}."
         )
 
