@@ -1,3 +1,6 @@
+import os
+from dotenv import load_dotenv
+load_dotenv()
 # get_symbols_status.py
 import MetaTrader5 as mt5
 import pandas as pd
@@ -11,9 +14,9 @@ if scratch_dir not in sys.path:
 from alphaedge import calculate_bollinger_bands, calculate_rsi, calculate_atr, find_support_resistance
 
 MT5_CONFIG = {
-    "login": 81627783,
-    "password": "Iamgreat@2030",
-    "server": "Exness-MT5Trial10"
+    "login": int(os.getenv("MT5_LOGIN", "0")),
+    "password": os.getenv("MT5_PASSWORD", ""),
+    "server": os.getenv("MT5_SERVER", "")
 }
 
 def analyze_symbol_proximity(symbol):
@@ -64,3 +67,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

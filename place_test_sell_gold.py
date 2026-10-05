@@ -1,3 +1,6 @@
+import os
+from dotenv import load_dotenv
+load_dotenv()
 # place_test_sell_gold.py
 import MetaTrader5 as mt5
 import pandas as pd
@@ -11,9 +14,9 @@ if scratch_dir not in sys.path:
 from alphaedge import calculate_atr, send_telegram_alert
 
 MT5_CONFIG = {
-    "login": 81627783,
-    "password": "Iamgreat@2030",
-    "server": "Exness-MT5Trial10"
+    "login": int(os.getenv("MT5_LOGIN", "0")),
+    "password": os.getenv("MT5_PASSWORD", ""),
+    "server": os.getenv("MT5_SERVER", "")
 }
 
 def main():
@@ -78,3 +81,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
