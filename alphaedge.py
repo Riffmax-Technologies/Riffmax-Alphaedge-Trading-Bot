@@ -1895,13 +1895,13 @@ if __name__ == "__main__":
                     import traceback
                     logger.error(f"[Institutional] Cycle error:\n{traceback.format_exc()}")
 
-                # ── 1.5 Shadow Observation Scan (EURUSDm, USOILm, US30m) ───────────
-                # Completely non-trading paper observation mode. Never calls order_send.
-                try:
-                    import shadow_tracker
-                    shadow_tracker.run_shadow_cycle()
-                except Exception as shadow_err:
-                    logger.debug(f"[ShadowTracker] Observation error: {shadow_err}")
+                # ── 1.5 Shadow Observation Scan — DISABLED by user on 2026-10-05 ───
+                # To re-enable: uncomment the 3 lines below.
+                # try:
+                #     import shadow_tracker
+                #     shadow_tracker.run_shadow_cycle()
+                # except Exception as shadow_err:
+                #     logger.debug(f"[ShadowTracker] Observation error: {shadow_err}")
 
 
             # ── End-of-Day Pre-Close Gold Market Analysis (20:45 UTC) ──────────────
