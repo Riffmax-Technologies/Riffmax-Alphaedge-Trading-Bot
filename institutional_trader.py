@@ -49,32 +49,32 @@ ASSET_CONFIGS = {
         "lot": 0.02,                      # 0.02 Lot (User exact setting)
         "key_mult": 1.0,
         "atr_period": 10,
-        "tp_dollars": 60.0,              # Institutional Target: $60.00 USD Profit (30.0 pts move with 0.02 lot)
+        "tp_dollars": 60.0,              # Target: $60.00 USD Profit (30.0 pts move with 0.02 lot)
         "tp_catalyst_dollars": 80.0,      # Expanded $80.00 Target during High Momentum
         "be_trigger_dollars": 20.0,       # Stage 1: Move SL to Entry at +$20.00 profit (10.0 pts)
         "lock_trigger_dollars": 35.0,     # Stage 2: Trigger Profit Lock at +$35.00 profit (17.5 pts)
         "lock_amount_dollars": 25.0,      # Stage 2: Lock $25.00 profit into SL (12.5 pts)
-        "max_sl_dollars": 36.0,           # Max Initial Risk Cap: $36.00 USD (gives 18.0 pts room, beyond H1 ATR of 17 pts)
+        "max_sl_dollars": 36.0,           # Max Initial Risk Cap: $36.00 USD (18.0 pts room)
         "sl_atr_mult": 1.5,
         "currency": "USD"
     },
     "USOILm": {
         "symbol": "USOILm",
-        "lot": 0.05,                      # 0.05 Lot ($50.00 per $1.00 move, matching Gold risk)
+        "lot": 0.05,                      # 0.05 Lot ($50.00 per $1.00 move)
         "key_mult": 1.0,
         "atr_period": 10,
-        "tp_dollars": 60.0,              # Target: $60.00 USD ($1.20 move)
-        "tp_catalyst_dollars": 80.0,      # Expanded $80.00 Target ($1.60 move)
-        "be_trigger_dollars": 20.0,       # Stage 1: Move SL to Entry at +$20.00 profit ($0.40 move)
-        "lock_trigger_dollars": 35.0,     # Stage 2: Trigger Profit Lock at +$35.00 profit ($0.70 move)
-        "lock_amount_dollars": 25.0,      # Stage 2: Lock $25.00 profit into SL ($0.50 move)
-        "max_sl_dollars": 36.0,           # Max Initial Risk: $36.00 USD ($0.72 move)
+        "tp_dollars": 35.0,              # Optimized Realistic Target: $35.00 USD ($0.70 move, matches Oil intraday swings)
+        "tp_catalyst_dollars": 50.0,      # Expanded $50.00 Target ($1.00 move during high news volatility)
+        "be_trigger_dollars": 15.0,       # Fast BE Protection: Move SL to Entry at +$15.00 profit ($0.30 move)
+        "lock_trigger_dollars": 25.0,     # Fast Lock: Trigger Profit Lock at +$25.00 profit ($0.50 move)
+        "lock_amount_dollars": 20.0,      # Lock +$20.00 profit ($0.40 move) into SL
+        "max_sl_dollars": 25.0,           # Tightened Risk Cap: $25.00 USD ($0.50 move, 1:1.4 R:R)
         "sl_atr_mult": 1.5,
         "currency": "USD"
     },
     "US30m": {
         "symbol": "US30m",
-        "lot": 0.25,                      # 0.25 Lot ($0.25 per index pt, matching Gold/Oil risk)
+        "lot": 0.25,                      # 0.25 Lot ($0.25 per index pt)
         "key_mult": 1.0,
         "atr_period": 10,
         "tp_dollars": 60.0,              # Target: $60.00 USD Profit (240.0 index pts move)
