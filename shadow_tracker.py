@@ -21,7 +21,7 @@ from institutional_engine import InstitutionalEngine
 logger = logging.getLogger("AlphaEdge.ShadowTracker")
 
 # ─── Shadow Asset Configurations (Matched to Gold Option B Risk: $36 SL / $60 TP) ─
-# NOTE: EURUSDm and US30m only. USOILm was promoted to live trading on 2026-09-29.
+# NOTE: EURUSDm only. USOILm and US30m have both been promoted to live trading!
 SHADOW_CONFIGS = {
     "EURUSDm": {
         "symbol": "EURUSDm",
@@ -33,17 +33,6 @@ SHADOW_CONFIGS = {
         "lock_trigger_dollars": 35.0,    # Trigger lock at +$35.00 (35 pips)
         "lock_amount_dollars": 25.0,     # Lock +$25.00 profit into SL (25 pips)
         "pip_size": 0.00010
-    },
-    "US30m": {
-        "symbol": "US30m",
-        "name": "Dow Jones (US30)",
-        "lot": 0.25,                     # 0.25 Lot ($0.25 per index point)
-        "tp_dollars": 60.0,              # Target: $60.00 USD Profit (240 index pts)
-        "max_sl_dollars": 36.0,          # Risk Cap: $36.00 USD (144 index pts)
-        "be_trigger_dollars": 20.0,      # BE at +$20.00 (80 index pts)
-        "lock_trigger_dollars": 35.0,    # Trigger lock at +$35.00 (140 index pts)
-        "lock_amount_dollars": 25.0,     # Lock +$25.00 profit into SL (100 index pts)
-        "pip_size": 1.0
     }
 }
 

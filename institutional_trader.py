@@ -71,6 +71,20 @@ ASSET_CONFIGS = {
         "max_sl_dollars": 36.0,           # Max Initial Risk: $36.00 USD ($0.72 move)
         "sl_atr_mult": 1.5,
         "currency": "USD"
+    },
+    "US30m": {
+        "symbol": "US30m",
+        "lot": 0.25,                      # 0.25 Lot ($0.25 per index pt, matching Gold/Oil risk)
+        "key_mult": 1.0,
+        "atr_period": 10,
+        "tp_dollars": 60.0,              # Target: $60.00 USD Profit (240.0 index pts move)
+        "tp_catalyst_dollars": 80.0,      # Expanded $80.00 Target (320.0 index pts move)
+        "be_trigger_dollars": 20.0,       # Stage 1: Move SL to Entry at +$20.00 profit (80.0 pts)
+        "lock_trigger_dollars": 35.0,     # Stage 2: Trigger Profit Lock at +$35.00 profit (140.0 pts)
+        "lock_amount_dollars": 25.0,      # Stage 2: Lock $25.00 profit into SL (100.0 pts)
+        "max_sl_dollars": 36.0,           # Max Initial Risk: $36.00 USD (144.0 index pts room)
+        "sl_atr_mult": 1.5,
+        "currency": "USD"
     }
 }
 

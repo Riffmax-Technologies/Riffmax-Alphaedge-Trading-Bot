@@ -54,20 +54,24 @@ class InstitutionalEngine:
         self.lookback_swings = lookback_swings
 
     def get_mtf_data(self, symbol: str):
-        """Fetches H4, H1, and M15 bars from MT5."""
+        """Fetches H4, H1, M15, and M5 bars from MT5."""
         mt5.symbol_select(symbol, True)
         h4_rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H4, 0, 100)
         h1_rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, 0, 150)
         m15_rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M15, 0, 150)
+        m5_rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M5, 0, 150)
 
         if h4_rates is None or h1_rates is None or m15_rates is None:
             return None
 
-        return {
+        data = {
             "H4": pd.DataFrame(h4_rates),
             "H1": pd.DataFrame(h1_rates),
             "M15": pd.DataFrame(m15_rates)
         }
+        if m5_rates is not None:
+            data["M5"] = pd.DataFrame(m5_rates)
+        return data
 
     def analyze_dealing_range(self, df_h4: pd.DataFrame, current_price: float):
         """
@@ -275,6 +279,96 @@ class InstitutionalEngine:
 
         return "NONE"
 
+    def verify_m5_pullback_confirmation(self, df_m5: pd.DataFrame, direction: str) -> dict:
+        """
+        M5 Micro-Fractal Pullback Confirmation:
+        Ensures the entry occurs on the TURN of the pullback, not at the top of an initial impulse.
+        - For BUY: Checks that recent M5 bars pulled back/paused and the latest completed M5 bar
+          closes bullish and breaks the micro-structure (close > open and close >= previous high or breaks micro EMA).
+        - For SELL: Checks that recent M5 bars pulled back/paused and the latest completed M5 bar
+          closes bearish and breaks the micro-structure (close < open and close <= previous low or breaks micro EMA).
+        Returns: {"confirmed": bool, "entry_price": float, "reason": str}
+        """
+        if df_m5 is None or len(df_m5) < 6:
+            # Fallback if M5 data unavailable
+            return {"confirmed": True, "entry_price": None, "reason": "M5 data unavailable, fallback"}
+
+        closes = df_m5['close'].astype(float).values
+        opens  = df_m5['open'].astype(float).values
+        highs  = df_m5['high'].astype(float).values
+        lows   = df_m5['low'].astype(float).values
+
+        # Index -2 is the latest fully closed M5 bar; index -3 is the previous closed M5 bar
+        c_close = closes[-2]
+        c_open  = opens[-2]
+        c_high  = highs[-2]
+        c_low   = lows[-2]
+
+        p_close = closes[-3]
+        p_open  = opens[-3]
+        p_high  = highs[-3]
+        p_low   = lows[-3]
+
+        # Check recent 3 bars prior to latest closed bar for pullback presence
+        prior_closes = closes[-5:-2]
+        prior_opens  = opens[-5:-2]
+
+        if direction == "BUY":
+            # Look for pullback evidence: at least one red or indecisive bar in the preceding 3 bars
+            had_pullback = any(prior_closes[k] <= prior_opens[k] for k in range(len(prior_closes)))
+            
+            # Confirmation: Latest closed M5 candle is BULLISH and breaks above previous M5 candle's high/close
+            is_bullish_turn = (c_close > c_open) and (c_close >= p_high or c_close > p_close)
+            
+            if had_pullback and is_bullish_turn:
+                return {
+                    "confirmed": True,
+                    "entry_price": c_close,
+                    "reason": f"M5 Bullish Turn Confirmed (Close {c_close:.2f} > Prev High {p_high:.2f})"
+                }
+            elif not had_pullback and (c_close > c_open):
+                # Strong impulse with no deep pullback, but M5 still actively accelerating bullishly
+                return {
+                    "confirmed": True,
+                    "entry_price": c_close,
+                    "reason": f"M5 Momentum Aligned Bullish (Close {c_close:.2f})"
+                }
+            else:
+                return {
+                    "confirmed": False,
+                    "entry_price": c_close,
+                    "reason": f"M5 Pullback In Progress: waiting for bullish reversal candle (Latest M5 close={c_close:.2f})"
+                }
+
+        elif direction == "SELL":
+            # Look for pullback bounce evidence: at least one green or indecisive bar in the preceding 3 bars
+            had_pullback = any(prior_closes[k] >= prior_opens[k] for k in range(len(prior_closes)))
+
+            # Confirmation: Latest closed M5 candle is BEARISH and breaks below previous M5 candle's low/close
+            is_bearish_turn = (c_close < c_open) and (c_close <= p_low or c_close < p_close)
+
+            if had_pullback and is_bearish_turn:
+                return {
+                    "confirmed": True,
+                    "entry_price": c_close,
+                    "reason": f"M5 Bearish Turn Confirmed (Close {c_close:.2f} < Prev Low {p_low:.2f})"
+                }
+            elif not had_pullback and (c_close < c_open):
+                # Strong downward impulse with no deep pullback, but M5 actively accelerating bearishly
+                return {
+                    "confirmed": True,
+                    "entry_price": c_close,
+                    "reason": f"M5 Momentum Aligned Bearish (Close {c_close:.2f})"
+                }
+            else:
+                return {
+                    "confirmed": False,
+                    "entry_price": c_close,
+                    "reason": f"M5 Pullback In Progress: waiting for bearish reversal candle (Latest M5 close={c_close:.2f})"
+                }
+
+        return {"confirmed": True, "entry_price": None, "reason": "Neutral"}
+
     def evaluate_institutional_setup(self, symbol: str):
         """
         Comprehensive Institutional Setup Evaluation:
@@ -385,70 +479,82 @@ class InstitutionalEngine:
         # Conditions: Macro BUY allowed AND (M15 UT Bot BUY OR M15/H1 Liquidity Sweep) AND M15 UT Bot NOT counter-trend (not SELL)
         has_buy_trigger = (ut_signal_m15 == "BUY" or m15_buy_sweep or h1_buy_sweep) and (ut_signal_m15 != "SELL")
         if macro_buy_allowed and has_buy_trigger and whale_gate_ok:
-            sweep_ref = min(m15_low, h1_low) if (m15_buy_sweep or h1_buy_sweep) else (curr_price - sl_buffer)
-            # SL is anchored BEYOND the lowest wick point of the sweep
-            sl_price = sweep_ref - sl_buffer
+            # M5 Micro Pullback Confirmation
+            df_m5 = mtf.get("M5")
+            m5_check = self.verify_m5_pullback_confirmation(df_m5, "BUY")
+            if not m5_check.get("confirmed", True):
+                logger.info(f"[InstitutionalEngine] {symbol} BUY Setup Armed, waiting for M5 pullback completion: {m5_check.get('reason')}")
+            else:
+                sweep_ref = min(m15_low, h1_low) if (m15_buy_sweep or h1_buy_sweep) else (curr_price - sl_buffer)
+                # SL is anchored BEYOND the lowest wick point of the sweep
+                sl_price = sweep_ref - sl_buffer
 
-            # Target 1.5x R:R or full institutional swing target
-            sl_dist = abs(tick.ask - sl_price)
-            if sl_dist > 0:
-                tp_offset = max(sl_dist * 1.5, min_tp_pts)
-                tp_price = tick.ask + tp_offset
+                # Target 1.5x R:R or full institutional swing target
+                sl_dist = abs(tick.ask - sl_price)
+                if sl_dist > 0:
+                    tp_offset = max(sl_dist * 1.5, min_tp_pts)
+                    tp_price = tick.ask + tp_offset
 
-                trigger_type = "Liquidity Sweep Wick Rejection" if (m15_buy_sweep or h1_buy_sweep) else f"M15 UT Bot {ut_signal_m15}"
-                logger.info(
-                    f"[InstitutionalEngine] BUY Triggered! {symbol} | H4: {h4_trend} ({range_info['location_pct']:.1f}%) | "
-                    f"Trigger: {trigger_type} | Entry: {tick.ask:.2f} | SL: {sl_price:.2f} | TP: {tp_price:.2f} (R:R {tp_offset/sl_dist:.2f})"
-                )
+                    trigger_type = "Liquidity Sweep Wick Rejection" if (m15_buy_sweep or h1_buy_sweep) else f"M15 UT Bot {ut_signal_m15}"
+                    logger.info(
+                        f"[InstitutionalEngine] BUY Triggered! {symbol} | H4: {h4_trend} ({range_info['location_pct']:.1f}%) | "
+                        f"Trigger: {trigger_type} [M5 Confirmed] | Entry: {tick.ask:.2f} | SL: {sl_price:.2f} | TP: {tp_price:.2f} (R:R {tp_offset/sl_dist:.2f})"
+                    )
 
-                return {
-                    "valid": True,
-                    "direction": "BUY",
-                    "reason": f"H4 Bias {h4_trend} ({range_info['location_pct']:.1f}%) + {trigger_type}",
-                    "entry_price": tick.ask,
-                    "sl_price": sl_price,
-                    "tp_price": tp_price,
-                    "deal_range": range_info,
-                    "whale_detected": has_whale_vol,
-                    "vol_ratio": max_vol_ratio,
-                    "sweep_level": sweep_ref,
-                    "fvg_detected": has_buy_fvg,
-                    "ut_bot": ut_signal_m15
-                }
+                    return {
+                        "valid": True,
+                        "direction": "BUY",
+                        "reason": f"H4 Bias {h4_trend} ({range_info['location_pct']:.1f}%) + {trigger_type} (M5 Confirmed)",
+                        "entry_price": tick.ask,
+                        "sl_price": sl_price,
+                        "tp_price": tp_price,
+                        "deal_range": range_info,
+                        "whale_detected": has_whale_vol,
+                        "vol_ratio": max_vol_ratio,
+                        "sweep_level": sweep_ref,
+                        "fvg_detected": has_buy_fvg,
+                        "ut_bot": ut_signal_m15
+                    }
 
         # ── SELL SETUP EVALUATION ─────────────────────────────────────────────
         # Conditions: Macro SELL allowed AND (M15 UT Bot SELL OR M15/H1 Liquidity Sweep) AND M15 UT Bot NOT counter-trend (not BUY)
         has_sell_trigger = (ut_signal_m15 == "SELL" or m15_sell_sweep or h1_sell_sweep) and (ut_signal_m15 != "BUY")
         if macro_sell_allowed and has_sell_trigger and whale_gate_ok:
-            sweep_ref = max(m15_high, h1_high) if (m15_sell_sweep or h1_sell_sweep) else (curr_price + sl_buffer)
-            # SL is anchored BEYOND the highest wick point of the sweep
-            sl_price = sweep_ref + sl_buffer
+            # M5 Micro Pullback Confirmation
+            df_m5 = mtf.get("M5")
+            m5_check = self.verify_m5_pullback_confirmation(df_m5, "SELL")
+            if not m5_check.get("confirmed", True):
+                logger.info(f"[InstitutionalEngine] {symbol} SELL Setup Armed, waiting for M5 pullback completion: {m5_check.get('reason')}")
+            else:
+                sweep_ref = max(m15_high, h1_high) if (m15_sell_sweep or h1_sell_sweep) else (curr_price + sl_buffer)
+                # SL is anchored BEYOND the highest wick point of the sweep
+                sl_price = sweep_ref + sl_buffer
 
-            sl_dist = abs(sl_price - tick.bid)
-            if sl_dist > 0:
-                tp_offset = max(sl_dist * 1.5, min_tp_pts)
-                tp_price = tick.bid - tp_offset
+                sl_dist = abs(sl_price - tick.bid)
+                if sl_dist > 0:
+                    tp_offset = max(sl_dist * 1.5, min_tp_pts)
+                    tp_price = tick.bid - tp_offset
 
-                trigger_type = "Liquidity Sweep Wick Rejection" if (m15_sell_sweep or h1_sell_sweep) else f"M15 UT Bot {ut_signal_m15}"
-                logger.info(
-                    f"[InstitutionalEngine] SELL Triggered! {symbol} | H4: {h4_trend} ({range_info['location_pct']:.1f}%) | "
-                    f"Trigger: {trigger_type} | Entry: {tick.bid:.2f} | SL: {sl_price:.2f} | TP: {tp_price:.2f} (R:R {tp_offset/sl_dist:.2f})"
-                )
+                    trigger_type = "Liquidity Sweep Wick Rejection" if (m15_sell_sweep or h1_sell_sweep) else f"M15 UT Bot {ut_signal_m15}"
+                    logger.info(
+                        f"[InstitutionalEngine] SELL Triggered! {symbol} | H4: {h4_trend} ({range_info['location_pct']:.1f}%) | "
+                        f"Trigger: {trigger_type} [M5 Confirmed] | Entry: {tick.bid:.2f} | SL: {sl_price:.2f} | TP: {tp_price:.2f} (R:R {tp_offset/sl_dist:.2f})"
+                    )
 
-                return {
-                    "valid": True,
-                    "direction": "SELL",
-                    "reason": f"H4 Bias {h4_trend} ({range_info['location_pct']:.1f}%) + {trigger_type}",
-                    "entry_price": tick.bid,
-                    "sl_price": sl_price,
-                    "tp_price": tp_price,
-                    "deal_range": range_info,
-                    "whale_detected": has_whale_vol,
-                    "vol_ratio": max_vol_ratio,
-                    "sweep_level": sweep_ref,
-                    "fvg_detected": has_sell_fvg,
-                    "ut_bot": ut_signal_m15
-                }
+                    return {
+                        "valid": True,
+                        "direction": "SELL",
+                        "reason": f"H4 Bias {h4_trend} ({range_info['location_pct']:.1f}%) + {trigger_type} (M5 Confirmed)",
+                        "entry_price": tick.bid,
+                        "sl_price": sl_price,
+                        "tp_price": tp_price,
+                        "deal_range": range_info,
+                        "whale_detected": has_whale_vol,
+                        "vol_ratio": max_vol_ratio,
+                        "sweep_level": sweep_ref,
+                        "fvg_detected": has_sell_fvg,
+                        "ut_bot": ut_signal_m15
+                    }
 
         block_note = ""
         if h4_trend == "BEARISH" and loc_pct < 35.0:

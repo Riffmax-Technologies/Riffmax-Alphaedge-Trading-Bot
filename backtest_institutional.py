@@ -2,13 +2,15 @@
 backtest_institutional.py
 =========================
 Historical Backtester simulating the EXACT institutional strategy currently deployed:
-- Asset: Gold (XAUUSDm) ONLY
-- Multi-Timeframe Structure: H4 EMA trend (EMA20/EMA50) + M15 micro trigger
-- Micro Trigger: M15 UT Bot Crossover & Liquidity Sweeps
-- SL & TP: Pure Dollar Values
-    * Gold (0.02 lot): Target $60.00 TP, $36.00 SL (18 pts room), BE at $20, Lock $25 at $35
-- Cooldown: 60-minute post-trade cooldown
-- No midway entry: only enter on fresh crossover/sweep alignment
+- Assets: Gold (XAUUSDm), Crude Oil (USOILm), Dow Jones (US30m)
+- Multi-Timeframe Structure: H4 Dealing Range & Trend Filter
+- Micro Trigger: M15 Setup + M5 Pullback Turn Confirmation
+- Equal Risk Profile:
+    * Gold: 0.02 lot ($36 SL / $60 TP / BE $20 / Lock $35->$25)
+    * Oil:  0.05 lot ($36 SL / $60 TP / BE $20 / Lock $35->$25)
+    * US30: 0.25 lot ($36 SL / $60 TP / BE $20 / Lock $35->$25)
+- Multi-Period Testing: 1 Month (~30 days), 2 Months (~60 days), 3 Months (~90 days)
+- Comparative mode: Compares direct M15 entry vs new M5-confirmed pullback entry.
 """
 
 import sys
@@ -16,17 +18,17 @@ import os
 import MetaTrader5 as mt5
 import pandas as pd
 import numpy as np
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 # Ensure project root is in path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from institutional_trader import ASSET_CONFIGS, get_dollar_per_pt
 from institutional_engine import InstitutionalEngine
 
-def run_simulation(symbol, lookback_bars=2500):
+def run_simulation(symbol, days=30, use_m5_confirmation=True):
     if not mt5.initialize():
         print(f"Failed to initialize MT5: {mt5.last_error()}")
-        return
+        return None
 
     cfg = ASSET_CONFIGS[symbol]
     lot = cfg['lot']
@@ -37,57 +39,55 @@ def run_simulation(symbol, lookback_bars=2500):
     lock_amount_usd = cfg['lock_amount_dollars']
 
     dollar_per_pt = get_dollar_per_pt(symbol, lot)
-    
+    if dollar_per_pt <= 0:
+        dollar_per_pt = 1.0
+
     tp_pts = tp_usd / dollar_per_pt
     sl_pts = sl_usd / dollar_per_pt
     be_pts = be_usd / dollar_per_pt
     lock_trigger_pts = lock_trigger_usd / dollar_per_pt
     lock_amount_pts = lock_amount_usd / dollar_per_pt
 
-    print(f"\n=======================================================")
-    print(f"  BACKTESTING INSTITUTIONAL STRATEGY: {symbol}")
-    print(f"=======================================================")
-    print(f"  Lot Size: {lot}")
-    print(f"  Dollar / Point: ${dollar_per_pt:.4f}")
-    print(f"  Target Profit (TP): ${tp_usd:.2f} ({tp_pts:.1f} pts)")
-    print(f"  Initial Risk (SL):  ${sl_usd:.2f} ({sl_pts:.1f} pts)")
-    print(f"  Break-Even Trigger: ${be_usd:.2f} ({be_pts:.1f} pts)")
-    print(f"  Profit Lock Trigger: ${lock_trigger_usd:.2f} -> Lock ${lock_amount_usd:.2f}")
+    # 1 day = 96 M15 bars; add buffer for indicators (150 bars)
+    m15_bars_needed = int(days * 96) + 200
+    m5_bars_needed = int(days * 288) + 600
 
-    # Fetch M15 historical bars
-    rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M15, 0, lookback_bars)
-    if rates is None or len(rates) < 300:
-        print(f"Insufficient rates for {symbol}")
-        return
+    rates_m15 = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M15, 0, m15_bars_needed)
+    rates_m5 = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M5, 0, m5_bars_needed)
 
-    df = pd.DataFrame(rates)
-    df['datetime'] = pd.to_datetime(df['time'], unit='s')
-    
-    engine = InstitutionalEngine()
-    
-    # Pre-calculate UT Bot stops on M15
-    closes = df['close'].values
-    highs = df['high'].values
-    lows = df['low'].values
-    n = len(df)
-    
-    # UT Bot calculation
+    if rates_m15 is None or len(rates_m15) < 200:
+        print(f"Insufficient M15 rates for {symbol}")
+        return None
+
+    df_m15 = pd.DataFrame(rates_m15)
+    df_m15['datetime'] = pd.to_datetime(df_m15['time'], unit='s')
+    df_m15 = df_m15.sort_values('time').reset_index(drop=True)
+
+    df_m5 = pd.DataFrame(rates_m5) if rates_m5 is not None else None
+    if df_m5 is not None:
+        df_m5['datetime'] = pd.to_datetime(df_m5['time'], unit='s')
+        df_m5 = df_m5.sort_values('time').reset_index(drop=True)
+
+    closes = df_m15['close'].values
+    highs = df_m15['high'].values
+    lows = df_m15['low'].values
+    n = len(df_m15)
+
+    # UT Bot calculation on M15
     key_value = 1.0
     atr_period = 10
-    
-    # ATR
     trs = [highs[0] - lows[0]]
     for i in range(1, n):
         hl = highs[i] - lows[i]
         hpc = abs(highs[i] - closes[i - 1])
         lpc = abs(lows[i] - closes[i - 1])
         trs.append(max(hl, hpc, lpc))
-    
+
     atrs = []
     for i in range(n):
         start = max(0, i - atr_period + 1)
         atrs.append(float(np.mean(trs[start:i+1])))
-        
+
     stops = [0.0] * n
     stops[0] = closes[0]
     for i in range(1, n):
@@ -102,7 +102,6 @@ def run_simulation(symbol, lookback_bars=2500):
         else:
             stops[i] = c - n_loss if c > prev_s else c + n_loss
 
-    # Iterate chronologically through bars simulating execution
     trades = []
     in_trade = False
     cooldown_until_idx = 0
@@ -110,25 +109,23 @@ def run_simulation(symbol, lookback_bars=2500):
 
     start_idx = 100
     for i in range(start_idx, n - 1):
-        curr_time = df['datetime'].iloc[i]
+        curr_time = df_m15['datetime'].iloc[i]
         curr_close = closes[i]
         curr_high = highs[i]
         curr_low = lows[i]
 
-        # If in a trade, evaluate position lifecycle
+        # Manage active position
         if in_trade:
             pos_type = trade_info['type']
             entry_price = trade_info['entry']
             current_sl = trade_info['sl']
             current_tp = trade_info['tp']
-            
-            # Check high/low of this candle against SL and TP
+
             hit_tp = False
             hit_sl = False
             exit_price = 0.0
 
             if pos_type == "BUY":
-                # Check BE / Profit Lock progression
                 max_pts_reached = curr_high - entry_price
                 if max_pts_reached >= lock_trigger_pts:
                     locked_sl = entry_price + lock_amount_pts
@@ -136,12 +133,12 @@ def run_simulation(symbol, lookback_bars=2500):
                         current_sl = locked_sl
                         trade_info['sl'] = locked_sl
                 elif max_pts_reached >= be_pts:
-                    be_sl = entry_price + (0.5 if symbol == "XAUUSDm" else 10.0)
+                    be_buffer = 0.5 if symbol == "XAUUSDm" else (0.02 if "OIL" in symbol else 10.0)
+                    be_sl = entry_price + be_buffer
                     if be_sl > current_sl:
                         current_sl = be_sl
                         trade_info['sl'] = be_sl
 
-                # Check exits
                 if curr_low <= current_sl:
                     hit_sl = True
                     exit_price = current_sl
@@ -149,7 +146,7 @@ def run_simulation(symbol, lookback_bars=2500):
                     hit_tp = True
                     exit_price = current_tp
 
-            else: # SELL
+            else:  # SELL
                 max_pts_reached = entry_price - curr_low
                 if max_pts_reached >= lock_trigger_pts:
                     locked_sl = entry_price - lock_amount_pts
@@ -157,7 +154,8 @@ def run_simulation(symbol, lookback_bars=2500):
                         current_sl = locked_sl
                         trade_info['sl'] = locked_sl
                 elif max_pts_reached >= be_pts:
-                    be_sl = entry_price - (0.5 if symbol == "XAUUSDm" else 10.0)
+                    be_buffer = 0.5 if symbol == "XAUUSDm" else (0.02 if "OIL" in symbol else 10.0)
+                    be_sl = entry_price - be_buffer
                     if be_sl < current_sl:
                         current_sl = be_sl
                         trade_info['sl'] = be_sl
@@ -179,9 +177,8 @@ def run_simulation(symbol, lookback_bars=2500):
                 trade_info['pnl_usd'] = usd_pnl
                 trade_info['outcome'] = outcome
                 trades.append(trade_info)
-                
+
                 in_trade = False
-                # 60-minute post-closure cooldown (4 M15 bars)
                 cooldown_until_idx = i + 4
                 continue
 
@@ -197,20 +194,19 @@ def run_simulation(symbol, lookback_bars=2500):
             if ut_signal == "NONE":
                 continue
 
-            # 2. H4 Macro Bias Approximation (last 80 M15 bars = 20 H4 bars range)
-            window_slice = df.iloc[max(0, i - 120): i]
+            # 2. H4 Macro Bias Approximation (last 80 M15 bars)
+            window_slice = df_m15.iloc[max(0, i - 120): i]
             range_high = float(window_slice['high'].max())
             range_low = float(window_slice['low'].min())
             spread = range_high - range_low
             if spread <= 0:
                 continue
-            eq = range_low + 0.5 * spread
             loc_pct = ((curr_close - range_low) / spread) * 100.0
 
-            # Rule: BUY only in Discount (< 50%), SELL only in Premium (> 50%)
-            if ut_signal == "BUY" and curr_close > eq:
+            # Dealing Range Gates
+            if ut_signal == "BUY" and loc_pct > 65.0:
                 continue
-            if ut_signal == "SELL" and curr_close < eq:
+            if ut_signal == "SELL" and loc_pct < 35.0:
                 continue
 
             # Session filter: strictly 8:00 AM to 8:00 PM EAT (Monday - Friday)
@@ -218,8 +214,41 @@ def run_simulation(symbol, lookback_bars=2500):
             if curr_time.weekday() in (5, 6) or eat_hour < 8 or eat_hour >= 20:
                 continue
 
-            # Valid setup found! Enter at next bar open or current close
+            # 3. M5 Pullback Turn Confirmation (if enabled)
             entry_price = curr_close
+            if use_m5_confirmation and df_m5 is not None:
+                m15_bar_ts = df_m15['time'].iloc[i]
+                # Slice M5 bars up to this M15 bar's close
+                m5_sub = df_m5[df_m5['time'] <= m15_bar_ts + 900]
+                if len(m5_sub) >= 6:
+                    m5_closes = m5_sub['close'].values
+                    m5_opens  = m5_sub['open'].values
+                    m5_highs  = m5_sub['high'].values
+                    m5_lows   = m5_sub['low'].values
+                    
+                    c_c = m5_closes[-1]
+                    c_o = m5_opens[-1]
+                    p_h = m5_highs[-2]
+                    p_l = m5_lows[-2]
+
+                    prior_c = m5_closes[-4:-1]
+                    prior_o = m5_opens[-4:-1]
+
+                    if ut_signal == "BUY":
+                        had_pb = any(prior_c[k] <= prior_o[k] for k in range(len(prior_c)))
+                        is_turn = (c_c > c_o) and (c_c >= p_h or c_c > prior_c[-1])
+                        if not (had_pb and is_turn):
+                            # Skip premature entry: pullback not yet exhausted/confirmed!
+                            continue
+                        entry_price = c_c
+                    elif ut_signal == "SELL":
+                        had_pb = any(prior_c[k] >= prior_o[k] for k in range(len(prior_c)))
+                        is_turn = (c_c < c_o) and (c_c <= p_l or c_c < prior_c[-1])
+                        if not (had_pb and is_turn):
+                            # Skip premature entry: bounce not yet exhausted/confirmed!
+                            continue
+                        entry_price = c_c
+
             if ut_signal == "BUY":
                 sl_price = entry_price - sl_pts
                 tp_price = entry_price + tp_pts
@@ -238,11 +267,12 @@ def run_simulation(symbol, lookback_bars=2500):
                 "location_pct": loc_pct
             }
 
-    # Summary Statistics
     total_trades = len(trades)
     if total_trades == 0:
-        print(f"No trades triggered for {symbol} under current strict institutional parameters.")
-        return
+        return {
+            "symbol": symbol, "days": days, "total": 0, "wins": 0, "losses": 0,
+            "win_rate": 0.0, "net_pnl": 0.0, "profit_factor": 0.0, "mode": "M5_CONFIRMED" if use_m5_confirmation else "DIRECT_M15"
+        }
 
     wins = [t for t in trades if t['pnl_usd'] > 0]
     losses = [t for t in trades if t['pnl_usd'] <= 0]
@@ -255,20 +285,55 @@ def run_simulation(symbol, lookback_bars=2500):
     net_pnl = sum(t['pnl_usd'] for t in trades)
     profit_factor = (total_profit / total_loss) if total_loss > 0 else 999.0
 
-    print(f"\n--- RESULTS SUMMARY ({symbol}) ---")
-    print(f"  Total Trades:     {total_trades}")
-    print(f"  Wins:             {win_count} ({win_rate:.1f}%)")
-    print(f"  Losses:           {loss_count} ({100.0 - win_rate:.1f}%)")
-    print(f"  Gross Profit:     ${total_profit:.2f}")
-    print(f"  Gross Loss:       ${total_loss:.2f}")
-    print(f"  Net Profit (USD): ${net_pnl:.2f}")
-    print(f"  Profit Factor:    {profit_factor:.2f}")
-    print(f"  Avg Trade PnL:    ${net_pnl / total_trades:.2f}")
+    return {
+        "symbol": symbol,
+        "days": days,
+        "total": total_trades,
+        "wins": win_count,
+        "losses": loss_count,
+        "win_rate": win_rate,
+        "net_pnl": net_pnl,
+        "profit_factor": profit_factor,
+        "gross_profit": total_profit,
+        "gross_loss": total_loss,
+        "mode": "M5_CONFIRMED" if use_m5_confirmation else "DIRECT_M15"
+    }
 
-    # Print sample of last 5 trades
-    print("\n  Sample Recent Trades:")
-    for t in trades[-5:]:
-        print(f"    {t['entry_time'].strftime('%Y-%m-%d %H:%M')} | {t['type']} @ {t['entry']:.2f} | Out @ {t['exit_price']:.2f} | {t['outcome']} (${t['pnl_usd']:+.2f})")
+def run_all_backtests():
+    if not mt5.initialize():
+        print("MT5 initialization failed")
+        return
+
+    symbols = ["XAUUSDm", "USOILm", "US30m"]
+    periods = [30, 60, 90]  # 1 month, 2 months, 3 months
+
+    all_results = []
+
+    print("=" * 80)
+    print("  ALPHAEDGE MULTI-ASSET & MULTI-PERIOD BACKTEST REPORT")
+    print("  Assets: XAUUSDm (0.02 lot), USOILm (0.05 lot), US30m (0.25 lot)")
+    print("  Risk Cap: $36.00 SL | Target: $60.00 TP | BE: $20.00 | Lock: $35 -> $25")
+    print("=" * 80)
+
+    for days in periods:
+        months_label = f"{days // 30} Month{'s' if days // 30 > 1 else ''} ({days} Days)"
+        print(f"\n==================== PERIOD: {months_label} ====================")
+        for sym in symbols:
+            # Run without M5 confirmation (old style)
+            res_old = run_simulation(sym, days=days, use_m5_confirmation=False)
+            # Run WITH M5 confirmation (refined trigger)
+            res_new = run_simulation(sym, days=days, use_m5_confirmation=True)
+
+            if res_old and res_new:
+                all_results.append((res_old, res_new))
+                print(f"\n--- {sym} [{months_label}] ---")
+                print(f"  Old M15 Direct : {res_old['total']:2d} Trades | {res_old['wins']:2d}W/{res_old['losses']:2d}L ({res_old['win_rate']:.1f}%) | Net: ${res_old['net_pnl']:+7.2f} | PF: {res_old['profit_factor']:.2f}")
+                print(f"  New M5 Refined : {res_new['total']:2d} Trades | {res_new['wins']:2d}W/{res_new['losses']:2d}L ({res_new['win_rate']:.1f}%) | Net: ${res_new['net_pnl']:+7.2f} | PF: {res_new['profit_factor']:.2f}")
+                diff = res_new['net_pnl'] - res_old['net_pnl']
+                wr_diff = res_new['win_rate'] - res_old['win_rate']
+                print(f"  -> Delta: PnL {diff:+7.2f} USD | Win Rate {wr_diff:+.1f}%")
+
+    mt5.shutdown()
 
 if __name__ == "__main__":
-    run_simulation("XAUUSDm", lookback_bars=3000)
+    run_all_backtests()
