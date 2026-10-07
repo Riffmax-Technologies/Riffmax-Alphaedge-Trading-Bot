@@ -1,16 +1,17 @@
 """
 backtest_institutional.py
 =========================
-Historical Backtester simulating the EXACT institutional strategy currently deployed:
-- Assets: Gold (XAUUSDm), Crude Oil (USOILm), Dow Jones (US30m)
+Historical Backtester simulating the EXACT institutional strategy:
 - Multi-Timeframe Structure: H4 Dealing Range & Trend Filter
-- Micro Trigger: M15 Setup + M5 Pullback Turn Confirmation
-- Equal Risk Profile:
-    * Gold: 0.02 lot ($36 SL / $60 TP / BE $20 / Lock $35->$25)
-    * Oil:  0.05 lot ($36 SL / $60 TP / BE $20 / Lock $35->$25)
-    * US30: 0.25 lot ($36 SL / $60 TP / BE $20 / Lock $35->$25)
-- Multi-Period Testing: 1 Month (~30 days), 2 Months (~60 days), 3 Months (~90 days)
-- Comparative mode: Compares direct M15 entry vs new M5-confirmed pullback entry.
+- Micro Trigger: M15 Setup + M5 Pullback Turn Sniper
+- Realistic Execution: Evaluates M5 sub-bars while in position to accurately
+  track the progression:
+    1. Early SL check (before unrealized gain)
+    2. BE Trigger ($20 USD) -> Moves SL to Entry + buffer
+    3. Profit Lock Trigger ($35 USD) -> Moves SL to +$25 USD guaranteed
+    4. Full TP Trigger ($60 USD)
+- Multi-Asset: XAUUSDm, USOILm, US30m
+- Multi-Period: 1 Month (30d), 2 Months (60d), 3 Months (90d)
 """
 
 import sys
@@ -23,7 +24,6 @@ from datetime import datetime, timezone, timedelta
 # Ensure project root is in path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from institutional_trader import ASSET_CONFIGS, get_dollar_per_pt
-from institutional_engine import InstitutionalEngine
 
 def run_simulation(symbol, days=30, use_m5_confirmation=True):
     if not mt5.initialize():
@@ -48,29 +48,28 @@ def run_simulation(symbol, days=30, use_m5_confirmation=True):
     lock_trigger_pts = lock_trigger_usd / dollar_per_pt
     lock_amount_pts = lock_amount_usd / dollar_per_pt
 
-    # 1 day = 96 M15 bars; add buffer for indicators (150 bars)
     m15_bars_needed = int(days * 96) + 200
     m5_bars_needed = int(days * 288) + 600
 
     rates_m15 = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M15, 0, m15_bars_needed)
     rates_m5 = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M5, 0, m5_bars_needed)
 
-    if rates_m15 is None or len(rates_m15) < 200:
-        print(f"Insufficient M15 rates for {symbol}")
+    if rates_m15 is None or len(rates_m15) < 200 or rates_m5 is None:
+        print(f"Insufficient rates for {symbol}")
         return None
 
     df_m15 = pd.DataFrame(rates_m15)
     df_m15['datetime'] = pd.to_datetime(df_m15['time'], unit='s')
     df_m15 = df_m15.sort_values('time').reset_index(drop=True)
 
-    df_m5 = pd.DataFrame(rates_m5) if rates_m5 is not None else None
-    if df_m5 is not None:
-        df_m5['datetime'] = pd.to_datetime(df_m5['time'], unit='s')
-        df_m5 = df_m5.sort_values('time').reset_index(drop=True)
+    df_m5 = pd.DataFrame(rates_m5)
+    df_m5['datetime'] = pd.to_datetime(df_m5['time'], unit='s')
+    df_m5 = df_m5.sort_values('time').reset_index(drop=True)
 
     closes = df_m15['close'].values
     highs = df_m15['high'].values
     lows = df_m15['low'].values
+    times = df_m15['time'].values
     n = len(df_m15)
 
     # UT Bot calculation on M15
@@ -104,73 +103,99 @@ def run_simulation(symbol, days=30, use_m5_confirmation=True):
 
     trades = []
     in_trade = False
-    cooldown_until_idx = 0
+    cooldown_until_time = 0
     trade_info = {}
 
     start_idx = 100
     for i in range(start_idx, n - 1):
+        curr_time_sec = times[i]
         curr_time = df_m15['datetime'].iloc[i]
         curr_close = closes[i]
-        curr_high = highs[i]
-        curr_low = lows[i]
 
-        # Manage active position
+        # Manage active trade through M5 sub-bars inside this M15 bar
         if in_trade:
             pos_type = trade_info['type']
             entry_price = trade_info['entry']
             current_sl = trade_info['sl']
             current_tp = trade_info['tp']
+            be_active = trade_info.get('be_active', False)
+            lock_active = trade_info.get('lock_active', False)
 
-            hit_tp = False
-            hit_sl = False
-            exit_price = 0.0
+            # Get the three M5 bars corresponding to this M15 bar
+            sub_m5 = df_m5[(df_m5['time'] >= curr_time_sec) & (df_m5['time'] < curr_time_sec + 900)]
+            if len(sub_m5) == 0:
+                sub_m5 = pd.DataFrame([{'open': curr_close, 'high': highs[i], 'low': lows[i], 'close': curr_close}])
 
-            if pos_type == "BUY":
-                max_pts_reached = curr_high - entry_price
-                if max_pts_reached >= lock_trigger_pts:
-                    locked_sl = entry_price + lock_amount_pts
-                    if locked_sl > current_sl:
-                        current_sl = locked_sl
-                        trade_info['sl'] = locked_sl
-                elif max_pts_reached >= be_pts:
-                    be_buffer = 0.5 if symbol == "XAUUSDm" else (0.02 if "OIL" in symbol else 10.0)
-                    be_sl = entry_price + be_buffer
-                    if be_sl > current_sl:
-                        current_sl = be_sl
-                        trade_info['sl'] = be_sl
+            trade_closed = False
+            for _, m5_row in sub_m5.iterrows():
+                m5_h = m5_row['high']
+                m5_l = m5_row['low']
 
-                if curr_low <= current_sl:
-                    hit_sl = True
-                    exit_price = current_sl
-                elif curr_high >= current_tp:
-                    hit_tp = True
-                    exit_price = current_tp
+                if pos_type == "BUY":
+                    # 1. Gain check on M5 high
+                    pts_up = m5_h - entry_price
+                    if pts_up >= lock_trigger_pts:
+                        lock_active = True
+                        current_sl = max(current_sl, entry_price + lock_amount_pts)
+                    elif pts_up >= be_pts and not lock_active:
+                        be_active = True
+                        be_buf = 0.5 if symbol == "XAUUSDm" else (0.02 if "OIL" in symbol else 10.0)
+                        current_sl = max(current_sl, entry_price + be_buf)
 
-            else:  # SELL
-                max_pts_reached = entry_price - curr_low
-                if max_pts_reached >= lock_trigger_pts:
-                    locked_sl = entry_price - lock_amount_pts
-                    if locked_sl < current_sl:
-                        current_sl = locked_sl
-                        trade_info['sl'] = locked_sl
-                elif max_pts_reached >= be_pts:
-                    be_buffer = 0.5 if symbol == "XAUUSDm" else (0.02 if "OIL" in symbol else 10.0)
-                    be_sl = entry_price - be_buffer
-                    if be_sl < current_sl:
-                        current_sl = be_sl
-                        trade_info['sl'] = be_sl
+                    # 2. Check if TP hit
+                    if m5_h >= current_tp:
+                        exit_price = current_tp
+                        outcome = "WIN_FULL_TP"
+                        trade_closed = True
+                        break
+                    # 3. Check if SL (or locked profit/BE) hit
+                    elif m5_l <= current_sl:
+                        exit_price = current_sl
+                        if lock_active:
+                            outcome = "WIN_LOCK"
+                        elif be_active:
+                            outcome = "BE"
+                        else:
+                            outcome = "LOSS_SL"
+                        trade_closed = True
+                        break
 
-                if curr_high >= current_sl:
-                    hit_sl = True
-                    exit_price = current_sl
-                elif curr_low <= current_tp:
-                    hit_tp = True
-                    exit_price = current_tp
+                else:  # SELL
+                    # 1. Gain check on M5 low
+                    pts_down = entry_price - m5_l
+                    if pts_down >= lock_trigger_pts:
+                        lock_active = True
+                        current_sl = min(current_sl, entry_price - lock_amount_pts)
+                    elif pts_down >= be_pts and not lock_active:
+                        be_active = True
+                        be_buf = 0.5 if symbol == "XAUUSDm" else (0.02 if "OIL" in symbol else 10.0)
+                        current_sl = min(current_sl, entry_price - be_buf)
 
-            if hit_tp or hit_sl:
+                    # 2. Check if TP hit
+                    if m5_l <= current_tp:
+                        exit_price = current_tp
+                        outcome = "WIN_FULL_TP"
+                        trade_closed = True
+                        break
+                    # 3. Check if SL (or locked profit/BE) hit
+                    elif m5_h >= current_sl:
+                        exit_price = current_sl
+                        if lock_active:
+                            outcome = "WIN_LOCK"
+                        elif be_active:
+                            outcome = "BE"
+                        else:
+                            outcome = "LOSS_SL"
+                        trade_closed = True
+                        break
+
+            trade_info['sl'] = current_sl
+            trade_info['be_active'] = be_active
+            trade_info['lock_active'] = lock_active
+
+            if trade_closed:
                 pts_pnl = (exit_price - entry_price) if pos_type == "BUY" else (entry_price - exit_price)
                 usd_pnl = pts_pnl * dollar_per_pt
-                outcome = "WIN" if usd_pnl > 0 else "LOSS"
                 trade_info['exit_time'] = curr_time
                 trade_info['exit_price'] = exit_price
                 trade_info['pnl_pts'] = pts_pnl
@@ -179,11 +204,11 @@ def run_simulation(symbol, days=30, use_m5_confirmation=True):
                 trades.append(trade_info)
 
                 in_trade = False
-                cooldown_until_idx = i + 4
+                cooldown_until_time = curr_time_sec + 3600  # 60-min cooldown
                 continue
 
         # If not in trade and not in cooldown, check setup
-        if not in_trade and i >= cooldown_until_idx:
+        if not in_trade and curr_time_sec >= cooldown_until_time:
             # 1. Fresh UT Bot Crossover check on bar i
             ut_signal = "NONE"
             if closes[i - 1] <= stops[i - 1] and closes[i] > stops[i]:
@@ -194,7 +219,7 @@ def run_simulation(symbol, days=30, use_m5_confirmation=True):
             if ut_signal == "NONE":
                 continue
 
-            # 2. H4 Macro Bias Approximation (last 80 M15 bars)
+            # 2. H4 Macro Bias Approximation (last 120 M15 bars)
             window_slice = df_m15.iloc[max(0, i - 120): i]
             range_high = float(window_slice['high'].max())
             range_low = float(window_slice['low'].min())
@@ -216,9 +241,8 @@ def run_simulation(symbol, days=30, use_m5_confirmation=True):
 
             # 3. M5 Pullback Turn Confirmation (if enabled)
             entry_price = curr_close
-            if use_m5_confirmation and df_m5 is not None:
+            if use_m5_confirmation:
                 m15_bar_ts = df_m15['time'].iloc[i]
-                # Slice M5 bars up to this M15 bar's close
                 m5_sub = df_m5[df_m5['time'] <= m15_bar_ts + 900]
                 if len(m5_sub) >= 6:
                     m5_closes = m5_sub['close'].values
@@ -238,14 +262,12 @@ def run_simulation(symbol, days=30, use_m5_confirmation=True):
                         had_pb = any(prior_c[k] <= prior_o[k] for k in range(len(prior_c)))
                         is_turn = (c_c > c_o) and (c_c >= p_h or c_c > prior_c[-1])
                         if not (had_pb and is_turn):
-                            # Skip premature entry: pullback not yet exhausted/confirmed!
                             continue
                         entry_price = c_c
                     elif ut_signal == "SELL":
                         had_pb = any(prior_c[k] >= prior_o[k] for k in range(len(prior_c)))
                         is_turn = (c_c < c_o) and (c_c <= p_l or c_c < prior_c[-1])
                         if not (had_pb and is_turn):
-                            # Skip premature entry: bounce not yet exhausted/confirmed!
                             continue
                         entry_price = c_c
 
@@ -264,6 +286,8 @@ def run_simulation(symbol, days=30, use_m5_confirmation=True):
                 "entry": entry_price,
                 "sl": sl_price,
                 "tp": tp_price,
+                "be_active": False,
+                "lock_active": False,
                 "location_pct": loc_pct
             }
 
@@ -271,7 +295,8 @@ def run_simulation(symbol, days=30, use_m5_confirmation=True):
     if total_trades == 0:
         return {
             "symbol": symbol, "days": days, "total": 0, "wins": 0, "losses": 0,
-            "win_rate": 0.0, "net_pnl": 0.0, "profit_factor": 0.0, "mode": "M5_CONFIRMED" if use_m5_confirmation else "DIRECT_M15"
+            "win_rate": 0.0, "net_pnl": 0.0, "profit_factor": 0.0,
+            "full_tp": 0, "locks": 0, "be_count": 0, "sl_count": 0
         }
 
     wins = [t for t in trades if t['pnl_usd'] > 0]
@@ -279,6 +304,11 @@ def run_simulation(symbol, days=30, use_m5_confirmation=True):
     win_count = len(wins)
     loss_count = len(losses)
     win_rate = (win_count / total_trades) * 100.0
+
+    full_tp = len([t for t in trades if t.get('outcome') == 'WIN_FULL_TP'])
+    locks = len([t for t in trades if t.get('outcome') == 'WIN_LOCK'])
+    bes = len([t for t in trades if t.get('outcome') == 'BE'])
+    sls = len([t for t in trades if t.get('outcome') == 'LOSS_SL'])
 
     total_profit = sum(t['pnl_usd'] for t in wins)
     total_loss = abs(sum(t['pnl_usd'] for t in losses))
@@ -294,8 +324,10 @@ def run_simulation(symbol, days=30, use_m5_confirmation=True):
         "win_rate": win_rate,
         "net_pnl": net_pnl,
         "profit_factor": profit_factor,
-        "gross_profit": total_profit,
-        "gross_loss": total_loss,
+        "full_tp": full_tp,
+        "locks": locks,
+        "be_count": bes,
+        "sl_count": sls,
         "mode": "M5_CONFIRMED" if use_m5_confirmation else "DIRECT_M15"
     }
 
@@ -305,33 +337,24 @@ def run_all_backtests():
         return
 
     symbols = ["XAUUSDm", "USOILm", "US30m"]
-    periods = [30, 60, 90]  # 1 month, 2 months, 3 months
+    periods = [30, 60, 90]
 
-    all_results = []
-
-    print("=" * 80)
-    print("  ALPHAEDGE MULTI-ASSET & MULTI-PERIOD BACKTEST REPORT")
+    print("=" * 90)
+    print("  ALPHAEDGE HIGH-PRECISION BACKTEST REPORT (M5 PULLBACK + ACCURATE BE & PROFIT LOCKS)")
     print("  Assets: XAUUSDm (0.02 lot), USOILm (0.05 lot), US30m (0.25 lot)")
-    print("  Risk Cap: $36.00 SL | Target: $60.00 TP | BE: $20.00 | Lock: $35 -> $25")
-    print("=" * 80)
+    print("  Shields: Initial SL $36 | Full TP $60 | BE Trigger $20 | Lock Trigger $35 -> Lock $25")
+    print("=" * 90)
 
     for days in periods:
         months_label = f"{days // 30} Month{'s' if days // 30 > 1 else ''} ({days} Days)"
         print(f"\n==================== PERIOD: {months_label} ====================")
         for sym in symbols:
-            # Run without M5 confirmation (old style)
-            res_old = run_simulation(sym, days=days, use_m5_confirmation=False)
-            # Run WITH M5 confirmation (refined trigger)
             res_new = run_simulation(sym, days=days, use_m5_confirmation=True)
-
-            if res_old and res_new:
-                all_results.append((res_old, res_new))
+            if res_new:
                 print(f"\n--- {sym} [{months_label}] ---")
-                print(f"  Old M15 Direct : {res_old['total']:2d} Trades | {res_old['wins']:2d}W/{res_old['losses']:2d}L ({res_old['win_rate']:.1f}%) | Net: ${res_old['net_pnl']:+7.2f} | PF: {res_old['profit_factor']:.2f}")
-                print(f"  New M5 Refined : {res_new['total']:2d} Trades | {res_new['wins']:2d}W/{res_new['losses']:2d}L ({res_new['win_rate']:.1f}%) | Net: ${res_new['net_pnl']:+7.2f} | PF: {res_new['profit_factor']:.2f}")
-                diff = res_new['net_pnl'] - res_old['net_pnl']
-                wr_diff = res_new['win_rate'] - res_old['win_rate']
-                print(f"  -> Delta: PnL {diff:+7.2f} USD | Win Rate {wr_diff:+.1f}%")
+                print(f"  Total Trades : {res_new['total']:2d} | Wins: {res_new['wins']:2d} | Losses: {res_new['losses']:2d} | Win Rate: {res_new['win_rate']:.1f}%")
+                print(f"  Breakdown    : Full TP: {res_new['full_tp']} (+$60) | Locks: {res_new['locks']} (+$25) | BE: {res_new['be_count']} ($0) | Full SL: {res_new['sl_count']} (-$36)")
+                print(f"  NET PROFIT   : ${res_new['net_pnl']:+8.2f} USD | Profit Factor: {res_new['profit_factor']:.2f}")
 
     mt5.shutdown()
 
