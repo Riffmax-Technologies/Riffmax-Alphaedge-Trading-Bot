@@ -464,12 +464,15 @@ class InstitutionalEngine:
         elif "OIL" in symbol:
             min_sl_pts = 0.50   # $0.50 ($25 USD at 0.05 lot)
             min_tp_pts = 0.70   # $0.70 ($35 USD at 0.05 lot)
-        elif "30" in symbol:
+        elif "30" in symbol or "USTEC" in symbol or "NAS" in symbol:
             min_sl_pts = 144.0  # 144 pts ($36 USD at 0.25 lot)
             min_tp_pts = 240.0  # 240 pts ($60 USD at 0.25 lot)
+        elif "XAG" in symbol or "SILVER" in symbol:
+            min_sl_pts = 0.36   # $0.36 ($36 USD at 0.02 lot)
+            min_tp_pts = 0.60   # $0.60 ($60 USD at 0.02 lot)
         else:
-            min_sl_pts = 0.0036 # EURUSD 36 pips
-            min_tp_pts = 0.0060 # EURUSD 60 pips
+            min_sl_pts = 0.0036 # Forex 36 pips ($36 USD at 0.10 lot)
+            min_tp_pts = 0.0060 # Forex 60 pips ($60 USD at 0.10 lot)
         sl_buffer = max(round(m15_atr * 1.5, 4), min_sl_pts)
 
         # Institutional Volume Gate: Gold fires on UT Bot signal or sweep (high liquidity).
