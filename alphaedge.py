@@ -1825,11 +1825,12 @@ if __name__ == "__main__":
 
     logger.info("=" * 65)
     logger.info("  ALPHAEDGE — INSTITUTIONAL MTF WHALE FLOW SWING ENGINE")
-    logger.info("  Live Assets: Gold (XAUUSDm) | Crude Oil (USOILm) | Dow Jones (US30m)")
+    logger.info("  Live Assets: Gold (XAUUSDm) | Crude Oil (USOILm) | Dow Jones (US30m) | Silver (XAGUSDm)")
     logger.info("  Strategy: H4 Dealing Range | Liquidity Sweep | Whale Volume | M5 Pullback Turn Sniper")
-    logger.info("  Gold:  0.02 lot | TP: $60.00 | Max SL: $36.00 (18 pts)  | BE: +$20 | Lock: $35->$25")
-    logger.info("  Oil:   0.05 lot | TP: $60.00 | Max SL: $36.00 ($0.72)   | BE: +$20 | Lock: $35->$25")
-    logger.info("  US30:  0.25 lot | TP: $60.00 | Max SL: $36.00 (144 pts) | BE: +$20 | Lock: $35->$25")
+    logger.info("  Gold:   0.02 lot | TP: $60.00 | Max SL: $36.00 (18 pts)  | BE: +$20 | Lock: $35->$25")
+    logger.info("  Oil:    0.05 lot | TP: $35.00 | Max SL: $25.00 ($0.50)   | BE: +$15 | Lock: $25->$20")
+    logger.info("  US30:   0.25 lot | TP: $60.00 | Max SL: $36.00 (144 pts) | BE: +$20 | Lock: $35->$25")
+    logger.info("  Silver: 0.02 lot | TP: $60.00 | Max SL: $36.00 ($0.36)   | BE: +$20 | Lock: $35->$25")
     logger.info("  Session: 8:00 AM - 8:00 PM EAT (Monday to Friday) | Overnight Gate Protected")
     logger.info("  Guidance: ForexFactory Real-Time Macro News Engine (USD)")
     logger.info("=" * 65)
@@ -1837,11 +1838,12 @@ if __name__ == "__main__":
     # 1. Send Online Startup Notification to Telegram
     startup_msg = (
         "<b>🏛 AlphaEdge — Institutional MTF Whale Flow Engine Active</b>\n\n"
-        "<b>Live Trading Assets:</b>\n"
+        "<b>Live Trading Assets (4 Assets Active):</b>\n"
         "• <b>Gold (XAUUSDm):</b> $60.00 TP | $36.00 SL (18 pts) | BE at +$20 | Lock $35→$25 | <b>0.02 Lot</b>\n"
         "• <b>Crude Oil (USOILm):</b> $35.00 TP | $25.00 SL ($0.50) | BE at +$15 | Lock $25→$20 | <b>0.05 Lot</b>\n"
-        "• <b>Dow Jones (US30m):</b> $60.00 TP | $36.00 SL (144 pts) | BE at +$20 | Lock $35→$25 | <b>0.25 Lot</b>\n\n"
-        "<b>Shadow Observation:</b> EURUSDm · USTECm (Nasdaq) · XAGUSDm (Silver) · GBPUSDm (paper mode)\n\n"
+        "• <b>Dow Jones (US30m):</b> $60.00 TP | $36.00 SL (144 pts) | BE at +$20 | Lock $35→$25 | <b>0.25 Lot</b>\n"
+        "• <b>Silver (XAGUSDm):</b> $60.00 TP | $36.00 SL ($0.36) | BE at +$20 | Lock $35→$25 | <b>0.02 Lot</b>\n\n"
+        "<b>Shadow Observation:</b> EURUSDm · USTECm (Nasdaq) · GBPUSDm (paper mode)\n\n"
         "<b>Strategy & Execution Upgrades:</b>\n"
         "• <b>M5 Pullback Turn Confirmation:</b> Never enters at impulse top; waits for micro-pullback turn\n"
         "• Strict Discount (≤35%) gate — SELL in deep discount is FORBIDDEN\n"
@@ -1849,7 +1851,7 @@ if __name__ == "__main__":
         "• UT Bot momentum alignment required — no counter-trend sweep entries\n"
         "• 60-Minute Cooldown Shield enforced after every trade closure\n\n"
         "<b>Trading Window:</b> 8:00 AM – 8:00 PM EAT (Strict Overnight Protection)\n\n"
-        "<b>Status:</b> 🟢 Engine ready. Hunting institutional setups on Gold, Oil &amp; Dow Jones."
+        "<b>Status:</b> 🟢 Engine ready. Hunting institutional setups on Gold, Oil, Dow Jones &amp; Silver."
     )
     send_telegram_alert(startup_msg)
 

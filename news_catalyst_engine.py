@@ -106,7 +106,7 @@ class NewsCatalystEngine:
 
     def get_upcoming_events(self, symbol, within_minutes=60):
         now_utc = datetime.now(timezone.utc)
-        target_curr = 'USD' if 'XAU' in symbol or 'US' in symbol else 'EUR'
+        target_curr = 'USD' if any(k in symbol for k in ['XAU', 'XAG', 'US', 'OIL']) else 'EUR'
         upcoming = []
         for ev in self.events:
             if ev['country'] == target_curr:
@@ -123,7 +123,7 @@ class NewsCatalystEngine:
 
     def get_market_catalyst_status(self, symbol):
         now_utc = datetime.now(timezone.utc)
-        target_curr = 'USD' if 'XAU' in symbol or 'US' in symbol else 'EUR'
+        target_curr = 'USD' if any(k in symbol for k in ['XAU', 'XAG', 'US', 'OIL']) else 'EUR'
 
         for ev in self.events:
             if ev['country'] == target_curr:

@@ -85,6 +85,20 @@ ASSET_CONFIGS = {
         "max_sl_dollars": 36.0,           # Max Initial Risk: $36.00 USD (144.0 index pts room)
         "sl_atr_mult": 1.5,
         "currency": "USD"
+    },
+    "XAGUSDm": {
+        "symbol": "XAGUSDm",
+        "lot": 0.02,                      # 0.02 Lot ($100.00 per $1.00 move)
+        "key_mult": 1.0,
+        "atr_period": 10,
+        "tp_dollars": 60.0,              # Target: $60.00 USD Profit ($0.60 move)
+        "tp_catalyst_dollars": 80.0,      # Expanded $80.00 Target ($0.80 move)
+        "be_trigger_dollars": 20.0,       # Stage 1: Move SL to Entry at +$20.00 profit ($0.20 move)
+        "lock_trigger_dollars": 35.0,     # Stage 2: Trigger Profit Lock at +$35.00 profit ($0.35 move)
+        "lock_amount_dollars": 25.0,      # Stage 2: Lock $25.00 profit into SL ($0.25 move)
+        "max_sl_dollars": 36.0,           # Max Initial Risk: $36.00 USD ($0.36 move)
+        "sl_atr_mult": 1.5,
+        "currency": "USD"
     }
 }
 

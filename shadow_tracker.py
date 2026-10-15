@@ -45,17 +45,6 @@ SHADOW_CONFIGS = {
         "lock_amount_dollars": 25.0,     # Lock +$25.00 profit into SL (100.0 index pts)
         "pip_size": 1.0
     },
-    "XAGUSDm": {
-        "symbol": "XAGUSDm",
-        "name": "Silver (XAG/USD)",
-        "lot": 0.02,                     # 0.02 Lot ($100 per $1.00 move)
-        "tp_dollars": 60.0,              # Target: $60.00 USD Profit ($0.60 move)
-        "max_sl_dollars": 36.0,          # Risk Cap: $36.00 USD ($0.36 move)
-        "be_trigger_dollars": 20.0,      # BE at +$20.00 ($0.20 move)
-        "lock_trigger_dollars": 35.0,    # Trigger lock at +$35.00 ($0.35 move)
-        "lock_amount_dollars": 25.0,     # Lock +$25.00 profit into SL ($0.25 move)
-        "pip_size": 0.01
-    },
     "GBPUSDm": {
         "symbol": "GBPUSDm",
         "name": "GBP/USD (Cable)",
