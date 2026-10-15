@@ -124,6 +124,7 @@ STRUCT_MEMORY = None
 ACTIVE_BE_TRACKED = {}   # ticket -> True if Stage 1 BE set
 ACTIVE_LOCK_TRACKED = {} # ticket -> True if Stage 2 Lock set
 WAS_OPEN_TRACKED = {}    # symbol -> True if position was open in previous cycle
+PRE_SESSION_GATE_FIRED = None  # date str (YYYY-MM-DD EAT) when gate last fired; reset daily
 
 # ─── Persistent Bar & Closure State (survives bot restarts) ────────────────────
 _BAR_STATE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "last_executed_bar.json")
@@ -594,6 +595,166 @@ def execute_order(symbol, order_type, lot, sl, tp, catalyst_desc="Standard", new
         return None
 
 
+# ─── Pre-Session Overnight Protection Gate ────────────────────────────────────
+def run_pre_session_secure_gate():
+    """
+    Pre-Session Auto-Secure Gate — fires ONCE per day between 19:45 and 19:55 EAT.
+
+    Purpose: Prevent overnight broker rollover spread spikes from stop-hunting open
+    positions.  Exness (and most ECN brokers) widen Gold / Silver spreads by
+    $1.50-$3.50 between 21:00-01:00 UTC (midnight rollover).  A $36 SL with a
+    $0.36 Silver stop can be wiped by a $0.30 spread spike without price actually
+    moving against the trade.
+
+    Decision logic per open position:
+      * Floating profit >= +$20  ->  Move SL to lock minimum +$15 USD above entry
+                                     (safe overnight cushion above rollover spread).
+      * Floating profit < +$20   ->  Close position entirely.  A near-entry or losing
+                                     trade is not worth overnight rollover risk.
+
+    A Telegram DM is sent summarising every action taken.
+    The gate will NOT fire a second time on the same EAT date.
+    """
+    global PRE_SESSION_GATE_FIRED
+
+    now_utc = datetime.now(timezone.utc)
+    now_eat = now_utc + timedelta(hours=3)
+
+    # Only run Monday-Friday
+    if now_eat.weekday() in (5, 6):
+        return
+
+    # Window: 19:45 - 19:55 EAT
+    gate_open = now_eat.hour == 19 and 45 <= now_eat.minute <= 55
+    if not gate_open:
+        return
+
+    # Fire only once per calendar day (EAT date)
+    today_str = now_eat.strftime("%Y-%m-%d")
+    if PRE_SESSION_GATE_FIRED == today_str:
+        return
+
+    PRE_SESSION_GATE_FIRED = today_str
+
+    # Gather all open positions across all live assets
+    all_positions = mt5.positions_get()
+    if not all_positions:
+        logger.info("[PreSessionGate] No open positions at 19:45 EAT — gate passed cleanly.")
+        _send_personal(
+            "🌙 <b>[Pre-Session Gate]</b>\n"
+            "No open positions at 19:45 EAT.\n"
+            "Session closing cleanly. No overnight exposure. ✅"
+        )
+        return
+
+    actions_taken = []
+
+    for pos in all_positions:
+        symbol   = pos.symbol
+        ticket   = pos.ticket
+        pos_type = "BUY" if pos.type == mt5.ORDER_TYPE_BUY else "SELL"
+        entry    = pos.price_open
+        sl       = pos.sl
+        tp       = pos.tp
+        profit   = pos.profit  # floating P&L in account currency (USD)
+
+        cfg = ASSET_CONFIGS.get(symbol)
+        if cfg is None:
+            # Position belongs to an asset not in ASSET_CONFIGS — skip silently
+            continue
+
+        lot           = cfg['lot']
+        dollar_per_pt = get_dollar_per_pt(symbol, lot)
+        lock_usd      = 15.0   # Minimum locked profit to survive overnight rollover
+        lock_pts      = (lock_usd / dollar_per_pt) if dollar_per_pt > 0 else 0.0
+        dp            = _sym_digits(symbol)
+
+        if profit >= 20.0:
+            # SECURE: lock SL to guarantee at least +$15 overnight
+            if pos_type == "BUY":
+                new_sl = round(entry + lock_pts, dp)
+                if sl < new_sl:
+                    modify_sl(ticket, symbol, new_sl, tp)
+                    action_desc = "SL locked to +$15 cushion (" + str(round(new_sl, dp)) + ")"
+                else:
+                    action_desc = "SL already secured (" + str(round(sl, dp)) + ") — no change"
+            else:
+                new_sl = round(entry - lock_pts, dp)
+                if sl > new_sl:
+                    modify_sl(ticket, symbol, new_sl, tp)
+                    action_desc = "SL locked to +$15 cushion (" + str(round(new_sl, dp)) + ")"
+                else:
+                    action_desc = "SL already secured (" + str(round(sl, dp)) + ") — no change"
+
+            logger.info(
+                "[PreSessionGate] " + symbol + " #" + str(ticket) + " | Profit: +$" +
+                str(round(profit, 2)) + " | Action: SECURED overnight. " + action_desc
+            )
+            actions_taken.append(
+                "🔒 <b>" + symbol + "</b> #" + str(ticket) + " (" + pos_type + ") | "
+                "Profit: <b>+$" + str(round(profit, 2)) + "</b>\n"
+                "   ➔ " + action_desc
+            )
+
+        else:
+            # CLOSE: insufficient profit buffer to absorb overnight spread
+            tick        = mt5.symbol_info_tick(symbol)
+            close_price = tick.bid if pos_type == "BUY" else tick.ask
+            close_type  = mt5.ORDER_TYPE_SELL if pos_type == "BUY" else mt5.ORDER_TYPE_BUY
+            req = {
+                "action":       mt5.TRADE_ACTION_DEAL,
+                "symbol":       symbol,
+                "volume":       pos.volume,
+                "type":         close_type,
+                "position":     ticket,
+                "price":        close_price,
+                "deviation":    20,
+                "magic":        20250831,
+                "comment":      "PRE_SESSION_GATE",
+                "type_time":    mt5.ORDER_TIME_GTC,
+                "type_filling": mt5.ORDER_FILLING_IOC,
+            }
+            res = mt5.order_send(req)
+            if res.retcode == mt5.TRADE_RETCODE_DONE:
+                pnl_str = ("+$" + str(round(profit, 2))) if profit >= 0 else ("-$" + str(round(abs(profit), 2)))
+                logger.info(
+                    "[PreSessionGate] " + symbol + " #" + str(ticket) + " CLOSED before overnight. "
+                    "Profit: " + pnl_str + ". Protected from rollover spread spike."
+                )
+                actions_taken.append(
+                    "🚪 <b>" + symbol + "</b> #" + str(ticket) + " (" + pos_type + ") | "
+                    "Profit: <b>" + pnl_str + "</b>\n"
+                    "   ➔ Closed before overnight rollover (insufficient cushion)"
+                )
+                # Mark closure cooldown so bot does not re-enter tonight
+                now_ts = int(now_utc.timestamp())
+                LAST_CLOSED_TIME[symbol] = now_ts
+                _save_closed_time(LAST_CLOSED_TIME)
+            else:
+                logger.error(
+                    "[PreSessionGate] Failed to close " + symbol + " #" + str(ticket) +
+                    ": " + res.comment + " (Retcode: " + str(res.retcode) + ")"
+                )
+                actions_taken.append(
+                    "⚠️ <b>" + symbol + "</b> #" + str(ticket) + " — CLOSE FAILED: " + res.comment
+                )
+
+    # Telegram summary
+    if actions_taken:
+        summary = "\n".join(actions_taken)
+        _send_personal(
+            "🌙 <b>[Pre-Session Gate Executed — 19:45 EAT]</b>\n\n"
+            + summary + "\n\n"
+            "Overnight spread protection complete. No new entries until 08:00 EAT tomorrow."
+        )
+    else:
+        _send_personal(
+            "🌙 <b>[Pre-Session Gate]</b>\n"
+            "Scanned all positions — none matched live asset configs.\n"
+            "Session closing cleanly. ✅"
+        )
+
+
 # ─── Autonomous Scan Cycle ─────────────────────────────────────────────────────
 def run_institutional_cycle():
     """
@@ -614,6 +775,12 @@ def run_institutional_cycle():
         PRE_BACKTESTER = PreTradeBacktester()
     if STRUCT_MEMORY is None:
         STRUCT_MEMORY = StructuralMemory()
+
+    # ── Pre-Session Overnight Protection Gate (19:45–19:55 EAT, once per day) ─
+    try:
+        run_pre_session_secure_gate()
+    except Exception as _gate_err:
+        logger.error("[PreSessionGate] Unexpected error in gate: " + str(_gate_err))
 
     try:
         NEWS_ENGINE.sync_calendar()
