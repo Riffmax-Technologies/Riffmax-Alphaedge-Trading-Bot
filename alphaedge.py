@@ -1844,14 +1844,15 @@ if __name__ == "__main__":
         "• <b>Dow Jones (US30m):</b> $60.00 TP | $36.00 SL (144 pts) | BE at +$20 | Lock $35→$25 | <b>0.25 Lot</b>\n"
         "• <b>Silver (XAGUSDm):</b> $60.00 TP | $36.00 SL ($0.36) | BE at +$20 | Lock $35→$25 | <b>0.02 Lot</b>\n\n"
         "<b>Shadow Observation (6 Assets):</b> EURUSDm · USTECm (Nasdaq) · GBPUSDm · US500m (S&P 500) · GBPJPYm (Guppy) · DE30m (DAX) (paper mode)\n\n"
-        "<b>Strategy & Execution Upgrades:</b>\n"
-        "• <b>M5 Pullback Turn Confirmation:</b> Never enters at impulse top; waits for micro-pullback turn\n"
-        "• Strict Discount (≤35%) gate — SELL in deep discount is FORBIDDEN\n"
-        "• Strict Premium (≥65%) gate — BUY in deep premium is FORBIDDEN\n"
-        "• UT Bot momentum alignment required — no counter-trend sweep entries\n"
-        "• 60-Minute Cooldown Shield enforced after every trade closure\n\n"
-        "<b>Trading Window:</b> 8:00 AM – 8:00 PM EAT (Strict Overnight Protection)\n\n"
-        "<b>Status:</b> 🟢 Engine ready. Hunting institutional setups on Gold, Oil, Dow Jones &amp; Silver."
+        "<b>Strategy & Execution Architecture:</b>\n"
+        "• <b>Fixed Daily Anchors (PDH/PDL):</b> Stable Previous Day High/Low dealing range eliminates intraday parallax\n"
+        "• <b>Precious Metals Mirror:</b> Gold and Silver always trade synchronized (Gold confirms → Silver mirrors & vice versa)\n"
+        "• <b>M5 Pullback Turn Confirmation:</b> Enters on micro-structure exhaustion turn, never chasing impulses\n"
+        "• <b>Strict Dealing Range Gates:</b> SELL blocked in deep discount (≤35%), BUY blocked in deep premium (≥65%)\n"
+        "• <b>60-Min Cooldown Shield:</b> Prevents overtrading after closures\n"
+        "• <b>Overnight Spread-Buffer Gate (23:00 EAT):</b> Gives $45 room on healthy trades to survive rollover spread spikes; cuts deep losses\n\n"
+        "<b>Trading Window:</b> 8:00 AM – 8:00 PM EAT (New Entries) | 23:00 EAT (Overnight Buffer Protection)\n\n"
+        "<b>Status:</b> 🟢 Engine ready. Hunting institutional setups on Gold, Oil, Dow Jones & Silver."
     )
     send_telegram_alert(startup_msg)
 

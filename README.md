@@ -1,106 +1,88 @@
-# AlphaEdge M15 Swing & News Catalyst Trading Engine
+# AlphaEdge Institutional Multi-Timeframe (MTF) & Whale Flow Swing Engine
 
-AlphaEdge is an institutional-grade autonomous trading system built for **MetaTrader 5 (MT5)**, powered by a mathematical replication of the **TradingView HPotter UT Bot (Version 6)**.
-
-The engine executes exclusively on the **15-Minute (M15) timeframe**, combining swing trend-following with a **Dynamic Break-Even Shield** and real-time **Macro News Catalyst Guidance** across **Gold (`XAUUSDm`)** and **DAX (`DE30m`)**.
+AlphaEdge is an institutional-grade algorithmic trading architecture engineered for **MetaTrader 5 (MT5)**. It synthesizes top-down multi-timeframe structural analysis, liquidity sweep detection, volume climax verification, and automated risk containment.
 
 ---
 
-## 🏛️ Core Strategy & Math (TradingView 1:1 Parity)
+## 🏛️ Core Architectural Pillars
 
-The engine replicates TradingView Pine Script with mathematical precision:
-1. **Wilder's Smoothing ATR (RMA)**:
-   $$\text{ATR}_i = \frac{\text{TR}_i + 9.0 \times \text{ATR}_{i-1}}{10.0}$$
-   Replicates TradingView's native `ta.rma(tr, 10)`.
-2. **Recursive Trailing Stop**:
-   Implements `f_calcTrailingStop` with `Key Value = 1.0` and `ATR Period = 10`.
-3. **Signal Confirmation**:
-   - **Strong Buy**: `ta.crossover(close, stop) and close > stop and close > close[1]`
-   - **Strong Sell**: `ta.crossover(stop, close) and close < stop and close < close[1]`
-   - Signals are confirmed on **completed candle close** (`index -2`), eliminating repainting.
-4. **Instant Reversal**:
-   When an opposite verified signal occurs, the engine closes the active trade immediately and flips direction to ride the new trend without lag.
+### 1. Fixed Daily Dealing Range (PDH / PDL Anchored)
+To eliminate intraday **parallax errors** caused by rolling windows shifting during active sessions, AlphaEdge anchors dealing ranges directly to confirmed **Previous Day High (PDH)** and **Previous Day Low (PDL)**:
+- **Equilibrium (50%)**: True midpoint of the previous day's confirmed range.
+- **Discount Zone ($\le 35\%$)**: Institutional accumulation territory (BUY permitted, SELL strictly forbidden).
+- **Premium Zone ($\ge 65\%$)**: Institutional distribution territory (SELL permitted, BUY strictly forbidden).
+- *Fallback*: Automatically falls back to H4 50-bar rolling window during session opens or data gaps.
 
----
+### 2. Precious Metals Mirror (`XAUUSDm` $\leftrightarrow$ `XAGUSDm`)
+Gold and Silver share macroeconomic fundamentals (USD valuation, inflation expectations, risk sentiment). To prevent harmful hedge drag or conflicting signals:
+- **Synchronized Execution**: Confirmation on Gold automatically triggers a mirrored entry on Silver (and vice versa) if the counterpart has no open position and is not in cooldown.
+- **Direction Lock**: If one metal holds an active position (e.g. Gold BUY), any opposite setup on the sister metal (e.g. Silver SELL) is blocked immediately.
 
-## 🎯 Asset Profiles & Risk Controls
+### 3. M5 Micro-Structure Pullback Confirmation
+AlphaEdge never enters blindly at the peak of an impulse. When H4 macro bias and M15 momentum align:
+- The engine monitors the M5 timeframe for micro-pullback exhaustion.
+- Orders execute only when a completed M5 candle demonstrates a structural turn (bullish rejection breaking prior bar high for BUYs, bearish rejection breaking prior bar low for SELLs).
 
-| Parameter | Gold (`XAUUSDm`) | DAX (`DE30m`) |
-| :--- | :---: | :---: |
-| **Execution Timeframe** | 15-Minute (`M15`) | 15-Minute (`M15`) |
-| **Volume Size** | `0.01 Lot` (Micro Risk) | `0.07 Lot` (Broker Minimum) |
-| **Take Profit (Standard)** | **+$8.00 USD** | **30 Index Points** (~$2.10) |
-| **Take Profit (News Catalyst)** | **+$16.00 USD** | **60 Index Points** (~$4.20) |
-| **Dynamic Break-Even Trigger** | **+$5.00 USD** | **20 Index Points** |
-| **Stop Loss Formula** | $1.2 \times \text{ATR}$ below/above entry | $1.2 \times \text{ATR}$ below/above entry |
+### 4. 2-Stage Dynamic Profit Protection
+Every trade is actively shielded without manual intervention:
+- **Stage 1 (Break-Even Shield)**: Shifts Stop Loss to Entry + buffer once target profit is attained to eliminate fakeout risk.
+- **Stage 2 (Profit Lock Shield)**: Moves Stop Loss into solid guaranteed profit as the trade expands toward full Take Profit.
 
-### 🛡️ Dynamic Break-Even Shield
-To eliminate fakeout losses and protect profits:
-- As soon as a Gold position gains **+$5.00** (or DAX gains **+20 points**), the engine shifts the Stop Loss to **Entry Price + Spread**.
-- If the market stalls or reverses, the trade exits at **Break-Even (Zero Loss)**, preserving 100% of trading capital.
+### 5. Overnight Spread-Buffer Gate (23:00 EAT)
+Broker rollover windows (21:00–01:00 UTC / 00:00–04:00 EAT) frequently suffer from artificial spread spikes of \$1.50–\$3.50+ on precious metals.
+- **At 23:00 EAT**:
+  - Positions already locked at BE or profit lock run overnight untouched.
+  - Healthy positions with original stops have their SL widened to a **$45 buffer from current price**, creating ample clearance so rollover spreads cannot trigger an accidental stop-out.
+  - Positions carrying deep losses ($> -\$25$) are closed immediately to prevent widening risk on invalidated setups.
 
 ---
 
-## ⚡ News Catalyst Guidance Engine (`news_catalyst_engine.py`)
+## 🎯 Active Assets Configuration
 
-AlphaEdge integrates real-time macro fundamentals from ForexFactory / FairEconomy covering High-Impact releases for **USD** (Gold) and **EUR** (DAX):
+| Asset | Ticker | Lot Size | Full TP | Max Initial SL | Stage 1 BE | Stage 2 Profit Lock |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| **Gold** | `XAUUSDm` | `0.02` | **+$60.00** (30.0 pts) | **$36.00** (18.0 pts) | +$20.00 | +$35.00 $\rightarrow$ Lock +$25.00 |
+| **Silver** | `XAGUSDm` | `0.02` | **+$60.00** ($0.60) | **$36.00** ($0.36) | +$20.00 | +$35.00 $\rightarrow$ Lock +$25.00 |
+| **Dow Jones** | `US30m` | `0.25` | **+$60.00** (240.0 pts) | **$36.00** (144.0 pts) | +$20.00 | +$35.00 $\rightarrow$ Lock +$25.00 |
+| **Crude Oil** | `USOILm` | `0.05` | **+$35.00** ($0.70) | **$25.00** ($0.50) | +$15.00 | +$25.00 $\rightarrow$ Lock +$20.00 |
 
-```mermaid
-graph TD
-    A["ForexFactory High-Impact Calendar"] --> B{"Event Timing"}
-    B -->|"5 Mins Prior to Release"| C["Pre-News Window"]
-    C --> C1["Move Open Winning Trades to Break-Even"]
-    C --> C2["Pause New Entries to Avoid Broker Spread Spikes"]
-    
-    B -->|"0 to 25 Mins Post-Release"| D["Catalyst Impulse Mode"]
-    D --> D1["Institutional Momentum Surge Detected"]
-    D --> D2["M15 UT Bot Confirms Trend Direction"]
-    D --> D3["Expand Profit Targets: Gold $16.00+ / DAX 60+ Pts"]
-    
-    B -->|"Standard Session"| E["Standard M15 Swing Rules"]
-    E --> E1["Gold: $8.00 TP | $5.00 BE Lock"]
-    E --> E2["DAX: 30 Pts TP | 20 Pts BE Lock"]
-```
-
-* **Pre-News Protection (5m prior)**: Pauses new entries to avoid artificial broker spread widening and locks Break-Even on winning positions.
-* **Catalyst Impulse (0 to 25m post-release)**: When institutional volume enters (NFP, CPI, PPI, ECB decisions), the engine automatically expands Take Profit to capture multi-candle macro runs.
-* **Persistent Disk Cache**: Caches events locally (`economic_calendar_cache.json`) to prevent rate-limiting.
+### 🔭 Shadow Portfolio (Real-Time Paper Tracking)
+AlphaEdge actively scans and records paper swing setups on 6 observation assets to evaluate historical consistency and prospective rotation:
+- `EURUSDm` (Euro FX)
+- `USTECm` (Nasdaq 100)
+- `GBPUSDm` (British Pound)
+- `US500m` (S&P 500)
+- `GBPJPYm` (Guppy)
+- `DE30m` (DAX 40)
 
 ---
 
-## ⏰ Active Trading Sessions
+## ⚡ News Catalyst Engine (`news_catalyst_engine.py`)
 
-AlphaEdge trades continuously through the high-volume European and American sessions:
-- **Active Hours**: **07:00 UTC to 21:00 UTC** (London Open through New York Close).
-- **Session Lock**: Automatically pauses entries during the late Asian dead-zone (21:00 to 07:00 UTC) and market weekends (Friday 21:00 UTC to Sunday 22:00 UTC) to prevent low-liquidity whipsaws.
+Integrates real-time macroeconomic event feeds (ForexFactory / FairEconomy) to safeguard against volatility shocks:
+- **Pre-News Freeze (T-5m)**: Tightens profit protection and blocks new order fills.
+- **Catalyst Impulse (T+0 to T+25m)**: Adapts profit targets during sustained post-release expansions.
+- **Persistent Local Cache**: Local storage (`economic_calendar_cache.json`) prevents rate limiting.
 
 ---
 
-## 🚀 How to Run the Bot
+## ⏰ Operational Windows & Cooldowns
 
-Launch the unified system with a single command:
+- **Day Trading Window**: **08:00 to 20:00 EAT** (Monday to Friday).
+- **Overnight Spread-Buffer Routine**: **23:00 to 23:10 EAT**.
+- **Post-Closure Cooldown**: **60 minutes** per asset after every trade exit (enforced from both execution timestamp and closure timestamp) to prevent revenge trading or false re-entries.
 
+---
+
+## 🚀 Execution & Telegram Controls
+
+### Launching the Bot
 ```powershell
 python alphaedge.py
 ```
 
-### What Initializes:
-1. **M15 Swing Engine**: Continuous monitoring of `XAUUSDm` and `DE30m`.
-2. **News Catalyst Engine**: Live background calendar tracking.
-3. **Telegram Command Listener**: Supports interactive commands directly from your phone:
-   - `/status` — View open positions, floating PnL, and current market state.
-   - `/start_scanner` — Resume scanning.
-   - `/stop_scanner` — Pause new trade execution.
-4. **Daily & Weekly Reports**: Dispatches automated end-of-day and weekly performance reports to Telegram.
-
----
-
-## 📂 Project Architecture
-
-* `alphaedge.py` — Master bot entrypoint, session manager, Telegram bot listener, and reporting scheduler.
-* `institutional_trader.py` — Core Institutional MTF execution engine. H4 Dealing Range, Liquidity Sweep detection, Whale Volume gate, BE/Lock management for Gold & DAX.
-* `institutional_engine.py` — Evaluates institutional setups: H4 structure analysis, UT Bot signals, sweep detection, and trade direction logic.
-* `news_catalyst_engine.py` — Real-time ForexFactory institutional news tracker with disk persistence.
-* `economic_calendar_cache.json` — Persistent local cache for economic calendar events.
-* `config_learned_m15.json` — Parameters locked to institutional targets (Gold TP=$40, DAX TP=150pts).
-* `ut_bot_strategy.pine` — Reference TradingView Pine Script (`@version=6`) for visual chart comparison.
+### Interactive Telegram Commands
+- `/status` — Displays account balance, equity, active trades, and engine health.
+- `/pnl` — Floating and realized PnL summary.
+- `/shadow` — Complete performance breakdown across all shadow assets.
+- `/start_scanner` / `/stop_scanner` — Interactive runtime controls.
