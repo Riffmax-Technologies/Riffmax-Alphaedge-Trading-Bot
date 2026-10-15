@@ -595,25 +595,34 @@ def execute_order(symbol, order_type, lot, sl, tp, catalyst_desc="Standard", new
         return None
 
 
-# ─── Pre-Session Overnight Protection Gate ────────────────────────────────────
+# ─── Overnight Spread-Buffer Gate (11:00 PM EAT) ──────────────────────────────
 def run_pre_session_secure_gate():
     """
-    Pre-Session Auto-Secure Gate — fires ONCE per day between 19:45 and 19:55 EAT.
+    Overnight Spread-Buffer Gate — fires ONCE per day between 23:00 and 23:10 EAT.
 
-    Purpose: Prevent overnight broker rollover spread spikes from stop-hunting open
-    positions.  Exness (and most ECN brokers) widen Gold / Silver spreads by
-    $1.50-$3.50 between 21:00-01:00 UTC (midnight rollover).  A $36 SL with a
-    $0.36 Silver stop can be wiped by a $0.30 spread spike without price actually
-    moving against the trade.
+    Philosophy: Let overnight trades run — they can be very profitable.
+    The danger is NOT the market moving against you; it's the broker's rollover
+    spread spike (21:00-01:00 UTC) accidentally touching a tight SL.
+    The solution is to give every trade enough SL room that the spread can't reach it.
 
-    Decision logic per open position:
-      * Floating profit >= +$20  ->  Move SL to lock minimum +$15 USD above entry
-                                     (safe overnight cushion above rollover spread).
-      * Floating profit < +$20   ->  Close position entirely.  A near-entry or losing
-                                     trade is not worth overnight rollover risk.
+    Decision logic per open position at 11:00 PM EAT:
 
-    A Telegram DM is sent summarising every action taken.
-    The gate will NOT fire a second time on the same EAT date.
+      1. Already secured (SL at or above entry for BUY, or at/below entry for SELL)
+         -> Leave it completely alone. Profit lock / BE already handles this.
+
+      2. Healthy trade (not deeply losing, SL still at original position):
+         -> Widen SL to give $45 of room from current price.
+            $45 = ~3x the worst-case Exness overnight spread on Gold/Silver.
+            This means even a $3 spread spike cannot trigger the stop.
+            The trade runs freely overnight with a real price-based SL,
+            not a spread-based accidental stop.
+
+      3. Deeply losing trade (floating loss > -$25):
+         -> Close it. No point holding a trade that's already badly wrong
+            overnight with an even wider SL — that's just more risk on a
+            losing idea.
+
+    Telegram DM summarises every action. Gate fires only once per EAT date.
     """
     global PRE_SESSION_GATE_FIRED
 
@@ -624,8 +633,8 @@ def run_pre_session_secure_gate():
     if now_eat.weekday() in (5, 6):
         return
 
-    # Window: 19:45 - 19:55 EAT
-    gate_open = now_eat.hour == 19 and 45 <= now_eat.minute <= 55
+    # Window: 23:00 - 23:10 EAT (11 PM)
+    gate_open = now_eat.hour == 23 and 0 <= now_eat.minute <= 10
     if not gate_open:
         return
 
@@ -636,68 +645,61 @@ def run_pre_session_secure_gate():
 
     PRE_SESSION_GATE_FIRED = today_str
 
-    # Gather all open positions across all live assets
+    # Gather all open positions across live assets
     all_positions = mt5.positions_get()
     if not all_positions:
-        logger.info("[PreSessionGate] No open positions at 19:45 EAT — gate passed cleanly.")
+        logger.info("[OvernightGate] No open positions at 23:00 EAT — clean night ahead.")
         _send_personal(
-            "🌙 <b>[Pre-Session Gate]</b>\n"
-            "No open positions at 19:45 EAT.\n"
-            "Session closing cleanly. No overnight exposure. ✅"
+            "🌙 <b>[Overnight Gate — 23:00 EAT]</b>\n"
+            "No open positions. Clean night, no overnight exposure. ✅"
         )
         return
 
     actions_taken = []
+
+    # $45 overnight buffer — comfortably above worst-case Exness rollover spread
+    OVERNIGHT_BUFFER_USD = 45.0
+    # Cut-off: close anything losing more than this at 11 PM (bad trade, not worth wider SL)
+    DEEP_LOSS_CUTOFF_USD = -25.0
 
     for pos in all_positions:
         symbol   = pos.symbol
         ticket   = pos.ticket
         pos_type = "BUY" if pos.type == mt5.ORDER_TYPE_BUY else "SELL"
         entry    = pos.price_open
+        current  = pos.price_current
         sl       = pos.sl
         tp       = pos.tp
-        profit   = pos.profit  # floating P&L in account currency (USD)
+        profit   = pos.profit   # floating P&L in USD
 
         cfg = ASSET_CONFIGS.get(symbol)
         if cfg is None:
-            # Position belongs to an asset not in ASSET_CONFIGS — skip silently
-            continue
+            continue   # Not a managed asset — skip
 
         lot           = cfg['lot']
         dollar_per_pt = get_dollar_per_pt(symbol, lot)
-        lock_usd      = 15.0   # Minimum locked profit to survive overnight rollover
-        lock_pts      = (lock_usd / dollar_per_pt) if dollar_per_pt > 0 else 0.0
         dp            = _sym_digits(symbol)
+        buf_pts       = (OVERNIGHT_BUFFER_USD / dollar_per_pt) if dollar_per_pt > 0 else 0.0
 
-        if profit >= 20.0:
-            # SECURE: lock SL to guarantee at least +$15 overnight
-            if pos_type == "BUY":
-                new_sl = round(entry + lock_pts, dp)
-                if sl < new_sl:
-                    modify_sl(ticket, symbol, new_sl, tp)
-                    action_desc = "SL locked to +$15 cushion (" + str(round(new_sl, dp)) + ")"
-                else:
-                    action_desc = "SL already secured (" + str(round(sl, dp)) + ") — no change"
-            else:
-                new_sl = round(entry - lock_pts, dp)
-                if sl > new_sl:
-                    modify_sl(ticket, symbol, new_sl, tp)
-                    action_desc = "SL locked to +$15 cushion (" + str(round(new_sl, dp)) + ")"
-                else:
-                    action_desc = "SL already secured (" + str(round(sl, dp)) + ") — no change"
-
+        # ── Case 1: Already secured at BE or profit lock — leave it alone ────
+        already_secured = (
+            (pos_type == "BUY"  and sl >= entry) or
+            (pos_type == "SELL" and sl <= entry and sl > 0)
+        )
+        if already_secured:
             logger.info(
-                "[PreSessionGate] " + symbol + " #" + str(ticket) + " | Profit: +$" +
-                str(round(profit, 2)) + " | Action: SECURED overnight. " + action_desc
+                "[OvernightGate] " + symbol + " #" + str(ticket) +
+                " already at BE/Lock (SL=" + str(round(sl, dp)) + ") — no change needed."
             )
             actions_taken.append(
-                "🔒 <b>" + symbol + "</b> #" + str(ticket) + " (" + pos_type + ") | "
+                "✅ <b>" + symbol + "</b> #" + str(ticket) + " (" + pos_type + ") | "
                 "Profit: <b>+$" + str(round(profit, 2)) + "</b>\n"
-                "   ➔ " + action_desc
+                "   ➔ Already secured at BE/Lock. Running overnight freely."
             )
+            continue
 
-        else:
-            # CLOSE: insufficient profit buffer to absorb overnight spread
+        # ── Case 2: Deeply losing — close it, no point widening SL on a bad trade ──
+        if profit < DEEP_LOSS_CUTOFF_USD:
             tick        = mt5.symbol_info_tick(symbol)
             close_price = tick.bid if pos_type == "BUY" else tick.ask
             close_type  = mt5.ORDER_TYPE_SELL if pos_type == "BUY" else mt5.ORDER_TYPE_BUY
@@ -710,48 +712,89 @@ def run_pre_session_secure_gate():
                 "price":        close_price,
                 "deviation":    20,
                 "magic":        20250831,
-                "comment":      "PRE_SESSION_GATE",
+                "comment":      "OVERNIGHT_GATE_DEEPLOSS",
                 "type_time":    mt5.ORDER_TIME_GTC,
                 "type_filling": mt5.ORDER_FILLING_IOC,
             }
             res = mt5.order_send(req)
+            pnl_str = "-$" + str(round(abs(profit), 2))
             if res.retcode == mt5.TRADE_RETCODE_DONE:
-                pnl_str = ("+$" + str(round(profit, 2))) if profit >= 0 else ("-$" + str(round(abs(profit), 2)))
                 logger.info(
-                    "[PreSessionGate] " + symbol + " #" + str(ticket) + " CLOSED before overnight. "
-                    "Profit: " + pnl_str + ". Protected from rollover spread spike."
+                    "[OvernightGate] " + symbol + " #" + str(ticket) +
+                    " CLOSED (deep loss " + pnl_str + "). Not worth overnight SL buffer."
                 )
                 actions_taken.append(
-                    "🚪 <b>" + symbol + "</b> #" + str(ticket) + " (" + pos_type + ") | "
-                    "Profit: <b>" + pnl_str + "</b>\n"
-                    "   ➔ Closed before overnight rollover (insufficient cushion)"
+                    "🛑 <b>" + symbol + "</b> #" + str(ticket) + " (" + pos_type + ") | "
+                    "Loss: <b>" + pnl_str + "</b>\n"
+                    "   ➔ Closed — deeply losing trade, not worth overnight exposure."
                 )
-                # Mark closure cooldown so bot does not re-enter tonight
                 now_ts = int(now_utc.timestamp())
                 LAST_CLOSED_TIME[symbol] = now_ts
                 _save_closed_time(LAST_CLOSED_TIME)
             else:
                 logger.error(
-                    "[PreSessionGate] Failed to close " + symbol + " #" + str(ticket) +
-                    ": " + res.comment + " (Retcode: " + str(res.retcode) + ")"
+                    "[OvernightGate] Failed to close deep-loss " + symbol +
+                    " #" + str(ticket) + ": " + res.comment
                 )
                 actions_taken.append(
-                    "⚠️ <b>" + symbol + "</b> #" + str(ticket) + " — CLOSE FAILED: " + res.comment
+                    "⚠️ <b>" + symbol + "</b> #" + str(ticket) +
+                    " — CLOSE FAILED: " + res.comment
                 )
+            continue
+
+        # ── Case 3: Healthy trade — widen SL to $45 from current price ───────
+        # Calculate new SL that gives $45 of room from where price is RIGHT NOW.
+        # This means the overnight spread (max ~$3) cannot accidentally trigger it.
+        if pos_type == "BUY":
+            new_sl = round(current - buf_pts, dp)
+            # Never move SL to a worse position than it already is
+            if new_sl > sl:
+                modify_sl(ticket, symbol, new_sl, tp)
+                action_desc = (
+                    "$45 spread-buffer SL set at " + str(round(new_sl, dp)) +
+                    " (was " + str(round(sl, dp)) + ")"
+                )
+            else:
+                action_desc = (
+                    "SL already has enough room (" + str(round(sl, dp)) + ") — no change"
+                )
+        else:
+            new_sl = round(current + buf_pts, dp)
+            if new_sl < sl or sl == 0:
+                modify_sl(ticket, symbol, new_sl, tp)
+                action_desc = (
+                    "$45 spread-buffer SL set at " + str(round(new_sl, dp)) +
+                    " (was " + str(round(sl, dp)) + ")"
+                )
+            else:
+                action_desc = (
+                    "SL already has enough room (" + str(round(sl, dp)) + ") — no change"
+                )
+
+        pnl_str = ("+$" + str(round(profit, 2))) if profit >= 0 else ("-$" + str(round(abs(profit), 2)))
+        logger.info(
+            "[OvernightGate] " + symbol + " #" + str(ticket) +
+            " | Profit: " + pnl_str + " | " + action_desc
+        )
+        actions_taken.append(
+            "🌙 <b>" + symbol + "</b> #" + str(ticket) + " (" + pos_type + ") | "
+            "Profit: <b>" + pnl_str + "</b>\n"
+            "   ➔ " + action_desc
+        )
 
     # Telegram summary
     if actions_taken:
         summary = "\n".join(actions_taken)
         _send_personal(
-            "🌙 <b>[Pre-Session Gate Executed — 19:45 EAT]</b>\n\n"
+            "🌙 <b>[Overnight Gate Executed — 23:00 EAT]</b>\n\n"
             + summary + "\n\n"
-            "Overnight spread protection complete. No new entries until 08:00 EAT tomorrow."
+            "All trades protected from overnight rollover spread. "
+            "Genuine price moves will be caught. Good night! 🌙"
         )
     else:
         _send_personal(
-            "🌙 <b>[Pre-Session Gate]</b>\n"
-            "Scanned all positions — none matched live asset configs.\n"
-            "Session closing cleanly. ✅"
+            "🌙 <b>[Overnight Gate — 23:00 EAT]</b>\n"
+            "No managed positions found. Clean night ahead. ✅"
         )
 
 
