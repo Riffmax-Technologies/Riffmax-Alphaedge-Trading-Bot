@@ -73,40 +73,58 @@ class InstitutionalEngine:
             data["M5"] = pd.DataFrame(m5_rates)
         return data
 
-    def analyze_dealing_range(self, df_h4: pd.DataFrame, current_price: float):
+    def analyze_dealing_range(self, df_h4: pd.DataFrame, current_price: float, pdh: float = 0.0, pdl: float = 0.0):
         """
-        Calculates the H4 Dealing Range:
-        - Range High, Range Low, Equilibrium (50%).
-        - Returns whether current price is in Discount (< 50%) or Premium (> 50%).
-        """
-        recent_h4 = df_h4.tail(self.lookback_h4)
-        range_high = float(recent_h4['high'].max())
-        range_low = float(recent_h4['low'].min())
-        spread_range = range_high - range_low
+        Calculates the Institutional Dealing Range using FIXED daily anchors.
 
+        Uses Previous Day High (PDH) and Previous Day Low (PDL) as the range
+        boundaries — these are confirmed, locked levels that do NOT shift as
+        new H4 bars form during the trading day. This eliminates the 'parallax
+        error' where a trade opened at 68% premium appears to be at 63% mid-range
+        an hour later because the rolling window expanded.
+
+        Falls back to the rolling H4 range (last 50 bars) if PDH/PDL are not
+        available (e.g. on first bar of the week or after a data gap).
+
+        Location %:
+          0%   = at PDL (Previous Day Low)   — deepest discount
+          50%  = at equilibrium (midpoint)   — neutral
+          100% = at PDH (Previous Day High)  — deepest premium
+        """
+        # ── Primary: PDH / PDL fixed anchor ──────────────────────────────────
+        if pdh > 0 and pdl > 0 and pdh > pdl:
+            range_high = float(pdh)
+            range_low  = float(pdl)
+        else:
+            # ── Fallback: rolling H4 window ───────────────────────────────────
+            recent_h4  = df_h4.tail(self.lookback_h4)
+            range_high = float(recent_h4['high'].max())
+            range_low  = float(recent_h4['low'].min())
+
+        spread_range = range_high - range_low
         if spread_range <= 0:
             return None
 
-        equilibrium = range_low + (0.5 * spread_range)
-        discount_threshold = range_low + (0.45 * spread_range)  # Deep discount zone
-        premium_threshold = range_high - (0.45 * spread_range)   # Deep premium zone
+        equilibrium        = range_low + (0.5  * spread_range)
+        discount_threshold = range_low + (0.35 * spread_range)   # Deep discount: bottom 35%
+        premium_threshold  = range_high - (0.35 * spread_range)  # Deep premium:  top 35%
 
-        location_pct = ((current_price - range_low) / spread_range) * 100.0
-
-        is_discount = current_price < equilibrium
+        location_pct    = ((current_price - range_low) / spread_range) * 100.0
+        is_discount     = current_price < equilibrium
         is_deep_discount = current_price <= discount_threshold
-        is_premium = current_price > equilibrium
-        is_deep_premium = current_price >= premium_threshold
+        is_premium      = current_price > equilibrium
+        is_deep_premium  = current_price >= premium_threshold
 
         return {
-            "range_high": range_high,
-            "range_low": range_low,
-            "equilibrium": equilibrium,
-            "location_pct": location_pct,
-            "is_discount": is_discount,
+            "range_high":      range_high,
+            "range_low":       range_low,
+            "equilibrium":     equilibrium,
+            "location_pct":    location_pct,
+            "is_discount":     is_discount,
             "is_deep_discount": is_deep_discount,
-            "is_premium": is_premium,
-            "is_deep_premium": is_deep_premium
+            "is_premium":      is_premium,
+            "is_deep_premium":  is_deep_premium,
+            "anchor":          "PDH/PDL" if (pdh > 0 and pdl > 0) else "H4_ROLLING"
         }
 
     def detect_whale_volume(self, df: pd.DataFrame, idx: int = -2):
@@ -387,8 +405,24 @@ class InstitutionalEngine:
         df_h1 = mtf["H1"]
         df_m15 = mtf["M15"]
 
-        # 1. H4 Macro Bias & Dealing Range Analysis
-        range_info = self.analyze_dealing_range(df_h4, curr_price)
+        # ── Load PDH/PDL from StructuralMemory state for fixed daily anchor ──────
+        # StructuralMemory tracks Previous Day High/Low per symbol — these are
+        # locked reference points that don't shift as new intra-day bars form.
+        pdh, pdl = 0.0, 0.0
+        try:
+            import os, json as _json
+            _state_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "structural_memory_state.json")
+            if os.path.exists(_state_path):
+                with open(_state_path, "r", encoding="utf-8") as _f:
+                    _state = _json.load(_f)
+                _sym_state = _state.get(symbol, {})
+                pdh = float(_sym_state.get("pdh", 0.0))
+                pdl = float(_sym_state.get("pdl", 0.0))
+        except Exception:
+            pass   # Fall through to rolling H4 anchor
+
+        # 1. H4 Macro Bias & Dealing Range Analysis (PDH/PDL anchored)
+        range_info = self.analyze_dealing_range(df_h4, curr_price, pdh=pdh, pdl=pdl)
         if not range_info:
             return {"valid": False, "direction": "NONE", "reason": "Dealing range calculation failed"}
 

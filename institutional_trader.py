@@ -933,15 +933,16 @@ def run_institutional_cycle():
 
             target_dir = setup['direction']  # "BUY" or "SELL"
 
-            # ── 2.4 Correlated Metals Conflict Guard ─────────────────────────────
-            # Gold (XAU) and Silver (XAG) share the same macro driver (USD strength,
-            # risk sentiment, precious metals flow). Opening OPPOSITE directions on
-            # them simultaneously creates a built-in hedge: one WILL lose when the
-            # other wins. This guard blocks the new entry if a conflicting correlated
-            # metal position is already open.
+            # ── 2.4 Metal Mirror Guard ────────────────────────────────────────────
+            # Gold (XAU) and Silver (XAG) share the same macro driver — USD strength,
+            # risk sentiment, precious metals flow. They must ALWAYS trade in the same
+            # direction. This guard blocks any entry that would be opposite to an
+            # existing position on the correlated metal.
             #
-            # Rule: If XAUUSDm SELL is open → block XAGUSDm BUY (and vice versa).
-            #       If XAUUSDm BUY is open  → block XAGUSDm SELL (and vice versa).
+            # Mirror execution happens AFTER the primary trade is confirmed and placed
+            # (see below, after execute_order succeeds).
+            #
+            # Block rule: If correlated metal has an OPPOSITE open position → skip.
             METAL_PAIRS = {
                 "XAUUSDm": "XAGUSDm",
                 "XAGUSDm": "XAUUSDm",
@@ -953,15 +954,14 @@ def run_institutional_cycle():
                     for corr_pos in corr_positions:
                         corr_dir = "BUY" if corr_pos.type == mt5.ORDER_TYPE_BUY else "SELL"
                         if corr_dir != target_dir:
-                            # Opposite direction on correlated metal — block this entry
                             logger.info(
-                                "[CorrelatedMetalsGuard] " + symbol + " " + target_dir +
-                                " BLOCKED — " + correlated_metal + " already has " + corr_dir +
-                                " open (#" + str(corr_pos.ticket) + "). Opposite precious metal "
-                                "positions create a guaranteed hedge drag. Waiting for " +
+                                "[MetalMirror] " + symbol + " " + target_dir +
+                                " BLOCKED — " + correlated_metal + " already has " +
+                                corr_dir + " open (#" + str(corr_pos.ticket) + "). "
+                                "Metals must trade same direction. Wait for " +
                                 correlated_metal + " to close first."
                             )
-                            has_pos = True   # Treat as if we already have a position — skip entry
+                            has_pos = True   # Skip entry — opposite metal is open
                             break
 
             # ── 2.5 Structural Confluence Check (Regime + Weekly EQ) ─────────────
@@ -1038,6 +1038,58 @@ def run_institutional_cycle():
             if execute_order(symbol, target_dir, cfg['lot'], sl_price, tp_price, mode_desc, event_name, setup.get('sweep_level', 0.0), 0.0):
                 LAST_EXECUTED_BAR[symbol] = now_m15_ts
                 _save_bar_state(LAST_EXECUTED_BAR)
+
+                # ── Metal Mirror: auto-open same direction on correlated metal ─────
+                # When Gold confirms → open Silver same direction (and vice versa).
+                # The mirror only fires if the correlated metal has NO open position
+                # and is not in cooldown. Uses the correlated metal's own lot/SL/TP.
+                mirror_symbol = METAL_PAIRS.get(symbol) if "XAUUSDm" in symbol or "XAGUSDm" in symbol else None
+                if mirror_symbol and mirror_symbol in ASSET_CONFIGS:
+                    mirror_existing = mt5.positions_get(symbol=mirror_symbol)
+                    mirror_has_pos  = bool(mirror_existing)
+                    mirror_closed_ts = LAST_CLOSED_TIME.get(mirror_symbol, 0)
+                    mirror_exec_ts   = LAST_EXECUTED_BAR.get(mirror_symbol, 0)
+                    mirror_in_cooldown = (now_ts - mirror_exec_ts < 3600) or (now_ts - mirror_closed_ts < 3600)
+
+                    if not mirror_has_pos and not mirror_in_cooldown:
+                        mcfg = ASSET_CONFIGS[mirror_symbol]
+                        m_dpp = get_dollar_per_pt(mirror_symbol, mcfg['lot'])
+                        m_tick = mt5.symbol_info_tick(mirror_symbol)
+                        if m_tick and m_dpp > 0:
+                            m_sl_dist = mcfg['max_sl_dollars'] / m_dpp
+                            m_tp_dist = mcfg['tp_dollars']    / m_dpp
+                            m_price   = m_tick.ask if target_dir == "BUY" else m_tick.bid
+                            if target_dir == "BUY":
+                                m_sl = m_price - m_sl_dist
+                                m_tp = m_price + m_tp_dist
+                            else:
+                                m_sl = m_price + m_sl_dist
+                                m_tp = m_price - m_tp_dist
+                            mirror_desc = "MetalMirror " + target_dir + " (mirroring " + symbol + ")"
+                            logger.info(
+                                "[MetalMirror] Auto-opening " + mirror_symbol + " " + target_dir +
+                                " to mirror confirmed " + symbol + " " + target_dir +
+                                " | Price: " + str(round(m_price, _sym_digits(mirror_symbol))) +
+                                " | SL: " + str(round(m_sl, _sym_digits(mirror_symbol))) +
+                                " | TP: " + str(round(m_tp, _sym_digits(mirror_symbol)))
+                            )
+                            if execute_order(mirror_symbol, target_dir, mcfg['lot'], m_sl, m_tp, mirror_desc, event_name, 0.0, 0.0):
+                                LAST_EXECUTED_BAR[mirror_symbol] = now_m15_ts
+                                _save_bar_state(LAST_EXECUTED_BAR)
+                                _send_personal(
+                                    "🔗 <b>[Metal Mirror]</b>\n"
+                                    "<b>" + mirror_symbol + " " + target_dir + "</b> auto-opened\n"
+                                    "mirroring confirmed <b>" + symbol + " " + target_dir + "</b>\n"
+                                    "Price: " + str(round(m_price, _sym_digits(mirror_symbol))) +
+                                    " | SL: " + str(round(m_sl, _sym_digits(mirror_symbol))) +
+                                    " | TP: " + str(round(m_tp, _sym_digits(mirror_symbol)))
+                                )
+                    else:
+                        reason = "already has position" if mirror_has_pos else "in cooldown"
+                        logger.info(
+                            "[MetalMirror] " + mirror_symbol + " mirror skipped — " + reason + "."
+                        )
+
 
         except Exception as e:
             logger.error(f"[Institutional MTF] Error processing {symbol}: {e}\n{traceback.format_exc()}")
