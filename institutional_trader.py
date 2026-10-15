@@ -933,6 +933,37 @@ def run_institutional_cycle():
 
             target_dir = setup['direction']  # "BUY" or "SELL"
 
+            # ── 2.4 Correlated Metals Conflict Guard ─────────────────────────────
+            # Gold (XAU) and Silver (XAG) share the same macro driver (USD strength,
+            # risk sentiment, precious metals flow). Opening OPPOSITE directions on
+            # them simultaneously creates a built-in hedge: one WILL lose when the
+            # other wins. This guard blocks the new entry if a conflicting correlated
+            # metal position is already open.
+            #
+            # Rule: If XAUUSDm SELL is open → block XAGUSDm BUY (and vice versa).
+            #       If XAUUSDm BUY is open  → block XAGUSDm SELL (and vice versa).
+            METAL_PAIRS = {
+                "XAUUSDm": "XAGUSDm",
+                "XAGUSDm": "XAUUSDm",
+            }
+            correlated_metal = METAL_PAIRS.get(symbol)
+            if correlated_metal:
+                corr_positions = mt5.positions_get(symbol=correlated_metal)
+                if corr_positions:
+                    for corr_pos in corr_positions:
+                        corr_dir = "BUY" if corr_pos.type == mt5.ORDER_TYPE_BUY else "SELL"
+                        if corr_dir != target_dir:
+                            # Opposite direction on correlated metal — block this entry
+                            logger.info(
+                                "[CorrelatedMetalsGuard] " + symbol + " " + target_dir +
+                                " BLOCKED — " + correlated_metal + " already has " + corr_dir +
+                                " open (#" + str(corr_pos.ticket) + "). Opposite precious metal "
+                                "positions create a guaranteed hedge drag. Waiting for " +
+                                correlated_metal + " to close first."
+                            )
+                            has_pos = True   # Treat as if we already have a position — skip entry
+                            break
+
             # ── 2.5 Structural Confluence Check (Regime + Weekly EQ) ─────────────
             # Institutional rule: only trade in the direction of the weekly regime.
             # In EXPANSION_UP   — only take BUY setups (price in Discount zone).
