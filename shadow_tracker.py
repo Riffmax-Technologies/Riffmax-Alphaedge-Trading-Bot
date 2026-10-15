@@ -55,6 +55,39 @@ SHADOW_CONFIGS = {
         "lock_trigger_dollars": 35.0,    # Trigger lock at +$35.00 (35 pips)
         "lock_amount_dollars": 25.0,     # Lock +$25.00 profit into SL (25 pips)
         "pip_size": 0.00010
+    },
+    "US500m": {
+        "symbol": "US500m",
+        "name": "S&P 500",
+        "lot": 1.0,                      # 1.0 Lot ($1.00 per index point)
+        "tp_dollars": 60.0,              # Target: $60.00 USD Profit (60.0 index pts)
+        "max_sl_dollars": 36.0,          # Risk Cap: $36.00 USD (36.0 index pts)
+        "be_trigger_dollars": 20.0,      # BE at +$20.00 (20.0 index pts)
+        "lock_trigger_dollars": 35.0,    # Trigger lock at +$35.00 (35.0 index pts)
+        "lock_amount_dollars": 25.0,     # Lock +$25.00 profit into SL (25.0 index pts)
+        "pip_size": 0.1
+    },
+    "GBPJPYm": {
+        "symbol": "GBPJPYm",
+        "name": "GBP/JPY (Guppy)",
+        "lot": 0.05,                     # 0.05 Lot (~$0.317 per pip)
+        "tp_dollars": 60.0,              # Target: $60.00 USD Profit (~189 pips = 1.89)
+        "max_sl_dollars": 36.0,          # Risk Cap: $36.00 USD (~114 pips = 1.14)
+        "be_trigger_dollars": 20.0,      # BE at +$20.00 (63 pips = 0.63)
+        "lock_trigger_dollars": 35.0,    # Trigger lock at +$35.00 (110 pips = 1.10)
+        "lock_amount_dollars": 25.0,     # Lock +$25.00 profit into SL (79 pips = 0.79)
+        "pip_size": 0.01
+    },
+    "DE30m": {
+        "symbol": "DE30m",
+        "name": "DAX 30 (GER40)",
+        "lot": 0.25,                     # 0.25 Lot (~$0.28 per index pt)
+        "tp_dollars": 60.0,              # Target: $60.00 USD Profit (214.0 index pts)
+        "max_sl_dollars": 36.0,          # Risk Cap: $36.00 USD (128.0 index pts)
+        "be_trigger_dollars": 20.0,      # BE at +$20.00 (71.0 index pts)
+        "lock_trigger_dollars": 35.0,    # Trigger lock at +$35.00 (125.0 index pts)
+        "lock_amount_dollars": 25.0,     # Lock +$25.00 profit into SL (89.0 index pts)
+        "pip_size": 1.0
     }
 }
 

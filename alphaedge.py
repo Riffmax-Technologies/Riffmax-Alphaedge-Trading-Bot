@@ -1843,7 +1843,7 @@ if __name__ == "__main__":
         "• <b>Crude Oil (USOILm):</b> $35.00 TP | $25.00 SL ($0.50) | BE at +$15 | Lock $25→$20 | <b>0.05 Lot</b>\n"
         "• <b>Dow Jones (US30m):</b> $60.00 TP | $36.00 SL (144 pts) | BE at +$20 | Lock $35→$25 | <b>0.25 Lot</b>\n"
         "• <b>Silver (XAGUSDm):</b> $60.00 TP | $36.00 SL ($0.36) | BE at +$20 | Lock $35→$25 | <b>0.02 Lot</b>\n\n"
-        "<b>Shadow Observation:</b> EURUSDm · USTECm (Nasdaq) · GBPUSDm (paper mode)\n\n"
+        "<b>Shadow Observation (6 Assets):</b> EURUSDm · USTECm (Nasdaq) · GBPUSDm · US500m (S&P 500) · GBPJPYm (Guppy) · DE30m (DAX) (paper mode)\n\n"
         "<b>Strategy & Execution Upgrades:</b>\n"
         "• <b>M5 Pullback Turn Confirmation:</b> Never enters at impulse top; waits for micro-pullback turn\n"
         "• Strict Discount (≤35%) gate — SELL in deep discount is FORBIDDEN\n"
