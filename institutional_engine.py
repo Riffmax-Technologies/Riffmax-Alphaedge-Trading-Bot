@@ -469,6 +469,7 @@ class InstitutionalEngine:
             min_tp_pts = 240.0  # 240 pts ($60 USD at 0.25 lot)
         elif "XAG" in symbol or "SILVER" in symbol:
             min_sl_pts = 0.36   # $0.36 ($36 USD at 0.02 lot)
+            min_tp_pts = 0.60   # $0.60 ($60 USD at 0.02 lot)
         elif "500" in symbol or "SPX" in symbol:
             min_sl_pts = 36.0   # 36.0 pts ($36 USD at 1.0 lot)
             min_tp_pts = 60.0   # 60.0 pts ($60 USD at 1.0 lot)
