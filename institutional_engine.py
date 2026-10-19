@@ -109,22 +109,34 @@ class InstitutionalEngine:
         discount_threshold = range_low + (0.35 * spread_range)   # Deep discount: bottom 35%
         premium_threshold  = range_high - (0.35 * spread_range)  # Deep premium:  top 35%
 
-        location_pct    = ((current_price - range_low) / spread_range) * 100.0
-        is_discount     = current_price < equilibrium
-        is_deep_discount = current_price <= discount_threshold
-        is_premium      = current_price > equilibrium
-        is_deep_premium  = current_price >= premium_threshold
+        # Raw percentage relative to yesterday's range
+        raw_location_pct = ((current_price - range_low) / spread_range) * 100.0
+
+        # Clamped location for internal oscillator metrics
+        location_pct = max(0.0, min(100.0, raw_location_pct))
+
+        # Breakout status: outside confirmed PDH/PDL range
+        is_breakout_down = current_price < range_low
+        is_breakout_up   = current_price > range_high
+
+        is_discount      = (current_price < equilibrium) and not is_breakout_down
+        is_deep_discount = (current_price <= discount_threshold) and not is_breakout_down
+        is_premium       = (current_price > equilibrium) and not is_breakout_up
+        is_deep_premium  = (current_price >= premium_threshold) and not is_breakout_up
 
         return {
-            "range_high":      range_high,
-            "range_low":       range_low,
-            "equilibrium":     equilibrium,
-            "location_pct":    location_pct,
-            "is_discount":     is_discount,
+            "range_high":       range_high,
+            "range_low":        range_low,
+            "equilibrium":      equilibrium,
+            "location_pct":     raw_location_pct,
+            "clamped_loc_pct":  location_pct,
+            "is_discount":      is_discount,
             "is_deep_discount": is_deep_discount,
-            "is_premium":      is_premium,
+            "is_premium":       is_premium,
             "is_deep_premium":  is_deep_premium,
-            "anchor":          "PDH/PDL" if (pdh > 0 and pdl > 0) else "H4_ROLLING"
+            "is_breakout_down": is_breakout_down,
+            "is_breakout_up":   is_breakout_up,
+            "anchor":           "PDH/PDL" if (pdh > 0 and pdl > 0) else "H4_ROLLING"
         }
 
     def detect_whale_volume(self, df: pd.DataFrame, idx: int = -2):
@@ -440,6 +452,10 @@ class InstitutionalEngine:
         ema20_h1 = pd.Series(h1_closes).ewm(span=20).mean().iloc[-1]
         ema50_h1 = pd.Series(h1_closes).ewm(span=50).mean().iloc[-1]
 
+        # H1 EMA Intermediate Trend Direction
+        h1_bullish = (curr_price > ema50_h1) and (ema20_h1 >= ema50_h1)
+        h1_bearish = (curr_price < ema50_h1) and (ema20_h1 <= ema50_h1)
+
         # Multi-bar swing structure
         is_higher_highs = h4_highs[-2] > h4_highs[-4] and h4_lows[-2] > h4_lows[-4]
         is_lower_lows = h4_highs[-2] < h4_highs[-4] and h4_lows[-2] < h4_lows[-4]
@@ -454,23 +470,29 @@ class InstitutionalEngine:
         else:
             h4_trend = "RANGE"
 
-        loc_pct = range_info.get("location_pct", 50.0)
+        loc_pct = range_info.get("clamped_loc_pct", 50.0)
+        raw_loc = range_info.get("location_pct", 50.0)
+        is_breakout_down = range_info.get("is_breakout_down", False)
+        is_breakout_up   = range_info.get("is_breakout_up", False)
 
-        # STRICT TREND & PRICE ACTION RULE:
-        # Never trade counter-trend, and NEVER buy deep premium or sell deep discount!
-        # When H4 trend is BULLISH -> ONLY BUY orders are allowed, BUT price must NOT be in deep premium (loc_pct <= 65.0%).
-        # When H4 trend is BEARISH -> ONLY SELL orders are allowed, BUT price must NOT be in deep discount (loc_pct >= 35.0%).
-        # When H4 is in a neutral RANGE -> Use Dealing Range (BUY in discount <= 45.0%, SELL in premium >= 55.0%).
+        # STRICT INSTITUTIONAL MULTI-TIMEFRAME GATE:
+        # 1. Never trade counter-trend on H4 / H1.
+        # 2. Never catch falling knives outside the dealing range:
+        #    If price broke below PDL (raw_loc < 0%), buying is FORBIDDEN (Institutions are in Expansion Down).
+        #    If price broke above PDH (raw_loc > 100%), selling is FORBIDDEN (Institutions are in Expansion Up).
+        # 3. Intermediate H1 trend must NOT oppose the setup.
         if h4_trend == "BULLISH":
-            macro_buy_allowed = loc_pct <= 65.0
+            # Buying allowed if price is not in deep premium (>65%) and not dumped into a free-fall (< 0% without reclaim)
+            macro_buy_allowed = (loc_pct <= 65.0) and not is_breakout_down and not h1_bearish
             macro_sell_allowed = False
         elif h4_trend == "BEARISH":
+            # Selling allowed if price is not in deep discount (<35%) and not pumped into an escape velocity (> 100% without reclaim)
             macro_buy_allowed = False
-            macro_sell_allowed = loc_pct >= 35.0
+            macro_sell_allowed = (loc_pct >= 35.0) and not is_breakout_up and not h1_bullish
         else:
-            # RANGE_BOUND: Only trade at extremes of the range
-            macro_buy_allowed = range_info["is_discount"] and loc_pct <= 45.0
-            macro_sell_allowed = range_info["is_premium"] and loc_pct >= 55.0
+            # RANGE_BOUND: Only trade at extremes of the confirmed range
+            macro_buy_allowed = range_info["is_discount"] and (loc_pct <= 45.0) and not is_breakout_down and not h1_bearish
+            macro_sell_allowed = range_info["is_premium"] and (loc_pct >= 55.0) and not is_breakout_up and not h1_bullish
 
         # 2. M15 / H1 Micro Actionable Trigger Evaluation
         m15_buy_sweep, m15_low = self.detect_liquidity_sweep(df_m15, "BUY")
@@ -522,8 +544,9 @@ class InstitutionalEngine:
         whale_gate_ok = True
 
         # ── BUY SETUP EVALUATION ──────────────────────────────────────────────
-        # Conditions: Macro BUY allowed AND (M15 UT Bot BUY OR M15/H1 Liquidity Sweep) AND M15 UT Bot NOT counter-trend (not SELL)
-        has_buy_trigger = (ut_signal_m15 == "BUY" or m15_buy_sweep or h1_buy_sweep) and (ut_signal_m15 != "SELL")
+        # Institutional Rule: Momentum confirmation required.
+        # Standalone wicks without displacement or UT Bot agreement are retail traps.
+        has_buy_trigger = (ut_signal_m15 == "BUY") or ((m15_buy_sweep or h1_buy_sweep) and has_buy_fvg and ut_signal_m15 != "SELL")
         if macro_buy_allowed and has_buy_trigger and whale_gate_ok:
             # M5 Micro Pullback Confirmation
             df_m5 = mtf.get("M5")
@@ -563,8 +586,9 @@ class InstitutionalEngine:
                     }
 
         # ── SELL SETUP EVALUATION ─────────────────────────────────────────────
-        # Conditions: Macro SELL allowed AND (M15 UT Bot SELL OR M15/H1 Liquidity Sweep) AND M15 UT Bot NOT counter-trend (not BUY)
-        has_sell_trigger = (ut_signal_m15 == "SELL" or m15_sell_sweep or h1_sell_sweep) and (ut_signal_m15 != "BUY")
+        # Institutional Rule: Momentum confirmation required.
+        # Standalone wicks without displacement or UT Bot agreement are retail traps.
+        has_sell_trigger = (ut_signal_m15 == "SELL") or ((m15_sell_sweep or h1_sell_sweep) and has_sell_fvg and ut_signal_m15 != "BUY")
         if macro_sell_allowed and has_sell_trigger and whale_gate_ok:
             # M5 Micro Pullback Confirmation
             df_m5 = mtf.get("M5")
