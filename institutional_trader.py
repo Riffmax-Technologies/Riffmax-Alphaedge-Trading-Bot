@@ -342,25 +342,37 @@ def _send_telegram(message):
 
 
 
-# ─── Session Filter (8:00 AM - 8:00 PM EAT / Monday - Friday) ───────────────────
+# ─── Session Filter (8:00 AM - 8:00 PM EAT / Tuesday - Friday) ──────────────────
 def is_session_active(symbol=None):
     """
-    Session Gateway:
-    Trading window is strictly 8:00 AM to 8:00 PM EAT (Monday to Friday).
-    Once it hits 8:00 PM (20:00) EAT, no new trades are opened.
-    Overnight trading (8:00 PM to 8:00 AM EAT) and weekends are completely blocked.
+    Institutional Session Gateway (Option B - Monday Observation Only):
+    Trading execution window is strictly Tuesday to Friday, 8:00 AM to 8:00 PM EAT.
+    
+    MONDAY INSTITUTIONAL RULE:
+      - Monday (weekday == 0) is STRICT OBSERVATION ONLY.
+      - Desks and algorithms observe price establishing Monday High / Low boundaries,
+        update structural memory, and record liquidity pools without opening live trades.
+      - Protects account from choppy early-week accumulation traps & fakeouts.
+      
+    TUESDAY - FRIDAY:
+      - Active execution from 08:00 EAT to 20:00 EAT.
+      - Overnight hours (20:00 to 08:00 EAT) and weekends (Saturday & Sunday) are blocked.
     """
     now_utc = datetime.now(timezone.utc)
     # EAT is UTC+3
     now_eat = now_utc + timedelta(hours=3)
-    weekday = now_eat.weekday()  # Monday=0, ..., Friday=4, Saturday=5, Sunday=6
+    weekday = now_eat.weekday()  # Monday=0, Tuesday=1, ..., Friday=4, Saturday=5, Sunday=6
     hour_eat = now_eat.hour
 
     # Closed on weekends (Saturday & Sunday)
     if weekday in (5, 6):
         return False
 
-    # Strictly 8:00 AM to 8:00 PM EAT (08:00 <= hour < 20:00)
+    # Option B: Monday is strictly Observation & Structural Memory mode (No new live executions)
+    if weekday == 0:
+        return False
+
+    # Tuesday to Friday: strictly 8:00 AM to 8:00 PM EAT (08:00 <= hour < 20:00)
     if hour_eat < 8 or hour_eat >= 20:
         return False
 

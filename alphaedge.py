@@ -242,6 +242,8 @@ def is_trading_session_active() -> bool:
 
     if weekday in (5, 6):
         return False
+    if weekday == 0:  # Option B: Monday is strictly Observation & Structure memory recording
+        return False
     if hour_eat < 8 or hour_eat >= 20:
         return False
     return True
