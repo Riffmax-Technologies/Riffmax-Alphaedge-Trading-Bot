@@ -1827,12 +1827,11 @@ if __name__ == "__main__":
 
     logger.info("=" * 65)
     logger.info("  ALPHAEDGE — INSTITUTIONAL MTF WHALE FLOW SWING ENGINE")
-    logger.info("  Live Assets: Gold (XAUUSDm) | Crude Oil (USOILm) | Dow Jones (US30m) | Silver (XAGUSDm)")
+    logger.info("  Live Assets: Gold (XAUUSDm) | Crude Oil (USOILm) | Dow Jones (US30m)")
     logger.info("  Strategy: H4 Dealing Range | Liquidity Sweep | Whale Volume | M5 Pullback Turn Sniper")
     logger.info("  Gold:   0.02 lot | TP: $60.00 | Max SL: $36.00 (18 pts)  | BE: +$20 | Lock: $35->$25")
-    logger.info("  Oil:    0.05 lot | TP: $35.00 | Max SL: $25.00 ($0.50)   | BE: +$15 | Lock: $25->$20")
+    logger.info("  Oil:    0.05 lot | TP: $35.00 | Max SL: $35.00 ($0.70)   | BE: +$18 | Lock: $28->$20")
     logger.info("  US30:   0.25 lot | TP: $60.00 | Max SL: $36.00 (144 pts) | BE: +$20 | Lock: $35->$25")
-    logger.info("  Silver: 0.02 lot | TP: $60.00 | Max SL: $36.00 ($0.36)   | BE: +$20 | Lock: $35->$25")
     logger.info("  Session: 8:00 AM - 8:00 PM EAT (Monday to Friday) | Overnight Gate Protected")
     logger.info("  Guidance: ForexFactory Real-Time Macro News Engine (USD)")
     logger.info("=" * 65)
@@ -1840,21 +1839,20 @@ if __name__ == "__main__":
     # 1. Send Online Startup Notification to Telegram
     startup_msg = (
         "<b>🏛 AlphaEdge — Institutional MTF Whale Flow Engine Active</b>\n\n"
-        "<b>Live Trading Assets (4 Assets Active):</b>\n"
+        "<b>Live Trading Assets (3 Assets Active):</b>\n"
         "• <b>Gold (XAUUSDm):</b> $60.00 TP | $36.00 SL (18 pts) | BE at +$20 | Lock $35→$25 | <b>0.02 Lot</b>\n"
-        "• <b>Crude Oil (USOILm):</b> $35.00 TP | $25.00 SL ($0.50) | BE at +$15 | Lock $25→$20 | <b>0.05 Lot</b>\n"
+        "• <b>Crude Oil (USOILm):</b> $35.00 TP | $35.00 SL ($0.70) | BE at +$18 | Lock $28→$20 | <b>0.05 Lot</b>\n"
         "• <b>Dow Jones (US30m):</b> $60.00 TP | $36.00 SL (144 pts) | BE at +$20 | Lock $35→$25 | <b>0.25 Lot</b>\n"
-        "• <b>Silver (XAGUSDm):</b> $60.00 TP | $36.00 SL ($0.36) | BE at +$20 | Lock $35→$25 | <b>0.02 Lot</b>\n\n"
         "<b>Shadow Observation (6 Assets):</b> EURUSDm · USTECm (Nasdaq) · GBPUSDm · US500m (S&P 500) · GBPJPYm (Guppy) · DE30m (DAX) (paper mode)\n\n"
         "<b>Strategy & Execution Architecture:</b>\n"
         "• <b>Fixed Daily Anchors (PDH/PDL):</b> Stable Previous Day High/Low dealing range eliminates intraday parallax\n"
-        "• <b>Precious Metals Mirror:</b> Gold and Silver always trade synchronized (Gold confirms → Silver mirrors & vice versa)\n"
+        "• <b>Solo Gold Focus:</b> Silver decoupled & removed completely to prevent hedge drag\n"
         "• <b>M5 Pullback Turn Confirmation:</b> Enters on micro-structure exhaustion turn, never chasing impulses\n"
         "• <b>Strict Dealing Range Gates:</b> SELL blocked in deep discount (≤35%), BUY blocked in deep premium (≥65%)\n"
         "• <b>60-Min Cooldown Shield:</b> Prevents overtrading after closures\n"
         "• <b>Overnight Spread-Buffer Gate (23:00 EAT):</b> Gives $45 room on healthy trades to survive rollover spread spikes; cuts deep losses\n\n"
         "<b>Trading Window:</b> 8:00 AM – 8:00 PM EAT (New Entries) | 23:00 EAT (Overnight Buffer Protection)\n\n"
-        "<b>Status:</b> 🟢 Engine ready. Hunting institutional setups on Gold, Oil, Dow Jones & Silver."
+        "<b>Status:</b> 🟢 Engine ready. Hunting institutional setups on Gold, Oil & Dow Jones."
     )
     send_telegram_alert(startup_msg)
 

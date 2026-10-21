@@ -518,8 +518,8 @@ class InstitutionalEngine:
             min_sl_pts = 18.0   # 18.0 pts ($36 USD at 0.02 lot)
             min_tp_pts = 30.0   # 30.0 pts ($60 USD at 0.02 lot)
         elif "OIL" in symbol:
-            min_sl_pts = 0.50   # $0.50 ($25 USD at 0.05 lot)
-            min_tp_pts = 0.70   # $0.70 ($35 USD at 0.05 lot)
+            min_sl_pts = 0.70   # $0.70 ($35 USD at 0.05 lot — expanded room against wicks)
+            min_tp_pts = 0.70   # $0.70 ($35 USD at 0.05 lot — 1:1 R:R)
         elif "30" in symbol or "USTEC" in symbol or "NAS" in symbol:
             min_sl_pts = 144.0  # 144 pts ($36 USD at 0.25 lot)
             min_tp_pts = 240.0  # 240 pts ($60 USD at 0.25 lot)

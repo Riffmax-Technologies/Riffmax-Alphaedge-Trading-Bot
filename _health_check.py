@@ -48,12 +48,10 @@ try:
     gold   = institutional_trader.ASSET_CONFIGS["XAUUSDm"]
     oil    = institutional_trader.ASSET_CONFIGS["USOILm"]
     us30   = institutional_trader.ASSET_CONFIGS["US30m"]
-    silver = institutional_trader.ASSET_CONFIGS["XAGUSDm"]
     print("OK  institutional_trader")
     print(f"    Gold  : lot={gold['lot']}  tp=${gold['tp_dollars']}  sl=${gold['max_sl_dollars']}")
     print(f"    Oil   : lot={oil['lot']}   tp=${oil['tp_dollars']}  sl=${oil['max_sl_dollars']}")
     print(f"    US30  : lot={us30['lot']}  tp=${us30['tp_dollars']}  sl=${us30['max_sl_dollars']}")
-    print(f"    Silver: lot={silver['lot']}  tp=${silver['tp_dollars']}  sl=${silver['max_sl_dollars']}")
 except Exception as e:
     print("ERR institutional_trader:", e)
     errors.append(str(e))

@@ -13,10 +13,10 @@ To eliminate intraday **parallax errors** caused by rolling windows shifting dur
 - **Premium Zone ($\ge 65\%$)**: Institutional distribution territory (SELL permitted, BUY strictly forbidden).
 - *Fallback*: Automatically falls back to H4 50-bar rolling window during session opens or data gaps.
 
-### 2. Precious Metals Mirror (`XAUUSDm` $\leftrightarrow$ `XAGUSDm`)
-Gold and Silver share macroeconomic fundamentals (USD valuation, inflation expectations, risk sentiment). To prevent harmful hedge drag or conflicting signals:
-- **Synchronized Execution**: Confirmation on Gold automatically triggers a mirrored entry on Silver (and vice versa) if the counterpart has no open position and is not in cooldown.
-- **Direction Lock**: If one metal holds an active position (e.g. Gold BUY), any opposite setup on the sister metal (e.g. Silver SELL) is blocked immediately.
+### 2. Standalone Disciplined Execution (Decoupled Solo Assets)
+To eliminate multi-asset contagion, hedge drag, or correlated false breakouts:
+- **Solo Asset Independence**: Each instrument (`XAUUSDm`, `USOILm`, `US30m`) evaluates independent dealing ranges, M15 momentum, and M5 structural rejection turns without cross-asset mirror triggers.
+- **Cooldown Isolation**: Stop-outs on one asset never lock out or penalize another asset.
 
 ### 3. M5 Micro-Structure Pullback Confirmation
 AlphaEdge never enters blindly at the peak of an impulse. When H4 macro bias and M15 momentum align:
@@ -42,9 +42,8 @@ Broker rollover windows (21:00–01:00 UTC / 00:00–04:00 EAT) frequently suffe
 | Asset | Ticker | Lot Size | Full TP | Max Initial SL | Stage 1 BE | Stage 2 Profit Lock |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Gold** | `XAUUSDm` | `0.02` | **+$60.00** (30.0 pts) | **$36.00** (18.0 pts) | +$20.00 | +$35.00 $\rightarrow$ Lock +$25.00 |
-| **Silver** | `XAGUSDm` | `0.02` | **+$60.00** ($0.60) | **$36.00** ($0.36) | +$20.00 | +$35.00 $\rightarrow$ Lock +$25.00 |
 | **Dow Jones** | `US30m` | `0.25` | **+$60.00** (240.0 pts) | **$36.00** (144.0 pts) | +$20.00 | +$35.00 $\rightarrow$ Lock +$25.00 |
-| **Crude Oil** | `USOILm` | `0.05` | **+$35.00** ($0.70) | **$25.00** ($0.50) | +$15.00 | +$25.00 $\rightarrow$ Lock +$20.00 |
+| **Crude Oil** | `USOILm` | `0.05` | **+$35.00** ($0.70) | **$35.00** ($0.70) | +$18.00 | +$28.00 $\rightarrow$ Lock +$20.00 |
 
 ### 🔭 Shadow Portfolio (Real-Time Paper Tracking)
 AlphaEdge actively scans and records paper swing setups on 6 observation assets to evaluate historical consistency and prospective rotation:
