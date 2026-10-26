@@ -234,6 +234,62 @@ print(f"  {'OK ' if ok5 else 'ERR'} [Aligned Setup] H4 BEARISH at 55% + UT SELL 
 if not ok5:
     errors.append("Aligned Setup failed: rejected valid aligned SELL setup")
 
+# ── 10. Yad Masri Principle 3 & Anti-Chase Shield Verification ────────────────
+print()
+print("--- Yad Masri Principle 3 & Anti-Chase Shield Tests ---")
+from institutional_engine import InstitutionalEngine
+import pandas as pd
+import numpy as np
+
+inst_eng = InstitutionalEngine()
+
+# Test 1: Pre-Zone Compression Filter (8 narrow bars right at border -> BLOCKED)
+# Create synthetic M5 dataframe with 25 bars where the last 8 bars are ultra-tight
+compressed_data = []
+base_p = 2700.0
+for i in range(25):
+    if i < 15:
+        # Standard bars (ATR ~ 2.0)
+        compressed_data.append({"high": base_p + 2.0, "low": base_p - 2.0, "close": base_p + 1.0, "open": base_p - 1.0})
+    else:
+        # Compressed bars right before touch (range ~ 0.3 pts, < 0.5x ATR)
+        compressed_data.append({"high": base_p + 0.15, "low": base_p - 0.15, "close": base_p + 0.05, "open": base_p - 0.05})
+df_compressed = pd.DataFrame(compressed_data)
+comp_res = inst_eng.check_approach_architecture(df_compressed, "BUY")
+ok_comp = (comp_res["safe"] == False and comp_res["approach"] == "PRE_ZONE_COMPRESSION")
+print(f"  {'OK ' if ok_comp else 'ERR'} [Yad Masri P3] Pre-Zone Compression -> Safe: {comp_res['safe']} ({comp_res['approach']}) -> {'pass' if ok_comp else 'FAIL'}")
+if not ok_comp:
+    errors.append("Yad Masri P3 failed: did not detect Pre-Zone Compression")
+
+# Test 2: Exhaustion Sweep Arrival (Wide bars straight into zone -> APPROVED)
+exhaustion_data = []
+for i in range(25):
+    # Wide exhaustion bars (range ~ 3.5 pts)
+    exhaustion_data.append({"high": base_p + 3.0, "low": base_p - 3.0, "close": base_p + 1.5, "open": base_p - 1.5})
+df_exhaustion = pd.DataFrame(exhaustion_data)
+exh_res = inst_eng.check_approach_architecture(df_exhaustion, "BUY")
+ok_exh = (exh_res["safe"] == True and exh_res["approach"] == "EXHAUSTION_SWEEP")
+print(f"  {'OK ' if ok_exh else 'ERR'} [Yad Masri P3] Exhaustion Sweep -> Safe: {exh_res['safe']} ({exh_res['approach']}) -> {'pass' if ok_exh else 'FAIL'}")
+if not ok_exh:
+    errors.append("Yad Masri P3 failed: did not approve Exhaustion Sweep")
+
+# Test 3: Anti-Chase Shield (M5 closed too far from sweep low -> DECLINED)
+chase_data = [
+    {"high": 2705.0, "low": 2698.0, "close": 2700.0, "open": 2704.0},
+    {"high": 2703.0, "low": 2695.0, "close": 2696.0, "open": 2702.0},
+    {"high": 2700.0, "low": 2690.0, "close": 2692.0, "open": 2698.0},
+    {"high": 2692.0, "low": 2688.0, "close": 2690.0, "open": 2691.0},
+    {"high": 2690.0, "low": 2685.0, "close": 2686.0, "open": 2689.0}, # sweep bar
+    {"high": 2702.0, "low": 2686.0, "close": 2701.0, "open": 2687.0}, # huge 15-pt bar closing at top
+    {"high": 2703.0, "low": 2700.0, "close": 2702.0, "open": 2701.0}, # current forming
+]
+df_chase = pd.DataFrame(chase_data)
+chase_res = inst_eng.verify_m5_pullback_confirmation(df_chase, "BUY", max_chase_dist=6.5, sweep_ref=2685.0)
+ok_chase = (chase_res["confirmed"] == False and chase_res.get("chasing") == True)
+print(f"  {'OK ' if ok_chase else 'ERR'} [Anti-Chase] Late M5 close (16 pts above low, max 6.5) -> Confirmed: {chase_res['confirmed']} -> {'pass' if ok_chase else 'FAIL'}")
+if not ok_chase:
+    errors.append("Anti-Chase Shield failed: allowed chasing entry 16 pts above low")
+
 # ── Final Result ──────────────────────────────────────────────────────────────
 print()
 if errors:

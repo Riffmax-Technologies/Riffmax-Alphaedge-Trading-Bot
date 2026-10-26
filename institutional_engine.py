@@ -309,19 +309,91 @@ class InstitutionalEngine:
 
         return "NONE"
 
-    def verify_m5_pullback_confirmation(self, df_m5: pd.DataFrame, direction: str) -> dict:
+    def check_approach_architecture(self, df_m5: pd.DataFrame, direction: str) -> dict:
         """
-        M5 Micro-Fractal Pullback Confirmation:
-        Ensures the entry occurs on the TURN of the pullback, not at the top of an initial impulse.
-        - For BUY: Checks that recent M5 bars pulled back/paused and the latest completed M5 bar
-          closes bullish and breaks the micro-structure (close > open and close >= previous high or breaks micro EMA).
-        - For SELL: Checks that recent M5 bars pulled back/paused and the latest completed M5 bar
-          closes bearish and breaks the micro-structure (close < open and close <= previous low or breaks micro EMA).
-        Returns: {"confirmed": bool, "entry_price": float, "reason": str}
+        Yad Masri Principle 3: Approach Architecture & Pre-Zone Compression Filter
+        -------------------------------------------------------------------------
+        How price arrives at an institutional support/resistance zone dictates whether
+        the zone will hold or be smashed:
+          1. PRE-ZONE COMPRESSION (Dangerous / Breakout Trap):
+             Price spends 6+ bars balancing in a tight range right before reaching the zone.
+             Market participants have accumulated stops right beneath the boundary;
+             the breakout will have excessive energy and smash the zone.
+             -> Trade must be ABORTED.
+          2. EXHAUSTION SWEEP (High Probability Reversal):
+             Price arrives via swift, wide-range exhaustion bars directly into the zone.
+             Short-term momentum is exhausted into resting institutional liquidity walls.
+             -> Trade is APPROVED for high-conviction fade.
+        """
+        if df_m5 is None or len(df_m5) < 18:
+            return {"safe": True, "approach": "EXHAUSTION_SWEEP", "reason": "M5 data insufficient, bypass filter"}
+
+        highs  = df_m5['high'].astype(float).values
+        lows   = df_m5['low'].astype(float).values
+
+        # Compute M5 local ATR over last 14 bars
+        m5_atr = _compute_atr(df_m5, period=14)
+        if m5_atr <= 0:
+            return {"safe": True, "approach": "EXHAUSTION_SWEEP", "reason": "ATR unavailable, bypass filter"}
+
+        # Inspect the 8 bars preceding the latest closed candle (bars -10 to -2)
+        window = 8
+        approach_highs = highs[- (window + 2): -2]
+        approach_lows  = lows[- (window + 2): -2]
+
+        bar_ranges = [approach_highs[k] - approach_lows[k] for k in range(len(approach_highs))]
+        avg_bar_range = float(np.mean(bar_ranges))
+        cluster_high = float(np.max(approach_highs))
+        cluster_low  = float(np.min(approach_lows))
+        total_cluster_span = cluster_high - cluster_low
+
+        # Compression Criteria:
+        # 1. Average bar range is very tight (< 0.50 * ATR)
+        # 2. Total span of the 8-bar block is unusually compressed (< 1.30 * ATR)
+        is_compressed = (avg_bar_range < (0.50 * m5_atr)) and (total_cluster_span < (1.30 * m5_atr))
+
+        if is_compressed:
+            return {
+                "safe": False,
+                "approach": "PRE_ZONE_COMPRESSION",
+                "avg_range": avg_bar_range,
+                "atr": m5_atr,
+                "cluster_span": total_cluster_span,
+                "reason": (
+                    f"Yad Masri Principle 3 Alert: Pre-Zone Compression detected "
+                    f"(Avg Range {avg_bar_range:.2f} < 0.5x ATR {m5_atr:.2f}, Span {total_cluster_span:.2f}). "
+                    f"Market balanced right at border — high risk of breakdown through zone."
+                )
+            }
+
+        return {
+            "safe": True,
+            "approach": "EXHAUSTION_SWEEP",
+            "avg_range": avg_bar_range,
+            "atr": m5_atr,
+            "cluster_span": total_cluster_span,
+            "reason": f"Exhaustion arrival into institutional liquidity wall (Range: {avg_bar_range:.2f})"
+        }
+
+    def verify_m5_pullback_confirmation(
+        self,
+        df_m5: pd.DataFrame,
+        direction: str,
+        max_chase_dist: float = 0.0,
+        sweep_ref: float = 0.0
+    ) -> dict:
+        """
+        M5 Micro-Fractal Pullback Confirmation & Anti-Chase Shield:
+        ---------------------------------------------------------
+        1. Ensures entry occurs on the TURN of the micro pullback (rejection candle).
+        2. Anti-Chase Shield (Yad Masri Fractal Execution):
+           If the candle closed too far into the move away from the sweep low/high
+           (> max_chase_dist), entering now means buying the apex of the wick with poor R:R.
+           Declines late entries to protect wholesale entry pricing.
         """
         if df_m5 is None or len(df_m5) < 6:
             # Fallback if M5 data unavailable
-            return {"confirmed": True, "entry_price": None, "reason": "M5 data unavailable, fallback"}
+            return {"confirmed": True, "chasing": False, "entry_price": None, "reason": "M5 data unavailable, fallback"}
 
         closes = df_m5['close'].astype(float).values
         opens  = df_m5['open'].astype(float).values
@@ -347,12 +419,24 @@ class InstitutionalEngine:
             # Look for pullback evidence: at least one red or indecisive bar in the preceding 3 bars
             had_pullback = any(prior_closes[k] <= prior_opens[k] for k in range(len(prior_closes)))
             
+            # Anti-Chase Shield check
+            if sweep_ref > 0 and max_chase_dist > 0:
+                chase_distance = c_close - sweep_ref
+                if chase_distance > max_chase_dist:
+                    return {
+                        "confirmed": False,
+                        "chasing": True,
+                        "entry_price": c_close,
+                        "reason": f"Anti-Chase Shield: M5 close {c_close:.2f} is {chase_distance:.2f} pts above sweep low (max allowed: {max_chase_dist:.2f}). Waiting for wholesale re-test."
+                    }
+
             # Confirmation: Latest closed M5 candle is BULLISH and breaks above previous M5 candle's high/close
             is_bullish_turn = (c_close > c_open) and (c_close >= p_high or c_close > p_close)
             
             if had_pullback and is_bullish_turn:
                 return {
                     "confirmed": True,
+                    "chasing": False,
                     "entry_price": c_close,
                     "reason": f"M5 Bullish Turn Confirmed (Close {c_close:.2f} > Prev High {p_high:.2f})"
                 }
@@ -360,12 +444,14 @@ class InstitutionalEngine:
                 # Strong impulse with no deep pullback, but M5 still actively accelerating bullishly
                 return {
                     "confirmed": True,
+                    "chasing": False,
                     "entry_price": c_close,
                     "reason": f"M5 Momentum Aligned Bullish (Close {c_close:.2f})"
                 }
             else:
                 return {
                     "confirmed": False,
+                    "chasing": False,
                     "entry_price": c_close,
                     "reason": f"M5 Pullback In Progress: waiting for bullish reversal candle (Latest M5 close={c_close:.2f})"
                 }
@@ -374,12 +460,24 @@ class InstitutionalEngine:
             # Look for pullback bounce evidence: at least one green or indecisive bar in the preceding 3 bars
             had_pullback = any(prior_closes[k] >= prior_opens[k] for k in range(len(prior_closes)))
 
+            # Anti-Chase Shield check
+            if sweep_ref > 0 and max_chase_dist > 0:
+                chase_distance = sweep_ref - c_close
+                if chase_distance > max_chase_dist:
+                    return {
+                        "confirmed": False,
+                        "chasing": True,
+                        "entry_price": c_close,
+                        "reason": f"Anti-Chase Shield: M5 close {c_close:.2f} is {chase_distance:.2f} pts below sweep high (max allowed: {max_chase_dist:.2f}). Waiting for wholesale re-test."
+                    }
+
             # Confirmation: Latest closed M5 candle is BEARISH and breaks below previous M5 candle's low/close
             is_bearish_turn = (c_close < c_open) and (c_close <= p_low or c_close < p_close)
 
             if had_pullback and is_bearish_turn:
                 return {
                     "confirmed": True,
+                    "chasing": False,
                     "entry_price": c_close,
                     "reason": f"M5 Bearish Turn Confirmed (Close {c_close:.2f} < Prev Low {p_low:.2f})"
                 }
@@ -387,17 +485,19 @@ class InstitutionalEngine:
                 # Strong downward impulse with no deep pullback, but M5 actively accelerating bearishly
                 return {
                     "confirmed": True,
+                    "chasing": False,
                     "entry_price": c_close,
                     "reason": f"M5 Momentum Aligned Bearish (Close {c_close:.2f})"
                 }
             else:
                 return {
                     "confirmed": False,
+                    "chasing": False,
                     "entry_price": c_close,
                     "reason": f"M5 Pullback In Progress: waiting for bearish reversal candle (Latest M5 close={c_close:.2f})"
                 }
 
-        return {"confirmed": True, "entry_price": None, "reason": "Neutral"}
+        return {"confirmed": True, "chasing": False, "entry_price": None, "reason": "Neutral"}
 
     def evaluate_institutional_setup(self, symbol: str):
         """
@@ -548,83 +648,105 @@ class InstitutionalEngine:
         # Standalone wicks without displacement or UT Bot agreement are retail traps.
         has_buy_trigger = (ut_signal_m15 == "BUY") or ((m15_buy_sweep or h1_buy_sweep) and has_buy_fvg and ut_signal_m15 != "SELL")
         if macro_buy_allowed and has_buy_trigger and whale_gate_ok:
-            # M5 Micro Pullback Confirmation
             df_m5 = mtf.get("M5")
-            m5_check = self.verify_m5_pullback_confirmation(df_m5, "BUY")
-            if not m5_check.get("confirmed", True):
-                logger.info(f"[InstitutionalEngine] {symbol} BUY Setup Armed, waiting for M5 pullback completion: {m5_check.get('reason')}")
+            # Yad Masri Principle 3: Approach Architecture Filter (Exhaustion vs Compression)
+            approach_check = self.check_approach_architecture(df_m5, "BUY")
+            if not approach_check.get("safe", True):
+                logger.info(f"[InstitutionalEngine] {symbol} BUY Setup ABORTED by Yad Masri Principle 3: {approach_check.get('reason')}")
             else:
                 sweep_ref = min(m15_low, h1_low) if (m15_buy_sweep or h1_buy_sweep) else (curr_price - sl_buffer)
-                # SL is anchored BEYOND the lowest wick point of the sweep
-                sl_price = sweep_ref - sl_buffer
+                max_chase = min_sl_pts * 0.40  # Max 40% of stop distance allowed as chase
 
-                # Target 1.5x R:R or full institutional swing target
-                sl_dist = abs(tick.ask - sl_price)
-                if sl_dist > 0:
-                    tp_offset = max(sl_dist * 1.5, min_tp_pts)
-                    tp_price = tick.ask + tp_offset
+                # M5 Micro Pullback & Anti-Chase Confirmation
+                m5_check = self.verify_m5_pullback_confirmation(df_m5, "BUY", max_chase_dist=max_chase, sweep_ref=sweep_ref)
+                if not m5_check.get("confirmed", True):
+                    logger.info(f"[InstitutionalEngine] {symbol} BUY Setup Armed, waiting for M5 pullback completion: {m5_check.get('reason')}")
+                else:
+                    # SL is anchored BEYOND the lowest wick point of the sweep
+                    sl_price = sweep_ref - sl_buffer
 
-                    trigger_type = "Liquidity Sweep Wick Rejection" if (m15_buy_sweep or h1_buy_sweep) else f"M15 UT Bot {ut_signal_m15}"
-                    logger.info(
-                        f"[InstitutionalEngine] BUY Triggered! {symbol} | H4: {h4_trend} ({range_info['location_pct']:.1f}%) | "
-                        f"Trigger: {trigger_type} [M5 Confirmed] | Entry: {tick.ask:.2f} | SL: {sl_price:.2f} | TP: {tp_price:.2f} (R:R {tp_offset/sl_dist:.2f})"
-                    )
+                    # Target 1.5x R:R or full institutional swing target
+                    sl_dist = abs(tick.ask - sl_price)
+                    if sl_dist > 0:
+                        tp_offset = max(sl_dist * 1.5, min_tp_pts)
+                        tp_price = tick.ask + tp_offset
 
-                    return {
-                        "valid": True,
-                        "direction": "BUY",
-                        "reason": f"H4 Bias {h4_trend} ({range_info['location_pct']:.1f}%) + {trigger_type} (M5 Confirmed)",
-                        "entry_price": tick.ask,
-                        "sl_price": sl_price,
-                        "tp_price": tp_price,
-                        "deal_range": range_info,
-                        "whale_detected": has_whale_vol,
-                        "vol_ratio": max_vol_ratio,
-                        "sweep_level": sweep_ref,
-                        "fvg_detected": has_buy_fvg,
-                        "ut_bot": ut_signal_m15
-                    }
+                        trigger_type = "Liquidity Sweep Wick Rejection" if (m15_buy_sweep or h1_buy_sweep) else f"M15 UT Bot {ut_signal_m15}"
+                        rr_calc = round(tp_offset / sl_dist, 2)
+                        logger.info(
+                            f"[InstitutionalEngine] BUY Triggered! {symbol} | H4: {h4_trend} ({range_info['location_pct']:.1f}%) | "
+                            f"Approach: {approach_check['approach']} | Trigger: {trigger_type} [M5 Confirmed] | "
+                            f"Entry: {tick.ask:.2f} | SL: {sl_price:.2f} | TP: {tp_price:.2f} (R:R {rr_calc:.2f})"
+                        )
+
+                        return {
+                            "valid": True,
+                            "direction": "BUY",
+                            "reason": f"H4 Bias {h4_trend} ({range_info['location_pct']:.1f}%) + {trigger_type} ({approach_check['approach']}, M5 Turn Confirmed)",
+                            "entry_price": tick.ask,
+                            "sl_price": sl_price,
+                            "tp_price": tp_price,
+                            "deal_range": range_info,
+                            "whale_detected": has_whale_vol,
+                            "vol_ratio": max_vol_ratio,
+                            "sweep_level": sweep_ref,
+                            "fvg_detected": has_buy_fvg,
+                            "ut_bot": ut_signal_m15,
+                            "approach_type": approach_check["approach"],
+                            "rr_ratio": rr_calc
+                        }
 
         # ── SELL SETUP EVALUATION ─────────────────────────────────────────────
         # Institutional Rule: Momentum confirmation required.
         # Standalone wicks without displacement or UT Bot agreement are retail traps.
         has_sell_trigger = (ut_signal_m15 == "SELL") or ((m15_sell_sweep or h1_sell_sweep) and has_sell_fvg and ut_signal_m15 != "BUY")
         if macro_sell_allowed and has_sell_trigger and whale_gate_ok:
-            # M5 Micro Pullback Confirmation
             df_m5 = mtf.get("M5")
-            m5_check = self.verify_m5_pullback_confirmation(df_m5, "SELL")
-            if not m5_check.get("confirmed", True):
-                logger.info(f"[InstitutionalEngine] {symbol} SELL Setup Armed, waiting for M5 pullback completion: {m5_check.get('reason')}")
+            # Yad Masri Principle 3: Approach Architecture Filter (Exhaustion vs Compression)
+            approach_check = self.check_approach_architecture(df_m5, "SELL")
+            if not approach_check.get("safe", True):
+                logger.info(f"[InstitutionalEngine] {symbol} SELL Setup ABORTED by Yad Masri Principle 3: {approach_check.get('reason')}")
             else:
                 sweep_ref = max(m15_high, h1_high) if (m15_sell_sweep or h1_sell_sweep) else (curr_price + sl_buffer)
-                # SL is anchored BEYOND the highest wick point of the sweep
-                sl_price = sweep_ref + sl_buffer
+                max_chase = min_sl_pts * 0.40  # Max 40% of stop distance allowed as chase
 
-                sl_dist = abs(sl_price - tick.bid)
-                if sl_dist > 0:
-                    tp_offset = max(sl_dist * 1.5, min_tp_pts)
-                    tp_price = tick.bid - tp_offset
+                # M5 Micro Pullback & Anti-Chase Confirmation
+                m5_check = self.verify_m5_pullback_confirmation(df_m5, "SELL", max_chase_dist=max_chase, sweep_ref=sweep_ref)
+                if not m5_check.get("confirmed", True):
+                    logger.info(f"[InstitutionalEngine] {symbol} SELL Setup Armed, waiting for M5 pullback completion: {m5_check.get('reason')}")
+                else:
+                    # SL is anchored BEYOND the highest wick point of the sweep
+                    sl_price = sweep_ref + sl_buffer
 
-                    trigger_type = "Liquidity Sweep Wick Rejection" if (m15_sell_sweep or h1_sell_sweep) else f"M15 UT Bot {ut_signal_m15}"
-                    logger.info(
-                        f"[InstitutionalEngine] SELL Triggered! {symbol} | H4: {h4_trend} ({range_info['location_pct']:.1f}%) | "
-                        f"Trigger: {trigger_type} [M5 Confirmed] | Entry: {tick.bid:.2f} | SL: {sl_price:.2f} | TP: {tp_price:.2f} (R:R {tp_offset/sl_dist:.2f})"
-                    )
+                    sl_dist = abs(sl_price - tick.bid)
+                    if sl_dist > 0:
+                        tp_offset = max(sl_dist * 1.5, min_tp_pts)
+                        tp_price = tick.bid - tp_offset
 
-                    return {
-                        "valid": True,
-                        "direction": "SELL",
-                        "reason": f"H4 Bias {h4_trend} ({range_info['location_pct']:.1f}%) + {trigger_type} (M5 Confirmed)",
-                        "entry_price": tick.bid,
-                        "sl_price": sl_price,
-                        "tp_price": tp_price,
-                        "deal_range": range_info,
-                        "whale_detected": has_whale_vol,
-                        "vol_ratio": max_vol_ratio,
-                        "sweep_level": sweep_ref,
-                        "fvg_detected": has_sell_fvg,
-                        "ut_bot": ut_signal_m15
-                    }
+                        trigger_type = "Liquidity Sweep Wick Rejection" if (m15_sell_sweep or h1_sell_sweep) else f"M15 UT Bot {ut_signal_m15}"
+                        rr_calc = round(tp_offset / sl_dist, 2)
+                        logger.info(
+                            f"[InstitutionalEngine] SELL Triggered! {symbol} | H4: {h4_trend} ({range_info['location_pct']:.1f}%) | "
+                            f"Approach: {approach_check['approach']} | Trigger: {trigger_type} [M5 Confirmed] | "
+                            f"Entry: {tick.bid:.2f} | SL: {sl_price:.2f} | TP: {tp_price:.2f} (R:R {rr_calc:.2f})"
+                        )
+
+                        return {
+                            "valid": True,
+                            "direction": "SELL",
+                            "reason": f"H4 Bias {h4_trend} ({range_info['location_pct']:.1f}%) + {trigger_type} ({approach_check['approach']}, M5 Turn Confirmed)",
+                            "entry_price": tick.bid,
+                            "sl_price": sl_price,
+                            "tp_price": tp_price,
+                            "deal_range": range_info,
+                            "whale_detected": has_whale_vol,
+                            "vol_ratio": max_vol_ratio,
+                            "sweep_level": sweep_ref,
+                            "fvg_detected": has_sell_fvg,
+                            "ut_bot": ut_signal_m15,
+                            "approach_type": approach_check["approach"],
+                            "rr_ratio": rr_calc
+                        }
 
         block_note = ""
         if h4_trend == "BEARISH" and loc_pct < 35.0:

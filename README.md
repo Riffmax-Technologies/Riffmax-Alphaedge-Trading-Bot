@@ -18,10 +18,11 @@ To eliminate multi-asset contagion, hedge drag, or correlated false breakouts:
 - **Solo Asset Independence**: Each instrument (`XAUUSDm`, `USOILm`, `US30m`) evaluates independent dealing ranges, M15 momentum, and M5 structural rejection turns without cross-asset mirror triggers.
 - **Cooldown Isolation**: Stop-outs on one asset never lock out or penalize another asset.
 
-### 3. M5 Micro-Structure Pullback Confirmation
-AlphaEdge never enters blindly at the peak of an impulse. When H4 macro bias and M15 momentum align:
-- The engine monitors the M5 timeframe for micro-pullback exhaustion.
-- Orders execute only when a completed M5 candle demonstrates a structural turn (bullish rejection breaking prior bar high for BUYs, bearish rejection breaking prior bar low for SELLs).
+### 3. Yad Masri Principle 3 Approach Architecture & Anti-Chase Shield
+AlphaEdge integrates institutional auction market dynamics:
+- **Approach Velocity & Pre-Zone Compression Filter (Principle 3)**: Analyzes how price arrives at the dealing range boundary. If the market spent multiple bars balancing/compressing in a tight range directly on top of support/resistance, it indicates coiling energy and accumulated stops—the zone is at high risk of being smashed. AlphaEdge automatically **aborts** the trade. Only swift, wide-range **exhaustion sweeps** into the level are approved for reversal trades.
+- **Anti-Chase Wholesale Shield**: Waiting for an M5 candle to close can cause late entries at the peak of an impulse. AlphaEdge enforces a strict wholesale proximity cap (maximum 40% of the stop loss distance from the sweep extreme). If a candle closes too far away, the entry is declined to preserve a superior Risk-to-Reward ratio.
+- **M5 Micro-Structure Pullback Confirmation**: Confirms structural turn on completed M5 rejection (bullish close breaking prior high for BUYs, bearish close breaking prior low for SELLs).
 
 ### 4. 2-Stage Dynamic Profit Protection
 Every trade is actively shielded without manual intervention:

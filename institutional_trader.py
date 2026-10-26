@@ -270,29 +270,53 @@ def _send_signal(message):
     _tg_send(_TELEGRAM_PERSONAL, message)
     _tg_send(_TELEGRAM_CHANNEL, message)
 
-def send_trade_entry_broadcast(symbol, order_type, price, lot, sl, tp, catalyst_desc="Standard"):
-    """Broadcasts clean trade entry signal to channel and owner DM."""
+def send_trade_entry_broadcast(symbol, order_type, price, lot, sl, tp, catalyst_desc="Standard", deal_range_loc=None, rr_ratio=None):
+    """Broadcasts clean, informative trade entry signal to channel and owner DM."""
+    dp = _sym_digits(symbol)
+    price_fmt = f"{price:.{dp}f}"
+    sl_fmt = f"{sl:.{dp}f}"
+    tp_fmt = f"{tp:.{dp}f}"
+
+    dollar_per_pt = get_dollar_per_pt(symbol, lot)
+    sl_dist = abs(price - sl)
+    tp_dist = abs(tp - price)
+    calc_sl_usd = sl_dist * dollar_per_pt if dollar_per_pt > 0 else 0.0
+    calc_tp_usd = tp_dist * dollar_per_pt if dollar_per_pt > 0 else 0.0
+    rr_val = (tp_dist / sl_dist) if sl_dist > 0 else 1.5
+
+    loc_str = f" | {deal_range_loc}" if deal_range_loc else ""
+
     channel_msg = (
         f"🚀 <b>[AlphaEdge Signal]</b>\n"
         f"Asset: <b>{symbol}</b>\n"
-        f"Action: <b>{order_type}</b> @ {price:.2f}\n"
-        f"Take Profit: {tp:.2f}\n"
-        f"Stop Loss: {sl:.2f}"
+        f"Action: <b>{order_type}</b> @ <code>{price_fmt}</code>\n"
+        f"Take Profit: <code>{tp_fmt}</code> (+${calc_tp_usd:.2f})\n"
+        f"Stop Loss: <code>{sl_fmt}</code> (-${calc_sl_usd:.2f})\n"
+        f"Risk/Reward: <b>{rr_val:.2f} : 1</b>"
     )
     dm_msg = (
         f"🚀 <b>[AlphaEdge Signal]</b>\n"
-        f"Asset: <b>{symbol}</b>\n"
-        f"Action: <b>{order_type}</b> @ {price:.2f}\n"
-        f"Volume: {lot} Lot\n"
-        f"Stop Loss: {sl:.2f}\n"
-        f"Take Profit: {tp:.2f}\n"
-        f"Mode: {catalyst_desc}"
+        f"Asset: <b>{symbol}</b> | Action: <b>{order_type}</b>\n"
+        f"Entry Price: <code>{price_fmt}</code>\n"
+        f"Volume: <b>{lot} Lot</b>\n"
+        f"Stop Loss: <code>{sl_fmt}</code> (Risk Cap: -${calc_sl_usd:.2f} | {sl_dist:.{dp}f} pts)\n"
+        f"Take Profit: <code>{tp_fmt}</code> (Target: +${calc_tp_usd:.2f} | {tp_dist:.{dp}f} pts)\n"
+        f"Risk/Reward: <b>{rr_val:.2f} : 1</b>\n"
+        f"🏛 <b>Yad Masri Context:</b> {catalyst_desc}{loc_str}"
     )
     _tg_send(_TELEGRAM_PERSONAL, dm_msg)
     _tg_send(_TELEGRAM_CHANNEL, channel_msg)
 
 def send_trade_close_broadcast(symbol, direction, open_price, close_price, pnl_usd, reason):
     """Broadcasts trade result (Win/Loss) to both public channel and owner DM."""
+    dp = _sym_digits(symbol)
+    try:
+        op_fmt = f"{float(open_price):.{dp}f}"
+        cp_fmt = f"{float(close_price):.{dp}f}"
+    except Exception:
+        op_fmt = str(open_price)
+        cp_fmt = str(close_price)
+
     if pnl_usd > 0:
         emoji = "🎯"
         tag = "WIN"
@@ -315,7 +339,7 @@ def send_trade_close_broadcast(symbol, direction, open_price, close_price, pnl_u
     msg = (
         f"{emoji} <b>[Trade Closed — {tag}]</b>\n"
         f"Asset: <b>{symbol}</b> ({direction})\n"
-        f"Entry: {open_price} ➔ Exit: {close_price}\n"
+        f"Entry: <code>{op_fmt}</code> ➔ Exit: <code>{cp_fmt}</code>\n"
         f"Result: {result_text}\n"
         f"Outcome: {detail}"
     )
@@ -541,7 +565,7 @@ def modify_sl(ticket, symbol, new_sl, tp):
         logger.warning(f"Failed to modify SL #{ticket}: {res.comment}")
 
 
-def execute_order(symbol, order_type, lot, sl, tp, catalyst_desc="Standard", news_name="None", ut_stop=0.0, atr=0.0):
+def execute_order(symbol, order_type, lot, sl, tp, catalyst_desc="Standard", news_name="None", ut_stop=0.0, atr=0.0, deal_range_loc=None, rr_ratio=None):
     dp = _sym_digits(symbol)
     tick = mt5.symbol_info_tick(symbol)
     price = tick.ask if order_type == "BUY" else tick.bid
@@ -563,7 +587,7 @@ def execute_order(symbol, order_type, lot, sl, tp, catalyst_desc="Standard", new
     }
     res = mt5.order_send(req)
     if res.retcode == mt5.TRADE_RETCODE_DONE:
-        logger.info(f"[{symbol}] {order_type} EXECUTED! Ticket: #{res.order} | Price: {price:.2f} | SL: {sl:.2f} | TP: {tp:.2f}")
+        logger.info(f"[{symbol}] {order_type} EXECUTED! Ticket: #{res.order} | Price: {price:.{dp}f} | SL: {sl:.{dp}f} | TP: {tp:.{dp}f}")
         # Log to dedicated trade analysis CSV starting from upgrade
         log_trade_opened(
             ticket=res.order,
@@ -585,7 +609,9 @@ def execute_order(symbol, order_type, lot, sl, tp, catalyst_desc="Standard", new
             lot=lot,
             sl=sl,
             tp=tp,
-            catalyst_desc=catalyst_desc
+            catalyst_desc=catalyst_desc,
+            deal_range_loc=deal_range_loc,
+            rr_ratio=rr_ratio
         )
         return res.order
     else:
@@ -992,17 +1018,21 @@ def run_institutional_cycle():
                 tp_price = order_price - target_tp_dist
 
             # ── 3. Approved: Execute High-Conviction Institutional Swing Order ────
+            dp = _sym_digits(symbol)
             event_name = catalyst.get('event', 'Institutional Flow')
-            mode_desc = f"Institutional {target_dir} (H4 Structure + M15 UT Bot)"
+            approach_name = setup.get('approach_type', 'Exhaustion Sweep')
+            mode_desc = f"H4 ({loc_pct}) | M15 UT {setup.get('ut_bot', '')} | {approach_name}"
+            deal_loc_desc = f"Dealing Range: {loc_pct}"
+            rr_val = round(target_tp_dist / target_sl_dist, 2) if target_sl_dist > 0 else 1.5
 
             order_price = tick.ask if target_dir == "BUY" else tick.bid
             logger.info(
                 f"[Institutional MTF] EXECUTING APPROVED {target_dir} on {symbol}! "
-                f"Price: {order_price:.2f} | SL: {sl_price:.2f} | TP: {tp_price:.2f} | "
-                f"Trigger: H4 Structure + M15 UT Bot"
+                f"Price: {order_price:.{dp}f} | SL: {sl_price:.{dp}f} | TP: {tp_price:.{dp}f} | "
+                f"Trigger: H4 Structure + M15 UT Bot ({approach_name})"
             )
 
-            if execute_order(symbol, target_dir, cfg['lot'], sl_price, tp_price, mode_desc, event_name, setup.get('sweep_level', 0.0), 0.0):
+            if execute_order(symbol, target_dir, cfg['lot'], sl_price, tp_price, mode_desc, event_name, setup.get('sweep_level', 0.0), 0.0, deal_range_loc=deal_loc_desc, rr_ratio=rr_val):
                 LAST_EXECUTED_BAR[symbol] = now_m15_ts
                 _save_bar_state(LAST_EXECUTED_BAR)
 

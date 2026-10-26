@@ -17,3 +17,4 @@ last_executed_bar.json
 structural_memory_state.json
 shadow_portfolio_state.json
 shadow_trade_history.json
+economic_calendar_cache.json
