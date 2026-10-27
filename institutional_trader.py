@@ -352,11 +352,11 @@ def _send_telegram(message):
 
 
 
-# ─── Session Filter (8:00 AM - 8:00 PM EAT / Tuesday - Friday) ──────────────────
+# ─── Session Filter (7:00 AM - 9:00 PM EAT / Tuesday - Friday) ──────────────────
 def is_session_active(symbol=None):
     """
     Institutional Session Gateway (Option B - Monday Observation Only):
-    Trading execution window is strictly Tuesday to Friday, 8:00 AM to 8:00 PM EAT.
+    Trading execution window is strictly Tuesday to Friday, 7:00 AM to 9:00 PM EAT.
     
     MONDAY INSTITUTIONAL RULE:
       - Monday (weekday == 0) is STRICT OBSERVATION ONLY.
@@ -365,8 +365,8 @@ def is_session_active(symbol=None):
       - Protects account from choppy early-week accumulation traps & fakeouts.
       
     TUESDAY - FRIDAY:
-      - Active execution from 08:00 EAT to 20:00 EAT.
-      - Overnight hours (20:00 to 08:00 EAT) and weekends (Saturday & Sunday) are blocked.
+      - Active execution from 07:00 EAT to 21:00 EAT (expanded to capture pre-London sweeps).
+      - Overnight hours (21:00 to 07:00 EAT) and weekends (Saturday & Sunday) are blocked.
     """
     now_utc = datetime.now(timezone.utc)
     # EAT is UTC+3
@@ -382,8 +382,8 @@ def is_session_active(symbol=None):
     if weekday == 0:
         return False
 
-    # Tuesday to Friday: strictly 8:00 AM to 8:00 PM EAT (08:00 <= hour < 20:00)
-    if hour_eat < 8 or hour_eat >= 20:
+    # Tuesday to Friday: strictly 7:00 AM to 9:00 PM EAT (07:00 <= hour < 21:00)
+    if hour_eat < 7 or hour_eat >= 21:
         return False
 
     return True
@@ -771,28 +771,27 @@ def run_pre_session_secure_gate():
         # This means the overnight spread (max ~$3) cannot accidentally trigger it.
         if pos_type == "BUY":
             new_sl = round(current - buf_pts, dp)
-            # Never move SL to a worse position than it already is
-            if new_sl > sl:
-                modify_sl(ticket, symbol, new_sl, tp)
-                action_desc = (
-                    "$45 spread-buffer SL set at " + str(round(new_sl, dp)) +
-                    " (was " + str(round(sl, dp)) + ")"
-                )
-            else:
-                action_desc = (
-                    "SL already has enough room (" + str(round(sl, dp)) + ") — no change"
-                )
-        else:
-            new_sl = round(current + buf_pts, dp)
+            # Give room: new_sl is lower than current SL (widens stop to absorb rollover spikes)
             if new_sl < sl or sl == 0:
                 modify_sl(ticket, symbol, new_sl, tp)
                 action_desc = (
-                    "$45 spread-buffer SL set at " + str(round(new_sl, dp)) +
-                    " (was " + str(round(sl, dp)) + ")"
+                    f"$45 spread-buffer SL set at {new_sl:.{dp}f} (was {sl:.{dp}f})"
                 )
             else:
                 action_desc = (
-                    "SL already has enough room (" + str(round(sl, dp)) + ") — no change"
+                    f"SL already has sufficient room ({sl:.{dp}f}) — no change"
+                )
+        else:
+            new_sl = round(current + buf_pts, dp)
+            # Give room: new_sl is higher than current SL for SELL
+            if new_sl > sl or sl == 0:
+                modify_sl(ticket, symbol, new_sl, tp)
+                action_desc = (
+                    f"$45 spread-buffer SL set at {new_sl:.{dp}f} (was {sl:.{dp}f})"
+                )
+            else:
+                action_desc = (
+                    f"SL already has sufficient room ({sl:.{dp}f}) — no change"
                 )
 
         pnl_str = ("+$" + str(round(profit, 2))) if profit >= 0 else ("-$" + str(round(abs(profit), 2)))
@@ -910,7 +909,7 @@ def run_institutional_cycle():
             has_pos = len(positions) > 0 if positions else False
 
             sym_session_ok = is_session_active(symbol)
-            session_tag = "ACTIVE (8am-8pm EAT)" if sym_session_ok else "CLOSED (8pm-8am Window Gate)"
+            session_tag = "ACTIVE (7am-9pm EAT)" if sym_session_ok else "CLOSED (9pm-7am Window Gate)"
             ut_tag = f" | UT: {setup.get('ut_bot', 'NONE')}" if setup.get('ut_bot') else ""
             logger.info(
                 f"[Institutional MTF] {symbol} | Price: {curr_price:.2f} | Range: {loc_pct} | "

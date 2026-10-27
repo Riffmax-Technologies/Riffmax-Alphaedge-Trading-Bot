@@ -68,7 +68,7 @@ Integrates real-time macroeconomic event feeds (ForexFactory / FairEconomy) to s
 
 ## ⏰ Operational Windows & Cooldowns
 
-- **Day Trading Window**: **08:00 to 20:00 EAT** (Monday to Friday).
+- **Day Trading Window**: **07:00 to 21:00 EAT** (Tuesday to Friday; Monday = Observation Only).
 - **Overnight Spread-Buffer Routine**: **23:00 to 23:10 EAT**.
 - **Post-Closure Cooldown**: **60 minutes** per asset after every trade exit (enforced from both execution timestamp and closure timestamp) to prevent revenge trading or false re-entries.
 

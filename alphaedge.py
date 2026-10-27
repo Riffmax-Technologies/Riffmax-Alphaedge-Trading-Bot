@@ -244,7 +244,7 @@ def is_trading_session_active() -> bool:
         return False
     if weekday == 0:  # Option B: Monday is strictly Observation & Structure memory recording
         return False
-    if hour_eat < 8 or hour_eat >= 20:
+    if hour_eat < 7 or hour_eat >= 21:
         return False
     return True
 
@@ -1832,7 +1832,7 @@ if __name__ == "__main__":
     logger.info("  Gold:   0.02 lot | TP: $60.00 | Max SL: $36.00 (18 pts)  | BE: +$20 | Lock: $35->$25")
     logger.info("  Oil:    0.05 lot | TP: $35.00 | Max SL: $35.00 ($0.70)   | BE: +$18 | Lock: $28->$20")
     logger.info("  US30:   0.25 lot | TP: $60.00 | Max SL: $36.00 (144 pts) | BE: +$20 | Lock: $35->$25")
-    logger.info("  Session: Tuesday - Friday, 8:00 AM - 8:00 PM EAT (Monday = Observation Only) | Overnight Gate")
+    logger.info("  Session: Tuesday - Friday, 7:00 AM - 9:00 PM EAT (Monday = Observation Only) | Overnight Gate")
     logger.info("  Guidance: ForexFactory Real-Time Macro News Engine (USD)")
     logger.info("=" * 65)
 
@@ -1849,7 +1849,7 @@ if __name__ == "__main__":
         "• <b>Anti-Chase Wholesale Shield:</b> Declines late entries at candle tops; guarantees wholesale fill pricing.\n"
         "• <b>Solo Gold Focus:</b> Silver decoupled completely to eliminate correlated drag.\n"
         "• <b>Overnight Spread Gate (23:00 EAT):</b> $45 buffer shields open swings from rollover spread spikes.\n\n"
-        "<b>Execution Window:</b> Tuesday – Friday, 8:00 AM – 8:00 PM EAT (Monday = Observation Only)\n\n"
+        "<b>Execution Window:</b> Tuesday – Friday, 7:00 AM – 9:00 PM EAT (Monday = Observation Only)\n\n"
         "<b>Status:</b> 🟢 Ready for Tuesday open. Hunting high-conviction institutional setups."
     )
     send_telegram_alert(startup_msg)

@@ -138,12 +138,14 @@ def save_shadow_history(history):
         logger.error(f"Failed to save shadow history: {e}")
 
 def is_shadow_session_active():
-    """8:00 AM to 8:00 PM EAT (Monday to Friday) matching live trading window."""
+    """7:00 AM to 9:00 PM EAT (Tuesday to Friday) matching live trading window."""
     now_utc = datetime.now(timezone.utc)
     now_eat = now_utc + timedelta(hours=3)
     if now_eat.weekday() in (5, 6):
         return False
-    if now_eat.hour < 8 or now_eat.hour >= 20:
+    if now_eat.weekday() == 0:
+        return False
+    if now_eat.hour < 7 or now_eat.hour >= 21:
         return False
     return True
 
