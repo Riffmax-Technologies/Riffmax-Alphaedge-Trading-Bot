@@ -49,11 +49,13 @@ ASSET_CONFIGS = {
         "lot": 0.02,                      # 0.02 Lot (User exact setting)
         "key_mult": 1.0,
         "atr_period": 10,
-        "tp_dollars": 60.0,              # Target: $60.00 USD Profit (30.0 pts move with 0.02 lot)
-        "tp_catalyst_dollars": 80.0,      # Expanded $80.00 Target during High Momentum
+        "tp_dollars": 100.0,             # Target: $100.00 USD Profit (50.0 pts move with 0.02 lot)
+        "tp_catalyst_dollars": 120.0,     # Expanded $120.00 Target during High Momentum
         "be_trigger_dollars": 20.0,       # Stage 1: Move SL to Entry at +$20.00 profit (10.0 pts)
         "lock_trigger_dollars": 35.0,     # Stage 2: Trigger Profit Lock at +$35.00 profit (17.5 pts)
         "lock_amount_dollars": 25.0,      # Stage 2: Lock $25.00 profit into SL (12.5 pts)
+        "lock2_trigger_dollars": 60.0,    # Stage 3: Trigger Profit Lock 2 at +$60.00 profit (30.0 pts)
+        "lock2_amount_dollars": 45.0,     # Stage 3: Lock $45.00 profit into SL (22.5 pts)
         "max_sl_dollars": 36.0,           # Max Initial Risk Cap: $36.00 USD (18.0 pts room)
         "sl_atr_mult": 1.5,
         "currency": "USD"
@@ -63,11 +65,13 @@ ASSET_CONFIGS = {
         "lot": 0.05,                      # 0.05 Lot ($50.00 per $1.00 move)
         "key_mult": 1.0,
         "atr_period": 10,
-        "tp_dollars": 35.0,              # Target: $35.00 USD ($0.70 move, 1:1 R:R)
-        "tp_catalyst_dollars": 50.0,      # Expanded $50.00 Target ($1.00 move during high news volatility)
-        "be_trigger_dollars": 18.0,       # BE Protection: Move SL to Entry at +$18.00 profit ($0.36 move)
-        "lock_trigger_dollars": 28.0,     # Trigger Profit Lock at +$28.00 profit ($0.56 move)
-        "lock_amount_dollars": 20.0,      # Lock +$20.00 profit into SL
+        "tp_dollars": 100.0,             # Target: $100.00 USD ($2.00 move at 0.05 lot)
+        "tp_catalyst_dollars": 120.0,     # Expanded $120.00 Target ($2.40 move during high news volatility)
+        "be_trigger_dollars": 20.0,       # BE Protection: Move SL to Entry at +$20.00 profit ($0.40 move)
+        "lock_trigger_dollars": 35.0,     # Stage 2: Trigger Profit Lock at +$35.00 profit ($0.70 move)
+        "lock_amount_dollars": 25.0,      # Stage 2: Lock +$25.00 profit into SL ($0.50 move)
+        "lock2_trigger_dollars": 60.0,    # Stage 3: Trigger Profit Lock 2 at +$60.00 profit ($1.20 move)
+        "lock2_amount_dollars": 45.0,     # Stage 3: Lock $45.00 profit into SL ($0.90 move)
         "max_sl_dollars": 35.0,           # Expanded Room: $35.00 USD ($0.70 room to prevent premature wick stopouts)
         "sl_atr_mult": 1.5,
         "currency": "USD"
@@ -77,11 +81,13 @@ ASSET_CONFIGS = {
         "lot": 0.25,                      # 0.25 Lot ($0.25 per index pt)
         "key_mult": 1.0,
         "atr_period": 10,
-        "tp_dollars": 60.0,              # Target: $60.00 USD Profit (240.0 index pts move)
-        "tp_catalyst_dollars": 80.0,      # Expanded $80.00 Target (320.0 index pts move)
+        "tp_dollars": 100.0,             # Target: $100.00 USD Profit (400.0 index pts move)
+        "tp_catalyst_dollars": 120.0,     # Expanded $120.00 Target (480.0 index pts move)
         "be_trigger_dollars": 20.0,       # Stage 1: Move SL to Entry at +$20.00 profit (80.0 pts)
         "lock_trigger_dollars": 35.0,     # Stage 2: Trigger Profit Lock at +$35.00 profit (140.0 pts)
         "lock_amount_dollars": 25.0,      # Stage 2: Lock $25.00 profit into SL (100.0 pts)
+        "lock2_trigger_dollars": 60.0,    # Stage 3: Trigger Profit Lock 2 at +$60.00 profit (240.0 pts)
+        "lock2_amount_dollars": 45.0,     # Stage 3: Lock $45.00 profit into SL (180.0 pts)
         "max_sl_dollars": 36.0,           # Max Initial Risk: $36.00 USD (144.0 index pts room)
         "sl_atr_mult": 1.5,
         "currency": "USD"
@@ -108,7 +114,8 @@ INST_ENGINE = None
 PRE_BACKTESTER = None
 STRUCT_MEMORY = None
 ACTIVE_BE_TRACKED = {}   # ticket -> True if Stage 1 BE set
-ACTIVE_LOCK_TRACKED = {} # ticket -> True if Stage 2 Lock set
+ACTIVE_LOCK_TRACKED = {} # ticket -> True if Stage 2 Lock ($35 -> $25) set
+ACTIVE_LOCK2_TRACKED = {} # ticket -> True if Stage 3 Lock ($60 -> $45) set
 WAS_OPEN_TRACKED = {}    # symbol -> True if position was open in previous cycle
 PRE_SESSION_GATE_FIRED = None  # date str (YYYY-MM-DD EAT) when gate last fired; reset daily
 
@@ -356,7 +363,7 @@ def _send_telegram(message):
 def is_session_active(symbol=None):
     """
     Institutional Session Gateway (Option B - Monday Observation Only):
-    Trading execution window is strictly Tuesday to Friday, 7:00 AM to 9:00 PM EAT.
+    Trading execution window is strictly Tuesday to Friday, 5:00 AM to 11:00 PM EAT.
     
     MONDAY INSTITUTIONAL RULE:
       - Monday (weekday == 0) is STRICT OBSERVATION ONLY.
@@ -365,8 +372,8 @@ def is_session_active(symbol=None):
       - Protects account from choppy early-week accumulation traps & fakeouts.
       
     TUESDAY - FRIDAY:
-      - Active execution from 07:00 EAT to 21:00 EAT (expanded to capture pre-London sweeps).
-      - Overnight hours (21:00 to 07:00 EAT) and weekends (Saturday & Sunday) are blocked.
+      - Active execution from 05:00 EAT to 23:00 EAT (expanded to capture early Asian momentum + full NY close).
+      - Midnight rollover blackout hours (23:00 to 05:00 EAT) and weekends (Saturday & Sunday) are blocked.
     """
     now_utc = datetime.now(timezone.utc)
     # EAT is UTC+3
@@ -382,8 +389,8 @@ def is_session_active(symbol=None):
     if weekday == 0:
         return False
 
-    # Tuesday to Friday: strictly 7:00 AM to 9:00 PM EAT (07:00 <= hour < 21:00)
-    if hour_eat < 7 or hour_eat >= 21:
+    # Tuesday to Friday: strictly 5:00 AM to 11:00 PM EAT (05:00 <= hour < 23:00)
+    if hour_eat < 5 or hour_eat >= 23:
         return False
 
     return True
@@ -503,15 +510,15 @@ def manage_open_positions(symbol, cfg, catalyst_state):
                 logger.info(f"[{symbol}] BREAK-EVEN LOCKED on #{ticket}! Gain: ${dollar_gain:.2f} -> SL: {new_sl:.2f}")
                 _send_telegram(msg)
 
-        # 2. Stage 2: Advanced Profit Lock (Gold $25 -> lock $18)
+        # 2. Stage 2: Advanced Profit Lock ($35 -> lock $25)
         is_lock_active = ACTIVE_LOCK_TRACKED.get(ticket, False)
         if not is_lock_active:
             lock_condition = False
-            lock_target_usd = cfg.get('lock_trigger_dollars', 25.0)
-            lock_amount_usd = cfg.get('lock_amount_dollars', 18.0)
+            lock_target_usd = cfg.get('lock_trigger_dollars', 35.0)
+            lock_amount_usd = cfg.get('lock_amount_dollars', 25.0)
             if dollar_gain >= lock_target_usd:
                 lock_condition = True
-                lock_dist = lock_amount_usd / dollar_per_point if dollar_per_point > 0 else 9.0
+                lock_dist = lock_amount_usd / dollar_per_point if dollar_per_point > 0 else 12.5
                 locked_profit_desc = f"+${lock_amount_usd:.2f}"
 
             if lock_condition:
@@ -520,12 +527,38 @@ def manage_open_positions(symbol, cfg, catalyst_state):
                 ACTIVE_LOCK_TRACKED[ticket] = True
                 ACTIVE_BE_TRACKED[ticket] = True
                 msg = (
-                    f"🔒 <b>[Profit Lock Activated]</b>\n"
+                    f"\U0001f512 <b>[Profit Lock Activated - Stage 1]</b>\n"
                     f"Asset: <b>{symbol}</b> (#{ticket})\n"
                     f"Gain Reached: +${dollar_gain:.2f}\n"
                     f"SL locked to <b>{locked_profit_desc}</b> ({new_sl:.2f}). Profit guaranteed!"
                 )
-                logger.info(f"[{symbol}] PROFIT LOCKED on #{ticket}! Gain: ${dollar_gain:.2f} -> SL: {new_sl:.2f}")
+                logger.info(f"[{symbol}] PROFIT LOCKED (Stage 1) on #{ticket}! Gain: ${dollar_gain:.2f} -> SL: {new_sl:.2f}")
+                _send_telegram(msg)
+
+        # 2b. Stage 3: Super-Runner Profit Lock 2 ($60 -> lock $45)
+        is_lock2_active = ACTIVE_LOCK2_TRACKED.get(ticket, False)
+        if not is_lock2_active:
+            lock2_condition = False
+            lock2_target_usd = cfg.get('lock2_trigger_dollars', 60.0)
+            lock2_amount_usd = cfg.get('lock2_amount_dollars', 45.0)
+            if dollar_gain >= lock2_target_usd:
+                lock2_condition = True
+                lock2_dist = lock2_amount_usd / dollar_per_point if dollar_per_point > 0 else 22.5
+                locked2_profit_desc = f"+${lock2_amount_usd:.2f}"
+
+            if lock2_condition:
+                new_sl2 = (entry_price + lock2_dist) if pos_type == "BUY" else (entry_price - lock2_dist)
+                modify_sl(ticket, symbol, new_sl2, current_tp)
+                ACTIVE_LOCK2_TRACKED[ticket] = True
+                ACTIVE_LOCK_TRACKED[ticket] = True
+                ACTIVE_BE_TRACKED[ticket] = True
+                msg = (
+                    f"\U0001f680 <b>[Super Profit Lock Activated - Stage 2]</b>\n"
+                    f"Asset: <b>{symbol}</b> (#{ticket})\n"
+                    f"Gain Reached: +${dollar_gain:.2f}\n"
+                    f"SL locked to <b>{locked2_profit_desc}</b> ({new_sl2:.2f}). Huge gain secured!"
+                )
+                logger.info(f"[{symbol}] PROFIT LOCKED (Stage 2) on #{ticket}! Gain: ${dollar_gain:.2f} -> SL: {new_sl2:.2f}")
                 _send_telegram(msg)
 
                 
@@ -909,7 +942,7 @@ def run_institutional_cycle():
             has_pos = len(positions) > 0 if positions else False
 
             sym_session_ok = is_session_active(symbol)
-            session_tag = "ACTIVE (7am-9pm EAT)" if sym_session_ok else "CLOSED (9pm-7am Window Gate)"
+            session_tag = "ACTIVE (5am-11pm EAT)" if sym_session_ok else "CLOSED (11pm-5am Window Gate)"
             ut_tag = f" | UT: {setup.get('ut_bot', 'NONE')}" if setup.get('ut_bot') else ""
             logger.info(
                 f"[Institutional MTF] {symbol} | Price: {curr_price:.2f} | Range: {loc_pct} | "

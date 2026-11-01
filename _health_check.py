@@ -58,7 +58,7 @@ except Exception as e:
 
 # ── 5. Session Filter Boundary Check (7:00 AM - 9:00 PM EAT) ──────────────────
 print()
-print("--- Session filter (07:00 - 21:00 EAT / Tuesday - Friday) ---")
+print("--- Session filter (05:00 - 23:00 EAT / Tuesday - Friday) ---")
 from institutional_trader import is_session_active
 from datetime import datetime, timezone, timedelta
 
@@ -72,25 +72,25 @@ def sim_session(weekday, hour_eat):
         return False
     if wd == 0:  # Option B: Monday is strictly Observation & Structural Memory
         return False
-    if he < 7 or he >= 21:
+    if he < 5 or he >= 23:
         return False
     return True
 
 tests = [
-    (0, 6,  "Mon 06:00 EAT (observation)", False),
-    (0, 7,  "Mon 07:00 EAT (observation)", False),
+    (0, 4,  "Mon 04:00 EAT (observation)", False),
+    (0, 5,  "Mon 05:00 EAT (observation)", False),
     (0, 8,  "Mon 08:00 EAT (observation)", False),
     (0, 12, "Mon 12:00 EAT (observation)", False),
-    (0, 20, "Mon 20:00 EAT (observation)", False),
-    (0, 21, "Mon 21:00 EAT (observation)", False),
+    (0, 22, "Mon 22:00 EAT (observation)", False),
     (0, 23, "Mon 23:00 EAT (overnight)  ", False),
-    (1, 6,  "Tue 06:00 EAT (pre-open)   ", False),
-    (1, 7,  "Tue 07:00 EAT (market open)", True),
+    (1, 4,  "Tue 04:00 EAT (pre-open)   ", False),
+    (1, 5,  "Tue 05:00 EAT (market open)", True),
+    (1, 7,  "Tue 07:00 EAT (early trade)", True),
     (1, 8,  "Tue 08:00 EAT (active trade)", True),
     (1, 12, "Tue 12:00 EAT (midday)     ", True),
     (3, 14, "Thu 14:00 EAT (active trade)", True),
-    (4, 20, "Fri 20:00 EAT (open)       ", True),
-    (4, 21, "Fri 21:00 EAT (cutoff)     ", False),
+    (4, 22, "Fri 22:00 EAT (evening open)", True),
+    (4, 23, "Fri 23:00 EAT (cutoff)     ", False),
     (5, 12, "Sat 12:00 EAT (weekend)    ", False),
     (6, 12, "Sun 12:00 EAT (weekend)    ", False),
 ]

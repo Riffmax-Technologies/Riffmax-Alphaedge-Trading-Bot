@@ -616,13 +616,13 @@ class InstitutionalEngine:
         m15_atr = _compute_atr(df_m15, period=14)
         if symbol == "XAUUSDm":
             min_sl_pts = 18.0   # 18.0 pts ($36 USD at 0.02 lot)
-            min_tp_pts = 30.0   # 30.0 pts ($60 USD at 0.02 lot)
+            min_tp_pts = 50.0   # 50.0 pts ($100 USD at 0.02 lot)
         elif "OIL" in symbol:
             min_sl_pts = 0.70   # $0.70 ($35 USD at 0.05 lot — expanded room against wicks)
-            min_tp_pts = 0.70   # $0.70 ($35 USD at 0.05 lot — 1:1 R:R)
+            min_tp_pts = 2.00   # $2.00 ($100 USD at 0.05 lot)
         elif "30" in symbol or "USTEC" in symbol or "NAS" in symbol:
             min_sl_pts = 144.0  # 144 pts ($36 USD at 0.25 lot)
-            min_tp_pts = 240.0  # 240 pts ($60 USD at 0.25 lot)
+            min_tp_pts = 400.0  # 400 pts ($100 USD at 0.25 lot)
         elif "XAG" in symbol or "SILVER" in symbol:
             min_sl_pts = 0.36   # $0.36 ($36 USD at 0.02 lot)
             min_tp_pts = 0.60   # $0.60 ($60 USD at 0.02 lot)
