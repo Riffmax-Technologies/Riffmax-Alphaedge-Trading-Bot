@@ -643,110 +643,69 @@ class InstitutionalEngine:
         # Institutional Volume Gate: Gold fires on UT Bot signal or sweep (high liquidity).
         whale_gate_ok = True
 
-        # ── BUY SETUP EVALUATION ──────────────────────────────────────────────
-        # Institutional Rule: Momentum confirmation required.
-        # Standalone wicks without displacement or UT Bot agreement are retail traps.
+        # ---------------- BUY SETUP EVALUATION ----------------
         has_buy_trigger = (ut_signal_m15 == "BUY") or ((m15_buy_sweep or h1_buy_sweep) and has_buy_fvg and ut_signal_m15 != "SELL")
         if macro_buy_allowed and has_buy_trigger and whale_gate_ok:
-            df_m5 = mtf.get("M5")
-            # Yad Masri Principle 3: Approach Architecture Filter (Exhaustion vs Compression)
-            approach_check = self.check_approach_architecture(df_m5, "BUY")
-            if not approach_check.get("safe", True):
-                logger.info(f"[InstitutionalEngine] {symbol} BUY Setup ABORTED by Yad Masri Principle 3: {approach_check.get('reason')}")
-            else:
-                sweep_ref = min(m15_low, h1_low) if (m15_buy_sweep or h1_buy_sweep) else (curr_price - sl_buffer)
-                max_chase = min_sl_pts * 0.40  # Max 40% of stop distance allowed as chase
+            sweep_ref = min(m15_low, h1_low) if (m15_buy_sweep or h1_buy_sweep) else (curr_price - sl_buffer)
+            sl_price = sweep_ref - sl_buffer
+            sl_dist = abs(tick.ask - sl_price)
+            if sl_dist > 0:
+                tp_offset = max(sl_dist * 1.5, min_tp_pts)
+                tp_price = tick.ask + tp_offset
+                trigger_type = "Liquidity Sweep Wick Rejection" if (m15_buy_sweep or h1_buy_sweep) else f"M15 UT Bot {ut_signal_m15}"
+                rr_calc = round(tp_offset / sl_dist, 2)
+                logger.info(
+                    f"[InstitutionalEngine] BUY Triggered! {symbol} | H4: {h4_trend} ({range_info['location_pct']:.1f}%) | "
+                    f"Trigger: {trigger_type} | Entry: {tick.ask:.2f} | SL: {sl_price:.2f} | TP: {tp_price:.2f} (R:R {rr_calc:.2f})"
+                )
+                return {
+                    "valid": True,
+                    "direction": "BUY",
+                    "reason": f"H4 Bias {h4_trend} ({range_info['location_pct']:.1f}%) + {trigger_type}",
+                    "entry_price": tick.ask,
+                    "sl_price": sl_price,
+                    "tp_price": tp_price,
+                    "deal_range": range_info,
+                    "whale_detected": has_whale_vol,
+                    "vol_ratio": max_vol_ratio,
+                    "sweep_level": sweep_ref,
+                    "fvg_detected": has_buy_fvg,
+                    "ut_bot": ut_signal_m15,
+                    "approach_type": "CLEAN_FLOW",
+                    "rr_ratio": rr_calc
+                }
 
-                # M5 Micro Pullback & Anti-Chase Confirmation
-                m5_check = self.verify_m5_pullback_confirmation(df_m5, "BUY", max_chase_dist=max_chase, sweep_ref=sweep_ref)
-                if not m5_check.get("confirmed", True):
-                    logger.info(f"[InstitutionalEngine] {symbol} BUY Setup Armed, waiting for M5 pullback completion: {m5_check.get('reason')}")
-                else:
-                    # SL is anchored BEYOND the lowest wick point of the sweep
-                    sl_price = sweep_ref - sl_buffer
-
-                    # Target 1.5x R:R or full institutional swing target
-                    sl_dist = abs(tick.ask - sl_price)
-                    if sl_dist > 0:
-                        tp_offset = max(sl_dist * 1.5, min_tp_pts)
-                        tp_price = tick.ask + tp_offset
-
-                        trigger_type = "Liquidity Sweep Wick Rejection" if (m15_buy_sweep or h1_buy_sweep) else f"M15 UT Bot {ut_signal_m15}"
-                        rr_calc = round(tp_offset / sl_dist, 2)
-                        logger.info(
-                            f"[InstitutionalEngine] BUY Triggered! {symbol} | H4: {h4_trend} ({range_info['location_pct']:.1f}%) | "
-                            f"Approach: {approach_check['approach']} | Trigger: {trigger_type} [M5 Confirmed] | "
-                            f"Entry: {tick.ask:.2f} | SL: {sl_price:.2f} | TP: {tp_price:.2f} (R:R {rr_calc:.2f})"
-                        )
-
-                        return {
-                            "valid": True,
-                            "direction": "BUY",
-                            "reason": f"H4 Bias {h4_trend} ({range_info['location_pct']:.1f}%) + {trigger_type} ({approach_check['approach']}, M5 Turn Confirmed)",
-                            "entry_price": tick.ask,
-                            "sl_price": sl_price,
-                            "tp_price": tp_price,
-                            "deal_range": range_info,
-                            "whale_detected": has_whale_vol,
-                            "vol_ratio": max_vol_ratio,
-                            "sweep_level": sweep_ref,
-                            "fvg_detected": has_buy_fvg,
-                            "ut_bot": ut_signal_m15,
-                            "approach_type": approach_check["approach"],
-                            "rr_ratio": rr_calc
-                        }
-
-        # ── SELL SETUP EVALUATION ─────────────────────────────────────────────
-        # Institutional Rule: Momentum confirmation required.
-        # Standalone wicks without displacement or UT Bot agreement are retail traps.
+        # ---------------- SELL SETUP EVALUATION ----------------
         has_sell_trigger = (ut_signal_m15 == "SELL") or ((m15_sell_sweep or h1_sell_sweep) and has_sell_fvg and ut_signal_m15 != "BUY")
         if macro_sell_allowed and has_sell_trigger and whale_gate_ok:
-            df_m5 = mtf.get("M5")
-            # Yad Masri Principle 3: Approach Architecture Filter (Exhaustion vs Compression)
-            approach_check = self.check_approach_architecture(df_m5, "SELL")
-            if not approach_check.get("safe", True):
-                logger.info(f"[InstitutionalEngine] {symbol} SELL Setup ABORTED by Yad Masri Principle 3: {approach_check.get('reason')}")
-            else:
-                sweep_ref = max(m15_high, h1_high) if (m15_sell_sweep or h1_sell_sweep) else (curr_price + sl_buffer)
-                max_chase = min_sl_pts * 0.40  # Max 40% of stop distance allowed as chase
-
-                # M5 Micro Pullback & Anti-Chase Confirmation
-                m5_check = self.verify_m5_pullback_confirmation(df_m5, "SELL", max_chase_dist=max_chase, sweep_ref=sweep_ref)
-                if not m5_check.get("confirmed", True):
-                    logger.info(f"[InstitutionalEngine] {symbol} SELL Setup Armed, waiting for M5 pullback completion: {m5_check.get('reason')}")
-                else:
-                    # SL is anchored BEYOND the highest wick point of the sweep
-                    sl_price = sweep_ref + sl_buffer
-
-                    sl_dist = abs(sl_price - tick.bid)
-                    if sl_dist > 0:
-                        tp_offset = max(sl_dist * 1.5, min_tp_pts)
-                        tp_price = tick.bid - tp_offset
-
-                        trigger_type = "Liquidity Sweep Wick Rejection" if (m15_sell_sweep or h1_sell_sweep) else f"M15 UT Bot {ut_signal_m15}"
-                        rr_calc = round(tp_offset / sl_dist, 2)
-                        logger.info(
-                            f"[InstitutionalEngine] SELL Triggered! {symbol} | H4: {h4_trend} ({range_info['location_pct']:.1f}%) | "
-                            f"Approach: {approach_check['approach']} | Trigger: {trigger_type} [M5 Confirmed] | "
-                            f"Entry: {tick.bid:.2f} | SL: {sl_price:.2f} | TP: {tp_price:.2f} (R:R {rr_calc:.2f})"
-                        )
-
-                        return {
-                            "valid": True,
-                            "direction": "SELL",
-                            "reason": f"H4 Bias {h4_trend} ({range_info['location_pct']:.1f}%) + {trigger_type} ({approach_check['approach']}, M5 Turn Confirmed)",
-                            "entry_price": tick.bid,
-                            "sl_price": sl_price,
-                            "tp_price": tp_price,
-                            "deal_range": range_info,
-                            "whale_detected": has_whale_vol,
-                            "vol_ratio": max_vol_ratio,
-                            "sweep_level": sweep_ref,
-                            "fvg_detected": has_sell_fvg,
-                            "ut_bot": ut_signal_m15,
-                            "approach_type": approach_check["approach"],
-                            "rr_ratio": rr_calc
-                        }
+            sweep_ref = max(m15_high, h1_high) if (m15_sell_sweep or h1_sell_sweep) else (curr_price + sl_buffer)
+            sl_price = sweep_ref + sl_buffer
+            sl_dist = abs(sl_price - tick.bid)
+            if sl_dist > 0:
+                tp_offset = max(sl_dist * 1.5, min_tp_pts)
+                tp_price = tick.bid - tp_offset
+                trigger_type = "Liquidity Sweep Wick Rejection" if (m15_sell_sweep or h1_sell_sweep) else f"M15 UT Bot {ut_signal_m15}"
+                rr_calc = round(tp_offset / sl_dist, 2)
+                logger.info(
+                    f"[InstitutionalEngine] SELL Triggered! {symbol} | H4: {h4_trend} ({range_info['location_pct']:.1f}%) | "
+                    f"Trigger: {trigger_type} | Entry: {tick.bid:.2f} | SL: {sl_price:.2f} | TP: {tp_price:.2f} (R:R {rr_calc:.2f})"
+                )
+                return {
+                    "valid": True,
+                    "direction": "SELL",
+                    "reason": f"H4 Bias {h4_trend} ({range_info['location_pct']:.1f}%) + {trigger_type}",
+                    "entry_price": tick.bid,
+                    "sl_price": sl_price,
+                    "tp_price": tp_price,
+                    "deal_range": range_info,
+                    "whale_detected": has_whale_vol,
+                    "vol_ratio": max_vol_ratio,
+                    "sweep_level": sweep_ref,
+                    "fvg_detected": has_sell_fvg,
+                    "ut_bot": ut_signal_m15,
+                    "approach_type": "CLEAN_FLOW",
+                    "rr_ratio": rr_calc
+                }
 
         block_note = ""
         if h4_trend == "BEARISH" and loc_pct < 35.0:
