@@ -121,6 +121,19 @@ class NewsCatalystEngine:
                     })
         return upcoming
 
+    def _classify_event_tier(self, title: str) -> str:
+        """Classify economic event into Tier-1 Monster or Tier-2 Macro catalyst."""
+        t_lower = (title or "").lower()
+        tier_1_keywords = [
+            "cpi", "consumer price index", "nfp", "non-farm", "nonfarm",
+            "fomc", "federal funds rate", "fed interest rate", "interest rate decision",
+            "gross domestic product", "gdp"
+        ]
+        for kw in tier_1_keywords:
+            if kw in t_lower:
+                return "TIER_1_MONSTER"
+        return "TIER_2_MACRO"
+
     def get_market_catalyst_status(self, symbol):
         now_utc = datetime.now(timezone.utc)
         target_curr = 'USD' if any(k in symbol for k in ['XAU', 'XAG', 'US', 'OIL']) else 'EUR'
@@ -128,12 +141,15 @@ class NewsCatalystEngine:
         for ev in self.events:
             if ev['country'] == target_curr:
                 diff_min = (now_utc - ev['dt_utc']).total_seconds() / 60.0
+                tier = self._classify_event_tier(ev.get('title', ''))
 
                 # 5 min BEFORE news: freeze entries, lock BE on winning trades
                 if -5.0 <= diff_min < 0:
                     return {
                         'state': 'PRE_NEWS_FREEZE',
                         'event': ev['title'],
+                        'tier': tier,
+                        'volatility_multiplier': 1.0,
                         'minutes_to_release': abs(round(diff_min, 1)),
                         'action': 'LOCK_BE_NO_NEW_ENTRY'
                     }
@@ -143,20 +159,27 @@ class NewsCatalystEngine:
                     return {
                         'state': 'NEWS_SPIKE_BLOCK',
                         'event': ev['title'],
+                        'tier': tier,
+                        'volatility_multiplier': 1.0,
                         'minutes_since_release': round(diff_min, 1),
                         'action': 'NO_ENTRY_SPIKE_DANGER'
                     }
 
                 # 5–25 min AFTER news: direction confirmed, ride momentum with expanded TP
                 elif 5.0 <= diff_min <= 25.0:
+                    # Tier-1 Monster events (CPI, NFP, FOMC) expand momentum targets by +25%
+                    vol_mult = 1.25 if tier == "TIER_1_MONSTER" else 1.10
+                    action_desc = "EXPAND_TP_RIDE_MONSTER_TREND" if tier == "TIER_1_MONSTER" else "EXPAND_TP_RIDE_TREND"
                     return {
                         'state': 'CATALYST_IMPULSE',
                         'event': ev['title'],
+                        'tier': tier,
+                        'volatility_multiplier': vol_mult,
                         'minutes_since_release': round(diff_min, 1),
-                        'action': 'EXPAND_TP_RIDE_TREND'
+                        'action': action_desc
                     }
 
-        return {'state': 'NORMAL', 'action': 'STANDARD_M15_RULES'}
+        return {'state': 'NORMAL', 'tier': 'NONE', 'volatility_multiplier': 1.0, 'action': 'STANDARD_M15_RULES'}
 
     # ── Telegram helpers ─────────────────────────────────────────────────────────
     def _telegram(self, message):

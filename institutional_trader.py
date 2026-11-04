@@ -178,11 +178,46 @@ def apply_ai_learned_settings():
         try:
             with open(cfg_file, "r", encoding="utf-8") as f:
                 c = json.load(f)
-            # Retain institutional parameters ($40 Gold TP, 150pt DAX TP, 2500pt BTC TP)
-            # Do NOT allow dynamic AI brain to shrink targets down to scalping levels.
-            pass
+
+            symbols_cfg = c.get("symbols_config", {})
+            for sym, asset_cfg in ASSET_CONFIGS.items():
+                learned = symbols_cfg.get(sym, {})
+                if not learned:
+                    learned = {
+                        "tp_dollars": c.get("gold_tp_dollars", 100.0),
+                        "tp_catalyst_dollars": c.get("gold_tp_catalyst_dollars", 120.0),
+                        "be_trigger_dollars": c.get("gold_be_trigger_dollars", 20.0),
+                        "lock_trigger_dollars": c.get("gold_lock_trigger_dollars", 35.0),
+                        "lock_amount_dollars": c.get("gold_lock_amount_dollars", 25.0),
+                        "lock2_trigger_dollars": c.get("gold_lock2_trigger_dollars", 60.0),
+                        "lock2_amount_dollars": c.get("gold_lock2_amount_dollars", 45.0)
+                    }
+
+                # Safe clamp: Wholesale swing TP range ($70 - $150)
+                tp_val = float(learned.get("tp_dollars", asset_cfg.get("tp_dollars", 100.0)))
+                asset_cfg["tp_dollars"] = max(70.0, min(150.0, tp_val))
+
+                tp_cat = float(learned.get("tp_catalyst_dollars", asset_cfg.get("tp_catalyst_dollars", 120.0)))
+                asset_cfg["tp_catalyst_dollars"] = max(90.0, min(180.0, tp_cat))
+
+                be_trig = float(learned.get("be_trigger_dollars", asset_cfg.get("be_trigger_dollars", 20.0)))
+                asset_cfg["be_trigger_dollars"] = max(15.0, min(25.0, be_trig))
+
+                l1_trig = float(learned.get("lock_trigger_dollars", asset_cfg.get("lock_trigger_dollars", 35.0)))
+                asset_cfg["lock_trigger_dollars"] = max(25.0, min(50.0, l1_trig))
+
+                l1_amt = float(learned.get("lock_amount_dollars", asset_cfg.get("lock_amount_dollars", 25.0)))
+                asset_cfg["lock_amount_dollars"] = max(15.0, min(35.0, l1_amt))
+
+                l2_trig = float(learned.get("lock2_trigger_dollars", asset_cfg.get("lock2_trigger_dollars", 60.0)))
+                asset_cfg["lock2_trigger_dollars"] = max(45.0, min(80.0, l2_trig))
+
+                l2_amt = float(learned.get("lock2_amount_dollars", asset_cfg.get("lock2_amount_dollars", 45.0)))
+                asset_cfg["lock2_amount_dollars"] = max(30.0, min(60.0, l2_amt))
+
+                # SAFETY INVIOLABILITY: max_sl_dollars is NEVER widened or increased
         except Exception as e:
-            logger.debug(f"[Scalp] Dynamic config load skipped: {e}")
+            logger.debug(f"[Institutional] Dynamic config load skipped: {e}")
 
 
 try:
@@ -1032,14 +1067,20 @@ def run_institutional_cycle():
 
             # ── 3. Pre-Trade Real-Time Backtest Gate ────────────────────────────
 
-            # Enforce structural SL room and dollar profit expansion targets
+            # Enforce structural SL room and dynamic dollar profit expansion targets
             dollar_per_pt = get_dollar_per_pt(symbol, cfg['lot'])
-            tp_target_usd = cfg.get('tp_dollars', 40.0)
-            max_sl_usd = cfg.get('max_sl_dollars', 24.0)
-            
-            target_tp_dist = tp_target_usd / dollar_per_pt if dollar_per_pt > 0 else 20.0
-            # Strict dollar risk: exactly max_sl_dollars ($24.00 = 12.0 pts at 0.02 lot), never exceed or balloon
-            target_sl_dist = max_sl_usd / dollar_per_pt if dollar_per_pt > 0 else 12.0
+            max_sl_usd = cfg.get('max_sl_dollars', 36.0)
+
+            # Volatility & Catalyst Target Expansion
+            if catalyst.get('state') == 'CATALYST_IMPULSE':
+                vol_boost = catalyst.get('volatility_multiplier', 1.0)
+                tp_target_usd = cfg.get('tp_catalyst_dollars', 120.0) * vol_boost
+            else:
+                tp_target_usd = cfg.get('tp_dollars', 100.0)
+
+            target_tp_dist = tp_target_usd / dollar_per_pt if dollar_per_pt > 0 else 50.0
+            # Strict dollar risk: capped strictly at max_sl_dollars, never ballooned
+            target_sl_dist = max_sl_usd / dollar_per_pt if dollar_per_pt > 0 else 18.0
 
             order_price = tick.ask if target_dir == "BUY" else tick.bid
             if target_dir == "BUY":
