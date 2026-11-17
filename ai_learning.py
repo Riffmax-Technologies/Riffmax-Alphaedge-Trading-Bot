@@ -301,6 +301,16 @@ class AutoLearner:
                     "lock2_trigger_dollars": lock2_trig,
                     "lock2_amount_dollars": lock2_amt,
                     "max_sl_dollars": 34.0
+                },
+                "DE30m": {
+                    "tp_dollars": gold_tp,
+                    "tp_catalyst_dollars": gold_tp_catalyst,
+                    "be_trigger_dollars": gold_be,
+                    "lock_trigger_dollars": lock1_trig,
+                    "lock_amount_dollars": lock1_amt,
+                    "lock2_trigger_dollars": lock2_trig,
+                    "lock2_amount_dollars": lock2_amt,
+                    "max_sl_dollars": 34.0
                 }
             },
             "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S")

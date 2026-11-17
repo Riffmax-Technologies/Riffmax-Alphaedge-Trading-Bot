@@ -28,7 +28,13 @@ from datetime import datetime, timezone, timedelta
 import MetaTrader5 as mt5
 import numpy as np
 import pandas as pd
-from pure_price_action import CALIBRATED_ASSET_SPECS, is_killzone_active, is_weekend_quiet
+from pure_price_action import (
+    CALIBRATED_ASSET_SPECS,
+    compute_equity_scale,
+    is_killzone_active,
+    is_weekend_quiet,
+    scale_symbol_lot,
+)
 from news_catalyst_engine import NewsCatalystEngine
 from institutional_engine import InstitutionalEngine
 from pre_trade_backtester import PreTradeBacktester
@@ -185,9 +191,20 @@ def apply_ai_learned_settings():
             logger.debug(f"[Institutional] Dynamic config load skipped: {e}")
 
 
-def check_daily_drawdown_guard():
+def get_active_equity_scale() -> float:
+    """Compute live equity-tiered lot scale (~6.4% risk per trade, >= 1.0x)."""
+    try:
+        acc = mt5.account_info() if mt5.terminal_info() else None
+        if acc and getattr(acc, "balance", 0.0) > 0:
+            return compute_equity_scale(float(acc.balance))
+    except Exception:
+        pass
+    return 1.0
+
+
+def check_daily_drawdown_guard(scale: float = 1.0):
     """
-    Enforces strict -$50.00 daily drawdown hard stop (realized today + live floating PnL).
+    Enforces strict daily drawdown hard stop (~9.4% equity: -$50.00 at 1.0x, scaled with equity tiers).
     Returns (blocked: bool, daily_total: float, realized_today: float, floating_pnl: float).
     """
     global _DAILY_DD_ALERT_DATE
@@ -217,20 +234,21 @@ def check_daily_drawdown_guard():
     except Exception:
         pass
 
+    cap_usd = round(MAX_DAILY_DRAWDOWN_USD * max(1.0, float(scale)), 2)
     daily_total = round(realized_today + floating_pnl, 2)
-    blocked = daily_total <= -MAX_DAILY_DRAWDOWN_USD
+    blocked = daily_total <= -cap_usd
     if blocked:
         today_str = now_eat.strftime("%Y-%m-%d")
         logger.warning(
             f"[DailyDrawdownGuard] HARD STOP ACTIVE | Daily PnL ${daily_total:+.2f} "
-            f"(Realized ${realized_today:+.2f}, Float ${floating_pnl:+.2f}) <= -${MAX_DAILY_DRAWDOWN_USD:.2f}"
+            f"(Realized ${realized_today:+.2f}, Float ${floating_pnl:+.2f}) <= -${cap_usd:.2f}"
         )
         if _DAILY_DD_ALERT_DATE != today_str:
             _DAILY_DD_ALERT_DATE = today_str
             _send_personal(
                 f"🛑 <b>[Daily Drawdown Guard Triggered]</b>\n"
-                f"Today's PnL hit <b>${daily_total:+.2f}</b> (Cap: -${MAX_DAILY_DRAWDOWN_USD:.2f}).\n"
-                f"New entries paused until next session day to protect your $500 capital."
+                f"Today's PnL hit <b>${daily_total:+.2f}</b> (Cap: -${cap_usd:.2f}).\n"
+                f"New entries paused until next session day to protect capital."
             )
     return blocked, daily_total, round(realized_today, 2), round(floating_pnl, 2)
 
@@ -412,12 +430,10 @@ def _send_telegram(message):
 def is_session_active(symbol=None):
     """
     Pure Price Action Execution Gateway (Monday - Friday):
-      - London Killzone : 06:00 - 09:59 UTC (09:00 - 12:59 EAT)
-      - New York Session: 14:00 - 19:59 UTC (17:00 - 22:59 EAT)
-    Blocks low-liquidity Asian midnight chop (00-05 UTC), London lunch (10-13 UTC),
-    rollover spread widening (20-23 UTC), and weekends (Saturday & Sunday).
+      - Default (Gold, Oil, US30): London 06-09 UTC (09-12:59 EAT) & NY 14-19 UTC (17-22:59 EAT)
+      - DAX (DE30m)              : NY Open / Xetra Close Overlap 14-16 UTC (17:00-19:59 EAT)
     """
-    return is_killzone_active()
+    return is_killzone_active(symbol=symbol)
 
 
 # ─── Position Management & Break-Even Shield ──────────────────────────────────
@@ -425,12 +441,12 @@ def manage_open_positions(symbol, cfg, catalyst_state):
     positions = mt5.positions_get(symbol=symbol)
     if not positions:
         return
-        
+
     info = mt5.symbol_info(symbol)
     point = info.point
-    lot = cfg['lot']
-    dollar_per_point = get_dollar_per_pt(symbol, lot)
-    
+    base_lot = cfg['lot']
+    dp = _sym_digits(symbol)
+
     for pos in positions:
         ticket = pos.ticket
         entry_price = pos.price_open
@@ -438,41 +454,61 @@ def manage_open_positions(symbol, cfg, catalyst_state):
         current_tp = pos.tp
         pos_type = "BUY" if pos.type == mt5.ORDER_TYPE_BUY else "SELL"
         current_price = pos.price_current
-        
+        pos_vol = float(getattr(pos, "volume", base_lot) or base_lot)
+        pos_scale = max(1.0, pos_vol / base_lot) if base_lot > 0 else 1.0
+        dollar_per_point = get_dollar_per_pt(symbol, pos_vol)
+
         pts_gain = (current_price - entry_price) if pos_type == "BUY" else (entry_price - current_price)
-        # Accurate real-time profit in USD dollars
         dollar_gain = pts_gain * dollar_per_point
-        
-        # 1. Stage 1: Dynamic Break-Even Shield Check (Pure Dollar Calculation for Gold)
+
+        # 0. Hard Anti-Widen SL Guard: never let SL sit worse than -max_sl_usd * pos_scale
         is_be_active = ACTIVE_BE_TRACKED.get(ticket, False)
+        max_sl_usd = cfg.get('max_sl_dollars', 34.0) * pos_scale
+        allowed_sl_dist = (max_sl_usd / dollar_per_point) if dollar_per_point > 0 else 17.0
+        strict_sl = round((entry_price - allowed_sl_dist) if pos_type == "BUY" else (entry_price + allowed_sl_dist), dp)
+        if not is_be_active and allowed_sl_dist > 0:
+            if pos_type == "BUY":
+                widened = (current_sl <= 0) or (current_sl < entry_price - (allowed_sl_dist * 1.03))
+                can_snap = current_price > strict_sl + (4 * point)
+            else:
+                widened = (current_sl <= 0) or (current_sl > entry_price + (allowed_sl_dist * 1.03))
+                can_snap = current_price < strict_sl - (4 * point)
+            if widened and can_snap:
+                modify_sl(ticket, symbol, strict_sl, current_tp)
+                current_sl = strict_sl
+                logger.warning(
+                    f"[AntiWidenSLGuard] Snapped {symbol} #{ticket} SL back to strict -${max_sl_usd:.0f} cap ({strict_sl:.{dp}f})"
+                )
+
+        # 1. Stage 1: Dynamic Break-Even Shield Check (scaled to actual open lot)
         if not is_be_active:
             be_condition = False
-            be_target_usd = cfg.get('be_trigger_dollars', 28.0)
+            be_target_usd = cfg.get('be_trigger_dollars', 28.0) * pos_scale
             if dollar_gain >= be_target_usd:
                 be_condition = True
-                # Lock +$2.00 USD consistently across Gold/Oil/US30 to cover spread cleanly
-                be_buffer = (2.0 / dollar_per_point) if dollar_per_point > 0 else 0.5
-                
+                # Lock +$2.00 * pos_scale consistently across Gold/Oil/US30/DE30m to cover spread cleanly
+                be_buffer = ((2.0 * pos_scale) / dollar_per_point) if dollar_per_point > 0 else 0.5
+
             if be_condition:
                 new_sl = entry_price + be_buffer if pos_type == "BUY" else entry_price - be_buffer
                 modify_sl(ticket, symbol, new_sl, current_tp)
                 ACTIVE_BE_TRACKED[ticket] = True
-                update_trade_be(ticket) # Record in dedicated trade analysis log
+                update_trade_be(ticket)
                 msg = (
                     f"🛡️ <b>[Break-Even Protected]</b>\n"
                     f"Asset: <b>{symbol}</b> (#{ticket})\n"
                     f"Profit Reached: +${dollar_gain:.2f}\n"
-                    f"SL moved to Entry + Buffer ({new_sl:.2f}). Fakeout risk eliminated!"
+                    f"SL moved to Entry + Buffer ({new_sl:.{dp}f}). Fakeout risk eliminated!"
                 )
-                logger.info(f"[{symbol}] BREAK-EVEN LOCKED on #{ticket}! Gain: ${dollar_gain:.2f} -> SL: {new_sl:.2f}")
+                logger.info(f"[{symbol}] BREAK-EVEN LOCKED on #{ticket}! Gain: ${dollar_gain:.2f} -> SL: {new_sl:.{dp}f}")
                 _send_telegram(msg)
 
-        # 2. Stage 2: Advanced Profit Lock ($35 -> lock $25)
+        # 2. Stage 2: Advanced Profit Lock (scaled)
         is_lock_active = ACTIVE_LOCK_TRACKED.get(ticket, False)
         if not is_lock_active:
             lock_condition = False
-            lock_target_usd = cfg.get('lock_trigger_dollars', 35.0)
-            lock_amount_usd = cfg.get('lock_amount_dollars', 25.0)
+            lock_target_usd = cfg.get('lock_trigger_dollars', 44.0) * pos_scale
+            lock_amount_usd = cfg.get('lock_amount_dollars', 32.0) * pos_scale
             if dollar_gain >= lock_target_usd:
                 lock_condition = True
                 lock_dist = lock_amount_usd / dollar_per_point if dollar_per_point > 0 else 12.5
@@ -487,17 +523,17 @@ def manage_open_positions(symbol, cfg, catalyst_state):
                     f"\U0001f512 <b>[Profit Lock Activated - Stage 1]</b>\n"
                     f"Asset: <b>{symbol}</b> (#{ticket})\n"
                     f"Gain Reached: +${dollar_gain:.2f}\n"
-                    f"SL locked to <b>{locked_profit_desc}</b> ({new_sl:.2f}). Profit guaranteed!"
+                    f"SL locked to <b>{locked_profit_desc}</b> ({new_sl:.{dp}f}). Profit guaranteed!"
                 )
-                logger.info(f"[{symbol}] PROFIT LOCKED (Stage 1) on #{ticket}! Gain: ${dollar_gain:.2f} -> SL: {new_sl:.2f}")
+                logger.info(f"[{symbol}] PROFIT LOCKED (Stage 1) on #{ticket}! Gain: ${dollar_gain:.2f} -> SL: {new_sl:.{dp}f}")
                 _send_telegram(msg)
 
-        # 2b. Stage 3: Super-Runner Profit Lock 2 ($60 -> lock $45)
+        # 2b. Stage 3: Super-Runner Profit Lock 2 (scaled)
         is_lock2_active = ACTIVE_LOCK2_TRACKED.get(ticket, False)
         if not is_lock2_active:
             lock2_condition = False
-            lock2_target_usd = cfg.get('lock2_trigger_dollars', 60.0)
-            lock2_amount_usd = cfg.get('lock2_amount_dollars', 45.0)
+            lock2_target_usd = cfg.get('lock2_trigger_dollars', 56.0) * pos_scale
+            lock2_amount_usd = cfg.get('lock2_amount_dollars', 45.0) * pos_scale
             if dollar_gain >= lock2_target_usd:
                 lock2_condition = True
                 lock2_dist = lock2_amount_usd / dollar_per_point if dollar_per_point > 0 else 22.5
@@ -513,9 +549,9 @@ def manage_open_positions(symbol, cfg, catalyst_state):
                     f"\U0001f680 <b>[Super Profit Lock Activated - Stage 2]</b>\n"
                     f"Asset: <b>{symbol}</b> (#{ticket})\n"
                     f"Gain Reached: +${dollar_gain:.2f}\n"
-                    f"SL locked to <b>{locked2_profit_desc}</b> ({new_sl2:.2f}). Huge gain secured!"
+                    f"SL locked to <b>{locked2_profit_desc}</b> ({new_sl2:.{dp}f}). Huge gain secured!"
                 )
-                logger.info(f"[{symbol}] PROFIT LOCKED (Stage 2) on #{ticket}! Gain: ${dollar_gain:.2f} -> SL: {new_sl2:.2f}")
+                logger.info(f"[{symbol}] PROFIT LOCKED (Stage 2) on #{ticket}! Gain: ${dollar_gain:.2f} -> SL: {new_sl2:.{dp}f}")
                 _send_telegram(msg)
 
                 
@@ -890,7 +926,8 @@ def run_institutional_cycle():
         pass
 
     apply_ai_learned_settings()
-    dd_blocked, daily_pnl, _, _ = check_daily_drawdown_guard()
+    eq_scale = get_active_equity_scale()
+    dd_blocked, daily_pnl, _, _ = check_daily_drawdown_guard(scale=eq_scale)
 
     for symbol, cfg in ASSET_CONFIGS.items():
         try:
@@ -977,15 +1014,21 @@ def run_institutional_cycle():
 
             target_dir = setup['direction']  # "BUY" or "SELL"
 
-            # ── 2. Calibrated Dollar Targets & Strict -$34 SL ────────────────
-            dollar_per_pt = get_dollar_per_pt(symbol, cfg['lot'])
-            max_sl_usd = cfg.get('max_sl_dollars', 34.0)
+            # ── 2. Equity-Tiered Lot Scaling & Calibrated Risk/Reward ───────
+            sym_info = mt5.symbol_info(symbol)
+            vol_step = sym_info.volume_step if sym_info and sym_info.volume_step > 0 else 0.01
+            vol_min = sym_info.volume_min if sym_info and sym_info.volume_min > 0 else 0.01
+            trade_lot = scale_symbol_lot(cfg['lot'], eq_scale, lot_step=vol_step, min_lot=vol_min)
+            trade_scale = (trade_lot / cfg['lot']) if cfg['lot'] > 0 else 1.0
+
+            dollar_per_pt = get_dollar_per_pt(symbol, trade_lot)
+            max_sl_usd = cfg.get('max_sl_dollars', 34.0) * trade_scale
 
             if catalyst.get('state') == 'CATALYST_IMPULSE':
                 vol_boost = catalyst.get('volatility_multiplier', 1.0)
-                tp_target_usd = cfg.get('tp_catalyst_dollars', 70.0) * vol_boost
+                tp_target_usd = cfg.get('tp_catalyst_dollars', 70.0) * trade_scale * vol_boost
             else:
-                tp_target_usd = cfg.get('tp_dollars', 55.0)
+                tp_target_usd = cfg.get('tp_dollars', 55.0) * trade_scale
 
             target_tp_dist = tp_target_usd / dollar_per_pt if dollar_per_pt > 0 else 27.5
             target_sl_dist = max_sl_usd / dollar_per_pt if dollar_per_pt > 0 else 17.0
@@ -998,21 +1041,31 @@ def run_institutional_cycle():
                 sl_price = order_price + target_sl_dist
                 tp_price = order_price - target_tp_dist
 
+            # Margin sufficiency check (protects DE30m / multi-trade free margin)
+            acc = mt5.account_info()
+            o_type = mt5.ORDER_TYPE_BUY if target_dir == "BUY" else mt5.ORDER_TYPE_SELL
+            req_margin = mt5.order_calc_margin(o_type, symbol, trade_lot, order_price)
+            if acc and req_margin and req_margin > (acc.margin_free * 0.70):
+                logger.warning(
+                    f"[MarginGuard] Skipped {symbol} {trade_lot} lot — required margin ${req_margin:.2f} > 70% free ${acc.margin_free:.2f}"
+                )
+                continue
+
             # ── 3. Execute High-Conviction Pure Price Action 3-TF Order ──────
             dp = _sym_digits(symbol)
             event_name = catalyst.get('event', 'Pure PA Flow')
             pa_tag = setup.get('ut_bot', 'PA_3TF')
-            mode_desc = f"Pure PA 3-TF | {pa_tag} | H4 Leg {loc_pct}"
+            mode_desc = f"Pure PA 3-TF | {pa_tag} | H4 Leg {loc_pct} | {trade_scale:.2f}x"
             deal_loc_desc = f"H4 Swing Leg: {loc_pct}"
             rr_val = round(target_tp_dist / target_sl_dist, 2) if target_sl_dist > 0 else 1.62
 
             logger.info(
-                f"[PurePA 3-TF] EXECUTING {target_dir} on {symbol}! "
+                f"[PurePA 3-TF] EXECUTING {target_dir} {trade_lot} on {symbol}! "
                 f"Price: {order_price:.{dp}f} | SL: {sl_price:.{dp}f} (-${max_sl_usd:.0f}) | "
                 f"TP: {tp_price:.{dp}f} (+${tp_target_usd:.0f}) | {setup.get('reason')}"
             )
 
-            if execute_order(symbol, target_dir, cfg['lot'], sl_price, tp_price, mode_desc, event_name, setup.get('sweep_level', 0.0), 0.0, deal_range_loc=deal_loc_desc, rr_ratio=rr_val):
+            if execute_order(symbol, target_dir, trade_lot, sl_price, tp_price, mode_desc, event_name, setup.get('sweep_level', 0.0), 0.0, deal_range_loc=deal_loc_desc, rr_ratio=rr_val):
                 LAST_EXECUTED_BAR[symbol] = cur_bar_ts
                 _save_bar_state(LAST_EXECUTED_BAR)
 

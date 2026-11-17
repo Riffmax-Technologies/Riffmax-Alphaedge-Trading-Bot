@@ -1835,29 +1835,29 @@ if __name__ == "__main__":
 
     logger.info("=" * 65)
     logger.info("  ALPHAEDGE — PURE PRICE ACTION 3-TF INSTITUTIONAL SWING ENGINE")
-    logger.info("  Live Assets: Gold (XAUUSDm) | Crude Oil (USOILm) | Dow Jones (US30m)")
+    logger.info("  Live Assets: Gold (XAUUSDm) | Crude Oil (USOILm) | Dow Jones (US30m) | DAX 40 (DE30m)")
     logger.info("  Strategy: H4 Fractal Structure + 75%/25% Leg | PDH/Asian/H4 Sweeps | M5 Reclaim")
-    logger.info("  Gold:   0.02 lot | TP: $55.00 | Max SL: $34.00 (17 pts)  | BE: +$28 | Lock1: $44->$32 | Lock2: $56->$45")
-    logger.info("  Oil:    0.05 lot | TP: $55.00 | Max SL: $34.00 ($0.68)   | BE: +$28 | Lock1: $44->$32 | Lock2: $56->$45")
-    logger.info("  US30:   0.25 lot | TP: $55.00 | Max SL: $34.00 (136 pts) | BE: +$28 | Lock1: $44->$32 | Lock2: $56->$45")
-    logger.info("  Killzones: Mon - Fri 06-09 UTC (09-13 EAT) & 14-19 UTC (17-23 EAT) | Daily DD Cap: -$50 | Max Conc: 2")
-    logger.info("  Guidance: ForexFactory Real-Time Macro News Engine (USD) | Friday 20:45 UTC Weekend Guard")
+    logger.info("  Base 1x: Gold 0.02 | Oil 0.05 | US30 0.25 | DE30m 0.45 -> $55 TP / $34 SL / +$28 BE / $44->$32 Lock")
+    logger.info("  Compounding: Equity-Tiered Scaling (+0.5x per +$300 above $500 -> ~6.4% risk cap)")
+    logger.info("  Killzones: Gold/Oil/US30 06-09 & 14-19 UTC | DE30m 14-16 UTC | Anti-Widen SL Guard | Max Conc: 2")
+    logger.info("  Guidance: ForexFactory Real-Time Macro News (USD/EUR, 15m Pre-Freeze) | Friday 20:45 UTC Close")
     logger.info("=" * 65)
 
     # 1. Send Online Startup Notification to Telegram
     startup_msg = (
         "<b>🏛 AlphaEdge — Pure Price Action 3-TF Engine Active</b>\n\n"
-        "<b>Live Trading Assets (3 Assets | Strict -$50 Daily DD Cap):</b>\n"
-        "• <b>Gold (XAUUSDm):</b> $55.00 TP | $34.00 SL (17 pts) | BE +$28 | Lock1 $44->$32 | Lock2 $56->$45 | <b>0.02 Lot</b>\n"
-        "• <b>Crude Oil (USOILm):</b> $55.00 TP | $34.00 SL ($0.68) | BE +$28 | Lock1 $44->$32 | Lock2 $56->$45 | <b>0.05 Lot</b>\n"
-        "• <b>Dow Jones (US30m):</b> $55.00 TP | $34.00 SL (136 pts) | BE +$28 | Lock1 $44->$32 | Lock2 $56->$45 | <b>0.25 Lot</b>\n"
-        "<b>Shadow Observation (6 Assets):</b> EURUSDm · USTECm (Nasdaq) · GBPUSDm · US500m (S&P 500) · GBPJPYm (Guppy) · DE30m (DAX) (paper mode)\n\n"
-        "<b>Pure Price Action 3-Timeframe Architecture (Zero Indicators):</b>\n"
+        "<b>Live Trading Assets (4 Assets | Equity-Tiered Scaling):</b>\n"
+        "• <b>Gold (XAUUSDm):</b> <b>0.02</b> base lot | $55 TP | $34 SL (17 pts) | 09–13 & 17–23 EAT\n"
+        "• <b>Crude Oil (USOILm):</b> <b>0.05</b> base lot | $55 TP | $34 SL ($0.68) | 09–13 & 17–23 EAT\n"
+        "• <b>Dow Jones (US30m):</b> <b>0.25</b> base lot | $55 TP | $34 SL (136 pts) | 09–13 & 17–23 EAT\n"
+        "• <b>DAX 40 (DE30m):</b> <b>0.45</b> base lot | $55 TP | $34 SL (68 pts) | 17:00–19:59 EAT (NY/Xetra Overlap)\n"
+        "<b>Shadow Observation (5 Assets):</b> EURUSDm · USTECm (Nasdaq) · GBPUSDm · US500m (S&P 500) · GBPJPYm (paper mode)\n\n"
+        "<b>Pure Price Action 3-TF & Capital Hardening:</b>\n"
         "• <b>TF1 (D1 + H4):</b> Fractal Swing Structure (3-state) + 75%/25% Swing Leg Equilibrium.\n"
         "• <b>TF2 (Pools + M15):</b> PDH/PDL, Asian H/L & Closed H4 H/L Sweeps + Anti-Crash Validation.\n"
-        "• <b>TF3 (M5 Precision):</b> 2-Bar Sweep Reclaim & Engulf Turn + Anti-Climax Guard.\n"
-        "• <b>Capital Protection:</b> Hard $34 SL (never widened) | Max 2 Concurrent | Friday 23:45 EAT Close.\n\n"
-        "<b>Killzones:</b> Monday – Friday | 09:00–12:59 & 17:00–22:59 EAT (London + NY Open)\n\n"
+        "• <b>TF3 (M5 Precision):</b> 2-Bar Sweep Reclaim & Turn + Anti-Climax Guard.\n"
+        "• <b>Smart Compounding:</b> 1.0x below $800 → steps +0.5x every +$300 equity (~6.4% risk).\n"
+        "• <b>Hard Shields:</b> Auto Anti-Widen SL Guard | 15m News Pre-Freeze | Max 2 Concurrent | Sat/Sun Muted.\n\n"
         "<b>Status:</b> 🟢 Armed & Waiting for Pure PA Liquidity Sweeps."
     )
     send_telegram_alert(startup_msg)

@@ -624,6 +624,7 @@ class InstitutionalEngine:
                 asian_h=asian_h,
                 asian_l=asian_l,
                 dt_utc=dt_utc,
+                symbol=symbol,
             )
 
         loc_pct = range_info.get("clamped_loc_pct", 50.0)
@@ -668,6 +669,9 @@ class InstitutionalEngine:
         elif "OIL" in symbol:
             min_sl_pts = 0.68   # $0.68 ($34 USD at 0.05 lot)
             min_tp_pts = 1.10   # $1.10 ($55 USD at 0.05 lot)
+        elif "DE30" in symbol or "GER" in symbol:
+            min_sl_pts = 68.0   # 68.0 pts ($34 USD at 0.45 lot)
+            min_tp_pts = 110.0  # 110.0 pts ($55 USD at 0.45 lot)
         elif "30" in symbol or "USTEC" in symbol or "NAS" in symbol:
             min_sl_pts = 136.0  # 136 pts ($34 USD at 0.25 lot)
             min_tp_pts = 220.0  # 220 pts ($55 USD at 0.25 lot)
@@ -677,9 +681,6 @@ class InstitutionalEngine:
         elif "500" in symbol or "SPX" in symbol:
             min_sl_pts = 36.0   # 36.0 pts ($36 USD at 1.0 lot)
             min_tp_pts = 60.0   # 60.0 pts ($60 USD at 1.0 lot)
-        elif "DE30" in symbol or "GER" in symbol:
-            min_sl_pts = 128.0  # 128 pts ($36 USD at 0.25 lot)
-            min_tp_pts = 214.0  # 214 pts ($60 USD at 0.25 lot)
         elif "JPY" in symbol:
             min_sl_pts = 1.14   # 114 pips ($36 USD at 0.05 lot)
             min_tp_pts = 1.89   # 189 pips ($60 USD at 0.05 lot)

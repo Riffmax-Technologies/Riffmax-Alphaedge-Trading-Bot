@@ -2,11 +2,11 @@
 shadow_tracker.py
 =================
 Shadow Tracking Engine ("Paper Observation Mode")
-Monitors secondary assets (EURUSDm, US30m) without placing live MT5 orders.
+Monitors secondary assets (EURUSDm, USTECm, GBPUSDm, US500m, GBPJPYm) without placing live MT5 orders.
 Simulates theoretical entries, SL/TP execution, break-even, and profit locks.
 Feeds virtual performance data into the AI Learning Engine and Telegram daily reports.
-100% isolated from live execution (XAUUSDm, USOILm).
-NOTE: USOILm was promoted to live trading on 2026-09-29 and removed from shadow.
+100% isolated from live execution (XAUUSDm, USOILm, US30m, DE30m).
+NOTE: USOILm was promoted on 2026-09-29; DE30m was promoted to live trading on 2026-11-17.
 """
 
 import os
@@ -77,17 +77,6 @@ SHADOW_CONFIGS = {
         "lock_trigger_dollars": 35.0,    # Trigger lock at +$35.00 (110 pips = 1.10)
         "lock_amount_dollars": 25.0,     # Lock +$25.00 profit into SL (79 pips = 0.79)
         "pip_size": 0.01
-    },
-    "DE30m": {
-        "symbol": "DE30m",
-        "name": "DAX 30 (GER40)",
-        "lot": 0.25,                     # 0.25 Lot (~$0.28 per index pt)
-        "tp_dollars": 60.0,              # Target: $60.00 USD Profit (214.0 index pts)
-        "max_sl_dollars": 36.0,          # Risk Cap: $36.00 USD (128.0 index pts)
-        "be_trigger_dollars": 20.0,      # BE at +$20.00 (71.0 index pts)
-        "lock_trigger_dollars": 35.0,    # Trigger lock at +$35.00 (125.0 index pts)
-        "lock_amount_dollars": 25.0,     # Lock +$25.00 profit into SL (89.0 index pts)
-        "pip_size": 1.0
     }
 }
 

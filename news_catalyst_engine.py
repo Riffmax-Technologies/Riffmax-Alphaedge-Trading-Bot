@@ -143,8 +143,8 @@ class NewsCatalystEngine:
                 diff_min = (now_utc - ev['dt_utc']).total_seconds() / 60.0
                 tier = self._classify_event_tier(ev.get('title', ''))
 
-                # 5 min BEFORE news: freeze entries, lock BE on winning trades
-                if -5.0 <= diff_min < 0:
+                # 15 min BEFORE news: freeze entries, lock BE on winning trades
+                if -15.0 <= diff_min < 0:
                     return {
                         'state': 'PRE_NEWS_FREEZE',
                         'event': ev['title'],

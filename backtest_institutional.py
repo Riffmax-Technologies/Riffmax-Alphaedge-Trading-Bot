@@ -23,14 +23,17 @@ import MetaTrader5 as mt5
 from pure_price_action import (
     CALIBRATED_ASSET_SPECS,
     compute_asian_range_at,
+    compute_equity_scale,
     compute_h4_structure_series,
     evaluate_3tf_pure_pa_step,
+    scale_symbol_lot,
 )
 
 SYMBOLS = list(CALIBRATED_ASSET_SPECS.keys())
 MAX_CONCURRENT = 2
 DAILY_DD_CAP_USD = 50.0
 COOLDOWN_SEC = 3600
+START_BALANCE_USD = 534.0
 
 
 def _rolling_median_range(highs: np.ndarray, lows: np.ndarray, window: int = 20) -> np.ndarray:
@@ -46,7 +49,7 @@ def _get_dollar_per_pt(symbol: str, lot: float) -> float:
     info = mt5.symbol_info(symbol)
     if info and info.trade_tick_size > 0:
         return (1.0 / info.trade_tick_size) * info.trade_tick_value * lot
-    fallback = {"XAUUSDm": 2.0, "USOILm": 50.0, "US30m": 0.25}
+    fallback = {"XAUUSDm": 2.0, "USOILm": 50.0, "US30m": 0.25, "DE30m": 0.50}
     return fallback.get(symbol, 1.0)
 
 
@@ -190,144 +193,155 @@ def run_portfolio_backtest():
     common_start = max(int(d["m5_t"][25]) for d in data_by_sym.values())
     end_ts = max(int(d["m5_t"][-1]) for d in data_by_sym.values())
 
-    open_pos = {}
-    last_entry_ts = {s: 0 for s in SYMBOLS}
-    last_exit_ts = {s: 0 for s in SYMBOLS}
-    day_realized = {}
-    trades = []
+    def _sim(dynamic_scaling: bool):
+        open_pos = {}
+        last_entry_ts = {s: 0 for s in SYMBOLS}
+        last_exit_ts = {s: 0 for s in SYMBOLS}
+        day_realized = {}
+        trades = []
+        balance = START_BALANCE_USD
 
-    # Group events by exact timestamp so portfolio caps and floating PnL are synchronous
-    idx = 0
-    n_ev = len(events)
-    while idx < n_ev:
-        ts = events[idx][0]
-        step_items = []
-        while idx < n_ev and events[idx][0] == ts:
-            step_items.append(events[idx])
-            idx += 1
+        idx = 0
+        n_ev = len(events)
+        while idx < n_ev:
+            ts = events[idx][0]
+            step_items = []
+            while idx < n_ev and events[idx][0] == ts:
+                step_items.append(events[idx])
+                idx += 1
 
-        if ts < common_start:
-            continue
-
-        dt_utc = datetime.fromtimestamp(ts, tz=timezone.utc)
-        eat_day = (ts + 10800) // 86400
-        realized_today = day_realized.get(eat_day, 0.0)
-
-        # 1. Exit / Trail Check on open positions & accumulate floating PnL
-        floating_pnl = 0.0
-        for _, sym, bar_i in step_items:
-            if sym not in open_pos:
-                continue
-            d = data_by_sym[sym]
-            pos = open_pos[sym]
-            closed, pnl_now, reason = _check_bar_exit(
-                pos,
-                float(d["m5_h"][bar_i]),
-                float(d["m5_l"][bar_i]),
-                float(d["m5_c"][bar_i]),
-                dt_utc,
-                d["dpp"],
-                d["spec"]["spread_pts"],
-            )
-            if closed:
-                del open_pos[sym]
-                last_exit_ts[sym] = ts
-                realized_today += pnl_now
-                day_realized[eat_day] = realized_today
-                trades.append({
-                    "symbol": sym,
-                    "dir": pos["dir"],
-                    "open_ts": pos["open_ts"],
-                    "close_ts": ts,
-                    "pnl": round(pnl_now, 2),
-                    "reason": reason,
-                    "pools": pos["pools"],
-                })
-            else:
-                floating_pnl += pnl_now
-
-        daily_total = realized_today + floating_pnl
-        dd_blocked = daily_total <= -DAILY_DD_CAP_USD
-        fri_late = dt_utc.weekday() == 4 and (dt_utc.hour > 20 or (dt_utc.hour == 20 and dt_utc.minute >= 30))
-
-        if dd_blocked or fri_late:
-            continue
-
-        # 2. Pure PA 3-TF Entry Scan
-        for _, sym, bar_i in step_items:
-            if sym in open_pos or len(open_pos) >= MAX_CONCURRENT:
-                continue
-            if (ts - last_entry_ts[sym] < COOLDOWN_SEC) or (ts - last_exit_ts[sym] < COOLDOWN_SEC):
+            if ts < common_start:
                 continue
 
-            d = data_by_sym[sym]
-            mi = int(d["m15_idx"][bar_i])
-            hi_4 = int(d["h4_idx"][bar_i])
-            di = int(d["d1_idx"][bar_i])
-            if mi < 20 or hi_4 < 20 or di < 2:
+            dt_utc = datetime.fromtimestamp(ts, tz=timezone.utc)
+            eat_day = (ts + 10800) // 86400
+            realized_today = day_realized.get(eat_day, 0.0)
+
+            # 1. Exit / Trail Check on open positions & accumulate floating PnL
+            floating_pnl = 0.0
+            for _, sym, bar_i in step_items:
+                if sym not in open_pos:
+                    continue
+                d = data_by_sym[sym]
+                pos = open_pos[sym]
+                closed, pnl_now, reason = _check_bar_exit(
+                    pos,
+                    float(d["m5_h"][bar_i]),
+                    float(d["m5_l"][bar_i]),
+                    float(d["m5_c"][bar_i]),
+                    dt_utc,
+                    pos["dpp"],
+                    d["spec"]["spread_pts"],
+                )
+                if closed:
+                    del open_pos[sym]
+                    last_exit_ts[sym] = ts
+                    realized_today += pnl_now
+                    balance += pnl_now
+                    day_realized[eat_day] = realized_today
+                    trades.append({
+                        "symbol": sym,
+                        "dir": pos["dir"],
+                        "open_ts": pos["open_ts"],
+                        "close_ts": ts,
+                        "pnl": round(pnl_now, 2),
+                        "reason": reason,
+                        "pools": pos["pools"],
+                        "scale": pos["scale"],
+                    })
+                else:
+                    floating_pnl += pnl_now
+
+            cur_scale = compute_equity_scale(balance) if dynamic_scaling else 1.0
+            dd_cap = DAILY_DD_CAP_USD * cur_scale
+            daily_total = realized_today + floating_pnl
+            dd_blocked = daily_total <= -dd_cap
+            fri_late = dt_utc.weekday() == 4 and (dt_utc.hour > 20 or (dt_utc.hour == 20 and dt_utc.minute >= 30))
+
+            if dd_blocked or fri_late:
                 continue
 
-            day_bucket = ts // 86400
-            hr_utc = (ts % 86400) // 3600
-            asian_h, asian_l = d["asian_cache"].get(day_bucket, (np.nan, np.nan)) if hr_utc >= 6 else (np.nan, np.nan)
+            # 2. Pure PA 3-TF Entry Scan
+            for _, sym, bar_i in step_items:
+                if sym in open_pos or len(open_pos) >= MAX_CONCURRENT:
+                    continue
+                if (ts - last_entry_ts[sym] < COOLDOWN_SEC) or (ts - last_exit_ts[sym] < COOLDOWN_SEC):
+                    continue
 
-            res = evaluate_3tf_pure_pa_step(
-                c_m5=float(d["m5_c"][bar_i]),
-                o_m5=float(d["m5_o"][bar_i]),
-                h_m5=float(d["m5_h"][bar_i]),
-                l_m5=float(d["m5_l"][bar_i]),
-                c_m5_prev=float(d["m5_c"][bar_i - 1]),
-                h_m5_prev=float(d["m5_h"][bar_i - 1]),
-                l_m5_prev=float(d["m5_l"][bar_i - 1]),
-                m5_med_range=float(d["m5_med"][bar_i]),
-                m15_o=float(d["m15_o"][mi]),
-                m15_c=float(d["m15_c"][mi]),
-                m15_med_range=float(d["m15_med"][mi]),
-                h4_bias_state=int(d["h4_b3"][hi_4]),
-                h4_sh=float(d["h4_sh"][hi_4]),
-                h4_sl=float(d["h4_sl"][hi_4]),
-                pdh=float(d["d1_h"][di]),
-                pdl=float(d["d1_l"][di]),
-                h4_prev_h=float(d["h4_h"][hi_4]),
-                h4_prev_l=float(d["h4_l"][hi_4]),
-                asian_h=asian_h,
-                asian_l=asian_l,
-                dt_utc=dt_utc,
-            )
-            if not res["triggered"]:
-                continue
+                d = data_by_sym[sym]
+                mi = int(d["m15_idx"][bar_i])
+                hi_4 = int(d["h4_idx"][bar_i])
+                di = int(d["d1_idx"][bar_i])
+                if mi < 20 or hi_4 < 20 or di < 2:
+                    continue
 
-            spec = d["spec"]
-            dpp = d["dpp"]
-            spread = spec["spread_pts"]
-            sl_dist = spec["max_sl_dollars"] / dpp
-            tp_dist = spec["tp_dollars"] / dpp
-            cl = float(d["m5_c"][bar_i])
-            if res["direction"] == "BUY":
-                entry = cl + spread
-                sl_px = entry - sl_dist
-                tp_px = entry + tp_dist
-            else:
-                entry = cl
-                sl_px = entry + sl_dist
-                tp_px = entry - tp_dist
+                day_bucket = ts // 86400
+                hr_utc = (ts % 86400) // 3600
+                asian_h, asian_l = d["asian_cache"].get(day_bucket, (np.nan, np.nan)) if hr_utc >= 6 else (np.nan, np.nan)
 
-            open_pos[sym] = {
-                "dir": res["direction"],
-                "entry": entry,
-                "sl_px": sl_px,
-                "tp_px": tp_px,
-                "tp_usd": spec["tp_dollars"],
-                "be_trig_usd": spec["be_trigger_dollars"],
-                "be_buf": 2.0 / dpp,
-                "lock_trig_usd": spec["lock_trigger_dollars"],
-                "lock_amt_usd": spec["lock_amount_dollars"],
-                "be": False,
-                "lock1": False,
-                "open_ts": ts,
-                "pools": "+".join(res["swept_pools"]),
-            }
-            last_entry_ts[sym] = ts
+                res = evaluate_3tf_pure_pa_step(
+                    c_m5=float(d["m5_c"][bar_i]),
+                    o_m5=float(d["m5_o"][bar_i]),
+                    h_m5=float(d["m5_h"][bar_i]),
+                    l_m5=float(d["m5_l"][bar_i]),
+                    c_m5_prev=float(d["m5_c"][bar_i - 1]),
+                    h_m5_prev=float(d["m5_h"][bar_i - 1]),
+                    l_m5_prev=float(d["m5_l"][bar_i - 1]),
+                    m5_med_range=float(d["m5_med"][bar_i]),
+                    m15_o=float(d["m15_o"][mi]),
+                    m15_c=float(d["m15_c"][mi]),
+                    m15_med_range=float(d["m15_med"][mi]),
+                    h4_bias_state=int(d["h4_b3"][hi_4]),
+                    h4_sh=float(d["h4_sh"][hi_4]),
+                    h4_sl=float(d["h4_sl"][hi_4]),
+                    pdh=float(d["d1_h"][di]),
+                    pdl=float(d["d1_l"][di]),
+                    h4_prev_h=float(d["h4_h"][hi_4]),
+                    h4_prev_l=float(d["h4_l"][hi_4]),
+                    asian_h=asian_h,
+                    asian_l=asian_l,
+                    dt_utc=dt_utc,
+                    symbol=sym,
+                )
+                if not res["triggered"]:
+                    continue
+
+                spec = d["spec"]
+                trade_lot = scale_symbol_lot(spec["lot"], cur_scale, 0.01, 0.01) if dynamic_scaling else spec["lot"]
+                pos_scale = trade_lot / spec["lot"]
+                dpp = d["dpp"] * pos_scale
+                spread = spec["spread_pts"]
+                sl_dist = (spec["max_sl_dollars"] * pos_scale) / dpp
+                tp_dist = (spec["tp_dollars"] * pos_scale) / dpp
+                cl = float(d["m5_c"][bar_i])
+                if res["direction"] == "BUY":
+                    entry = cl + spread
+                    sl_px = entry - sl_dist
+                    tp_px = entry + tp_dist
+                else:
+                    entry = cl
+                    sl_px = entry + sl_dist
+                    tp_px = entry - tp_dist
+
+                open_pos[sym] = {
+                    "dir": res["direction"],
+                    "entry": entry,
+                    "sl_px": sl_px,
+                    "tp_px": tp_px,
+                    "dpp": dpp,
+                    "scale": pos_scale,
+                    "tp_usd": spec["tp_dollars"] * pos_scale,
+                    "be_trig_usd": spec["be_trigger_dollars"] * pos_scale,
+                    "be_buf": (2.0 * pos_scale) / dpp,
+                    "lock_trig_usd": spec["lock_trigger_dollars"] * pos_scale,
+                    "lock_amt_usd": spec["lock_amount_dollars"] * pos_scale,
+                    "be": False,
+                    "lock1": False,
+                    "open_ts": ts,
+                    "pools": "+".join(res["swept_pools"]),
+                }
+                last_entry_ts[sym] = ts
+        return trades, balance
 
     def summarize(label: str, subset: list[dict]):
         n = len(subset)
@@ -353,9 +367,10 @@ def run_portfolio_backtest():
             f"WR={wr:>5.1f}% | PF={pf:>4.2f} | Net=${net:>+8.2f} | Exp=${exp:>+5.2f} | MaxDD=${max_dd:>+7.2f}"
         )
 
+    trades, _ = _sim(dynamic_scaling=False)
     print("=" * 105)
-    print("ALPHAEDGE PURE PRICE ACTION 3-TF PORTFOLIO BACKTEST (SL=$34 | TP=$55 | BE=+$28 | Lock1=+$44->$32)")
-    print(f"Window: {datetime.fromtimestamp(common_start, timezone.utc).strftime('%Y-%m-%d')} -> {datetime.fromtimestamp(end_ts, timezone.utc).strftime('%Y-%m-%d')} | Max Conc: {MAX_CONCURRENT} | Daily DD Cap: -${DAILY_DD_CAP_USD:.0f}")
+    print("ALPHAEDGE PURE PRICE ACTION 3-TF 4-ASSET BACKTEST (BASE 1x: SL=$34 | TP=$55 | BE=+$28 | Lock1=+$44->$32)")
+    print(f"Assets: {', '.join(SYMBOLS)} | Window: {datetime.fromtimestamp(common_start, tz=timezone.utc).strftime('%Y-%m-%d')} -> {datetime.fromtimestamp(end_ts, tz=timezone.utc).strftime('%Y-%m-%d')} | Max Conc: {MAX_CONCURRENT}")
     print("=" * 105)
 
     split_ts = int(common_start + (end_ts - common_start) * 0.58)
@@ -368,6 +383,11 @@ def run_portfolio_backtest():
     print("-" * 105)
     for sym in SYMBOLS:
         summarize(f"Asset: {sym}", [t for t in trades if t["symbol"] == sym])
+
+    comp_trades, comp_end_bal = _sim(dynamic_scaling=True)
+    print("-" * 105)
+    summarize("COMPOUNDED (Tiered)", comp_trades)
+    print(f"Compounded Balance ($534 start, +0.5x per +$300 tier >= $800): ${START_BALANCE_USD:.2f} -> ${comp_end_bal:.2f} (Max Tier Used: {max(t['scale'] for t in comp_trades):.1f}x)")
     print("=" * 105)
 
 

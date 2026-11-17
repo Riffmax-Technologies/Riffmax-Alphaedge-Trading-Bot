@@ -57,15 +57,17 @@ for fname in core_files:
 
 import pure_price_action as ppa
 import institutional_trader as it
+import shadow_tracker as st
 from institutional_engine import InstitutionalEngine
 from news_catalyst_engine import NewsCatalystEngine
 from ai_learning import AutoLearner
 import m15_trade_analysis_logger as tlog
 
-print("\n--- 2. Calibrated Asset Specs & Risk Constants ---")
+print("\n--- 2. Calibrated Asset Specs, Shadow Promotion & Equity Scaling ---")
 check("Daily DD Cap", it.MAX_DAILY_DRAWDOWN_USD == 50.0, f"-${it.MAX_DAILY_DRAWDOWN_USD:.2f}")
 check("Max Concurrent", it.MAX_CONCURRENT_POSITIONS == 2, f"{it.MAX_CONCURRENT_POSITIONS} trades")
-for sym, expected_lot in [("XAUUSDm", 0.02), ("USOILm", 0.05), ("US30m", 0.25)]:
+check("DE30m removed from shadow", "DE30m" not in st.SHADOW_CONFIGS, f"shadow={list(st.SHADOW_CONFIGS.keys())}")
+for sym, expected_lot in [("XAUUSDm", 0.02), ("USOILm", 0.05), ("US30m", 0.25), ("DE30m", 0.45)]:
     cfg = it.ASSET_CONFIGS.get(sym, {})
     ok = (
         cfg.get("lot") == expected_lot
@@ -77,19 +79,28 @@ for sym, expected_lot in [("XAUUSDm", 0.02), ("USOILm", 0.05), ("US30m", 0.25)]:
     )
     check(f"Spec {sym}", ok, f"lot={cfg.get('lot')}, SL=${cfg.get('max_sl_dollars')}, TP=${cfg.get('tp_dollars')}, BE=${cfg.get('be_trigger_dollars')}")
 
+check("Equity scale $534 -> 1.0x", ppa.compute_equity_scale(534.0) == 1.0, f"got={ppa.compute_equity_scale(534.0)}")
+check("Equity scale $800 -> 1.5x", ppa.compute_equity_scale(800.0) == 1.5, f"got={ppa.compute_equity_scale(800.0)}")
+check("Equity scale $1100 -> 2.0x", ppa.compute_equity_scale(1100.0) == 2.0, f"got={ppa.compute_equity_scale(1100.0)}")
+check("Scaled lot Gold 1.5x", ppa.scale_symbol_lot(0.02, 1.5) == 0.03, f"got={ppa.scale_symbol_lot(0.02, 1.5)}")
+check("Scaled lot DE30m 1.5x", ppa.scale_symbol_lot(0.45, 1.5) == 0.68, f"got={ppa.scale_symbol_lot(0.45, 1.5)}")
+
 print("\n--- 3. Mon-Fri London & NY Killzone Schedule ---")
 # Mondays & Fridays MUST trade during Killzones; weekends & off-hours MUST block
 schedule_cases = [
-    ("Mon 07:00 UTC (London KZ)", datetime(2026, 11, 9, 7, 0, tzinfo=timezone.utc), True),
-    ("Fri 15:30 UTC (NY KZ)", datetime(2026, 11, 13, 15, 30, tzinfo=timezone.utc), True),
-    ("Wed 02:00 UTC (Asian chop)", datetime(2026, 11, 11, 2, 0, tzinfo=timezone.utc), False),
-    ("Wed 11:00 UTC (London lunch)", datetime(2026, 11, 11, 11, 0, tzinfo=timezone.utc), False),
-    ("Thu 21:00 UTC (Rollover)", datetime(2026, 11, 12, 21, 0, tzinfo=timezone.utc), False),
-    ("Sat 08:00 UTC (Weekend)", datetime(2026, 11, 14, 8, 0, tzinfo=timezone.utc), False),
-    ("Sun 16:00 UTC (Weekend)", datetime(2026, 11, 15, 16, 0, tzinfo=timezone.utc), False),
+    ("Mon 07:00 UTC (Gold London KZ)", datetime(2026, 11, 9, 7, 0, tzinfo=timezone.utc), "XAUUSDm", True),
+    ("Mon 07:00 UTC (DE30m Blocked Pre-NY)", datetime(2026, 11, 9, 7, 0, tzinfo=timezone.utc), "DE30m", False),
+    ("Tue 15:00 UTC (DE30m NY/Xetra KZ)", datetime(2026, 11, 10, 15, 0, tzinfo=timezone.utc), "DE30m", True),
+    ("Tue 18:00 UTC (DE30m Blocked Late)", datetime(2026, 11, 10, 18, 0, tzinfo=timezone.utc), "DE30m", False),
+    ("Fri 15:30 UTC (NY KZ)", datetime(2026, 11, 13, 15, 30, tzinfo=timezone.utc), "US30m", True),
+    ("Wed 02:00 UTC (Asian chop)", datetime(2026, 11, 11, 2, 0, tzinfo=timezone.utc), "USOILm", False),
+    ("Wed 11:00 UTC (London lunch)", datetime(2026, 11, 11, 11, 0, tzinfo=timezone.utc), "XAUUSDm", False),
+    ("Thu 21:00 UTC (Rollover)", datetime(2026, 11, 12, 21, 0, tzinfo=timezone.utc), "US30m", False),
+    ("Sat 08:00 UTC (Weekend)", datetime(2026, 11, 14, 8, 0, tzinfo=timezone.utc), "XAUUSDm", False),
+    ("Sun 16:00 UTC (Weekend)", datetime(2026, 11, 15, 16, 0, tzinfo=timezone.utc), "DE30m", False),
 ]
-for label, dt_case, expected in schedule_cases:
-    got = ppa.is_killzone_active(dt_case)
+for label, dt_case, sym_case, expected in schedule_cases:
+    got = ppa.is_killzone_active(dt_case, symbol=sym_case)
     check(label, got == expected, f"got={got}, expected={expected}")
 
 weekend_cases = [
@@ -227,6 +238,19 @@ perf = tlog.get_performance_summary()
 check("Logger summary", isinstance(perf, dict) and "total" in perf, f"trades={perf.get('total')}")
 news = NewsCatalystEngine()
 check("News engine status", isinstance(news.get_market_catalyst_status("XAUUSDm"), dict), "OK")
+from datetime import timedelta as _td
+news.events = [{
+    "title": "FOMC Chair Speech Test", "country": "USD", "impact": "High",
+    "forecast": "", "previous": "", "dt_utc": datetime.now(timezone.utc) + _td(minutes=10), "timestamp": 0.0,
+}]
+cat_test = news.get_market_catalyst_status("XAUUSDm")
+check("15m News Pre-Freeze", cat_test.get("state") == "PRE_NEWS_FREEZE", f"state={cat_test.get('state')}")
+news.events = [{
+    "title": "ECB President Speaks Test", "country": "EUR", "impact": "High",
+    "forecast": "", "previous": "", "dt_utc": datetime.now(timezone.utc) + _td(minutes=10), "timestamp": 0.0,
+}]
+cat_de30 = news.get_market_catalyst_status("DE30m")
+check("DE30m maps EUR News", cat_de30.get("state") == "PRE_NEWS_FREEZE", f"state={cat_de30.get('state')}")
 
 print("\n" + "=" * 72)
 if failures:

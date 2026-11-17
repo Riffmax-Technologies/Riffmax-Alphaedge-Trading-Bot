@@ -18,6 +18,10 @@ import numpy as np
 
 
 KILLZONE_HOURS_UTC = frozenset({6, 7, 8, 9, 14, 15, 16, 17, 18, 19})
+DE30M_KILLZONE_HOURS_UTC = frozenset({14, 15, 16})
+SYMBOL_KILLZONE_HOURS_UTC = {
+    "DE30m": DE30M_KILLZONE_HOURS_UTC,
+}
 
 
 def is_weekend_quiet(dt_utc: datetime | None = None) -> bool:
@@ -70,22 +74,57 @@ CALIBRATED_ASSET_SPECS = {
         "max_sl_dollars": 34.0,
         "spread_pts": 1.30,
     },
+    "DE30m": {
+        "lot": 0.45,
+        "tp_dollars": 55.0,
+        "tp_catalyst_dollars": 70.0,
+        "be_trigger_dollars": 28.0,
+        "lock_trigger_dollars": 44.0,
+        "lock_amount_dollars": 32.0,
+        "lock2_trigger_dollars": 56.0,
+        "lock2_amount_dollars": 45.0,
+        "max_sl_dollars": 34.0,
+        "spread_pts": 0.70,
+    },
 }
 
 
-def is_killzone_active(dt_utc: datetime | None = None) -> bool:
+def compute_equity_scale(balance_usd: float, max_scale: float = 5.0) -> float:
+    """
+    Equity-tiered position multiplier preserving ~6.4% initial risk per trade:
+      - < $800        -> 1.0x ($34 SL / $55 TP)
+      - $800 - $1,099 -> 1.5x ($51 SL / $82.50 TP)
+      - $1,100+       -> +0.5x per +$300 equity tier (capped at max_scale)
+    """
+    if balance_usd < 800.0:
+        return 1.0
+    steps = int((balance_usd - 500.0) // 300.0)
+    return min(float(max_scale), round(1.0 + 0.5 * max(0, steps), 2))
+
+
+def scale_symbol_lot(base_lot: float, scale: float, lot_step: float = 0.01, min_lot: float = 0.01) -> float:
+    """Round scaled lot safely to broker volume_step and volume_min."""
+    raw = float(base_lot) * max(1.0, float(scale))
+    if lot_step > 0:
+        stepped = round(round(raw / lot_step) * lot_step, 2)
+    else:
+        stepped = round(raw, 2)
+    return max(round(float(min_lot), 2), stepped)
+
+
+def is_killzone_active(dt_utc: datetime | None = None, symbol: str | None = None) -> bool:
     """
     Active Monday - Friday during institutional liquidity windows:
-      - London Killzone : 06:00 - 09:59 UTC (09:00 - 12:59 EAT)
-      - New York Session: 14:00 - 19:59 UTC (17:00 - 22:59 EAT)
-    Blocks dead Asian midnight chop (00-05 UTC), London-lunch / US-open fakeouts
-    (10-13 UTC), rollover spread widening (20-23 UTC), and weekends.
+      - Default (Gold, Oil, US30): London 06-09 UTC (09-12:59 EAT) & NY 14-19 UTC (17-22:59 EAT)
+      - DAX (DE30m)               : NY Open / Xetra Close Overlap 14-16 UTC (17-19:59 EAT)
+    Blocks dead Asian midnight chop (00-05 UTC), low-edge session hours, and weekends.
     """
     if dt_utc is None:
         dt_utc = datetime.now(timezone.utc)
     if dt_utc.weekday() in (5, 6):
         return False
-    return dt_utc.hour in KILLZONE_HOURS_UTC
+    allowed_hours = SYMBOL_KILLZONE_HOURS_UTC.get(symbol, KILLZONE_HOURS_UTC) if symbol else KILLZONE_HOURS_UTC
+    return dt_utc.hour in allowed_hours
 
 
 def detect_fractal_swings(highs: np.ndarray, lows: np.ndarray, left: int = 2, right: int = 2):
@@ -181,6 +220,7 @@ def evaluate_3tf_pure_pa_step(
     h4_prev_h: float, h4_prev_l: float,
     asian_h: float, asian_l: float,
     dt_utc: datetime,
+    symbol: str | None = None,
 ):
     """
     Execute the exact calibrated 3-Timeframe Pure Price Action signal gate on closed bars.
@@ -205,7 +245,7 @@ def evaluate_3tf_pure_pa_step(
         "reason": "NO_SETUP",
     }
 
-    if not is_killzone_active(dt_utc):
+    if not is_killzone_active(dt_utc, symbol=symbol):
         result["reason"] = "OUTSIDE_KILLZONE"
         return result
 
