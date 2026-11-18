@@ -1839,7 +1839,7 @@ if __name__ == "__main__":
     logger.info("  Strategy: H4 Fractal Structure + 75%/25% Leg | PDH/Asian/H4 Sweeps | M5 Reclaim")
     logger.info("  Base 1x: Gold 0.02 | Oil 0.05 | US30 0.25 | DE30m 0.45 -> $55 TP / $34 SL / +$28 BE / $44->$32 Lock")
     logger.info("  Compounding: Equity-Tiered Scaling (+0.5x per +$300 above $500 -> ~6.4% risk cap)")
-    logger.info("  Killzones: Gold/Oil/US30 06-09 & 14-19 UTC | DE30m 14-16 UTC | Anti-Widen SL Guard | Max Conc: 2")
+    logger.info("  Killzones: Mon-Fri 06-19 UTC (09:00-22:59 EAT Continuous) | Anti-Widen SL Guard | Max Conc: 2")
     logger.info("  Guidance: ForexFactory Real-Time Macro News (USD/EUR, 15m Pre-Freeze) | Friday 20:45 UTC Close")
     logger.info("=" * 65)
 
@@ -1847,10 +1847,10 @@ if __name__ == "__main__":
     startup_msg = (
         "<b>🏛 AlphaEdge — Pure Price Action 3-TF Engine Active</b>\n\n"
         "<b>Live Trading Assets (4 Assets | Equity-Tiered Scaling):</b>\n"
-        "• <b>Gold (XAUUSDm):</b> <b>0.02</b> base lot | $55 TP | $34 SL (17 pts) | 09–13 & 17–23 EAT\n"
-        "• <b>Crude Oil (USOILm):</b> <b>0.05</b> base lot | $55 TP | $34 SL ($0.68) | 09–13 & 17–23 EAT\n"
-        "• <b>Dow Jones (US30m):</b> <b>0.25</b> base lot | $55 TP | $34 SL (136 pts) | 09–13 & 17–23 EAT\n"
-        "• <b>DAX 40 (DE30m):</b> <b>0.45</b> base lot | $55 TP | $34 SL (68 pts) | 17:00–19:59 EAT (NY/Xetra Overlap)\n"
+        "• <b>Gold (XAUUSDm):</b> <b>0.02</b> base lot | $55 TP | $34 SL (17 pts) | 09:00–22:59 EAT\n"
+        "• <b>Crude Oil (USOILm):</b> <b>0.05</b> base lot | $55 TP | $34 SL ($0.68) | 09:00–22:59 EAT\n"
+        "• <b>Dow Jones (US30m):</b> <b>0.25</b> base lot | $55 TP | $34 SL (136 pts) | 09:00–22:59 EAT\n"
+        "• <b>DAX 40 (DE30m):</b> <b>0.45</b> base lot | $55 TP | $34 SL (68 pts) | 09:00–22:59 EAT\n"
         "<b>Shadow Observation (5 Assets):</b> EURUSDm · USTECm (Nasdaq) · GBPUSDm · US500m (S&P 500) · GBPJPYm (paper mode)\n\n"
         "<b>Pure Price Action 3-TF & Capital Hardening:</b>\n"
         "• <b>TF1 (D1 + H4):</b> Fractal Swing Structure (3-state) + 75%/25% Swing Leg Equilibrium.\n"

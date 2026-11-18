@@ -89,12 +89,12 @@ print("\n--- 3. Mon-Fri London & NY Killzone Schedule ---")
 # Mondays & Fridays MUST trade during Killzones; weekends & off-hours MUST block
 schedule_cases = [
     ("Mon 07:00 UTC (Gold London KZ)", datetime(2026, 11, 9, 7, 0, tzinfo=timezone.utc), "XAUUSDm", True),
-    ("Mon 07:00 UTC (DE30m Blocked Pre-NY)", datetime(2026, 11, 9, 7, 0, tzinfo=timezone.utc), "DE30m", False),
-    ("Tue 15:00 UTC (DE30m NY/Xetra KZ)", datetime(2026, 11, 10, 15, 0, tzinfo=timezone.utc), "DE30m", True),
-    ("Tue 18:00 UTC (DE30m Blocked Late)", datetime(2026, 11, 10, 18, 0, tzinfo=timezone.utc), "DE30m", False),
+    ("Mon 07:00 UTC (DE30m London Active)", datetime(2026, 11, 9, 7, 0, tzinfo=timezone.utc), "DE30m", True),
+    ("Tue 15:00 UTC (DE30m NY Active)", datetime(2026, 11, 10, 15, 0, tzinfo=timezone.utc), "DE30m", True),
+    ("Tue 18:00 UTC (DE30m Late NY Active)", datetime(2026, 11, 10, 18, 0, tzinfo=timezone.utc), "DE30m", True),
     ("Fri 15:30 UTC (NY KZ)", datetime(2026, 11, 13, 15, 30, tzinfo=timezone.utc), "US30m", True),
     ("Wed 02:00 UTC (Asian chop)", datetime(2026, 11, 11, 2, 0, tzinfo=timezone.utc), "USOILm", False),
-    ("Wed 11:00 UTC (London lunch)", datetime(2026, 11, 11, 11, 0, tzinfo=timezone.utc), "XAUUSDm", False),
+    ("Wed 11:00 UTC (Midday Active)", datetime(2026, 11, 11, 11, 0, tzinfo=timezone.utc), "XAUUSDm", True),
     ("Thu 21:00 UTC (Rollover)", datetime(2026, 11, 12, 21, 0, tzinfo=timezone.utc), "US30m", False),
     ("Sat 08:00 UTC (Weekend)", datetime(2026, 11, 14, 8, 0, tzinfo=timezone.utc), "XAUUSDm", False),
     ("Sun 16:00 UTC (Weekend)", datetime(2026, 11, 15, 16, 0, tzinfo=timezone.utc), "DE30m", False),
@@ -147,19 +147,19 @@ r_cnt = ppa.evaluate_3tf_pure_pa_step(
 )
 check("H4 BEAR blocks BUY", (not r_cnt["triggered"]) and "H4_BEARISH_BLOCKS_BUY" in r_cnt["reason"], r_cnt["reason"])
 
-# Test C: H4 Swing Leg > 75% blocks BUY chase
+# Test C: H4 Swing Leg > 75% blocks BUY chase in RANGE (0)
 r_ext = ppa.evaluate_3tf_pure_pa_step(
     c_m5=2604.0, o_m5=2598.0, h_m5=2605.0, l_m5=2594.0,
     c_m5_prev=2597.0, h_m5_prev=2602.0, l_m5_prev=2595.0,
     m5_med_range=8.0,
     m15_o=2596.0, m15_c=2601.0, m15_med_range=14.0,
-    h4_bias_state=1, h4_sh=2610.0, h4_sl=2510.0,  # 2604 is at 94% of leg!
+    h4_bias_state=0, h4_sh=2610.0, h4_sl=2510.0,  # 2604 is at 94% of range leg!
     pdh=2640.0, pdl=2600.0,
     h4_prev_h=2620.0, h4_prev_l=2596.0,
     asian_h=2615.0, asian_l=2601.0,
     dt_utc=kz_dt,
 )
-check("H4 Leg > 75% blocks BUY", (not r_ext["triggered"]) and "H4_OVEREXTENDED_BUY" in r_ext["reason"], r_ext["reason"])
+check("H4 Range Leg > 75% blocks BUY", (not r_ext["triggered"]) and "H4_OVEREXTENDED_BUY" in r_ext["reason"], r_ext["reason"])
 
 # Test D: M15 Bearish Crash (> 1.5x med) blocks BUY
 r_crash = ppa.evaluate_3tf_pure_pa_step(

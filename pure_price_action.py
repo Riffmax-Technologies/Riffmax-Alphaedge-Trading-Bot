@@ -17,11 +17,9 @@ from datetime import datetime, timezone, timedelta
 import numpy as np
 
 
-KILLZONE_HOURS_UTC = frozenset({6, 7, 8, 9, 14, 15, 16, 17, 18, 19})
-DE30M_KILLZONE_HOURS_UTC = frozenset({14, 15, 16})
-SYMBOL_KILLZONE_HOURS_UTC = {
-    "DE30m": DE30M_KILLZONE_HOURS_UTC,
-}
+KILLZONE_HOURS_UTC = frozenset(range(6, 20))  # 06:00 - 19:59 UTC (09:00 - 22:59 EAT continuous active session)
+DE30M_KILLZONE_HOURS_UTC = KILLZONE_HOURS_UTC
+SYMBOL_KILLZONE_HOURS_UTC = {}
 
 
 def is_weekend_quiet(dt_utc: datetime | None = None) -> bool:
@@ -259,14 +257,15 @@ def evaluate_3tf_pure_pa_step(
         result["reason"] = "M5_CLIMAX_OVEREXTENDED"
         return result
 
-    # TF1 H4 Active Swing Leg Equilibrium (Block top 25% chasing for BUY, bottom 25% for SELL)
+    # TF1 H4 Active Swing Leg Equilibrium (Only filter extremes in RANGE; never block trend-aligned H4 continuations)
     h4_eq_buy_ok = True
     h4_eq_sell_ok = True
     if not np.isnan(h4_sh) and not np.isnan(h4_sl) and h4_sh > h4_sl:
         h4_loc = (c_m5 - h4_sl) / (h4_sh - h4_sl) * 100.0
         result["h4_swing_loc_pct"] = round(h4_loc, 1)
-        h4_eq_buy_ok = h4_loc <= 75.0
-        h4_eq_sell_ok = h4_loc >= 25.0
+        if h4_bias_state == 0:
+            h4_eq_buy_ok = h4_loc <= 75.0
+            h4_eq_sell_ok = h4_loc >= 25.0
 
     # Liquidity pools from completed sessions/higher timeframes
     buy_lvls = [("PDL", pdl), ("H4L", h4_prev_l)]
