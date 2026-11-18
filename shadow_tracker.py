@@ -20,62 +20,61 @@ from institutional_engine import InstitutionalEngine
 
 logger = logging.getLogger("AlphaEdge.ShadowTracker")
 
-# ─── Shadow Asset Configurations (Matched to Option B Risk: $36 SL / $60 TP) ─
-# Observation Assets: EURUSDm, USTECm (Nasdaq), XAGUSDm (Silver), GBPUSDm (British Pound)
+# ─── Shadow Asset Configurations (2.5x Lot Scaled: $85 SL / $137.50 TP) ────────
 SHADOW_CONFIGS = {
     "EURUSDm": {
         "symbol": "EURUSDm",
         "name": "EUR/USD",
-        "lot": 0.10,                     # 0.10 Lot ($1.00 per pip / $10,000 per full pt)
-        "tp_dollars": 60.0,              # Target: $60.00 USD Profit (60 pips = 0.00600)
-        "max_sl_dollars": 36.0,          # Risk Cap: $36.00 USD (36 pips = 0.00360)
-        "be_trigger_dollars": 20.0,      # BE at +$20.00 (20 pips)
-        "lock_trigger_dollars": 35.0,    # Trigger lock at +$35.00 (35 pips)
-        "lock_amount_dollars": 25.0,     # Lock +$25.00 profit into SL (25 pips)
+        "lot": 0.24,                     # 0.24 Lot ($2.40 per pip / $24,000 per full pt)
+        "tp_dollars": 137.5,             # Target: $137.50 USD Profit (57.3 pips)
+        "max_sl_dollars": 85.0,          # Risk Cap: $85.00 USD (35.4 pips)
+        "be_trigger_dollars": 70.0,      # BE at +$70.00 (29.2 pips)
+        "lock_trigger_dollars": 110.0,   # Trigger lock at +$110.00
+        "lock_amount_dollars": 80.0,     # Lock +$80.00 profit into SL
         "pip_size": 0.00010
     },
     "USTECm": {
         "symbol": "USTECm",
         "name": "Nasdaq 100",
-        "lot": 0.25,                     # 0.25 Lot ($0.25 per index point)
-        "tp_dollars": 60.0,              # Target: $60.00 USD Profit (240.0 index pts)
-        "max_sl_dollars": 36.0,          # Risk Cap: $36.00 USD (144.0 index pts)
-        "be_trigger_dollars": 20.0,      # BE at +$20.00 (80.0 index pts)
-        "lock_trigger_dollars": 35.0,    # Trigger lock at +$35.00 (140.0 index pts)
-        "lock_amount_dollars": 25.0,     # Lock +$25.00 profit into SL (100.0 index pts)
+        "lot": 0.59,                     # 0.59 Lot ($0.59 per index point)
+        "tp_dollars": 137.5,             # Target: $137.50 USD Profit (233.1 index pts)
+        "max_sl_dollars": 85.0,          # Risk Cap: $85.00 USD (144.1 index pts)
+        "be_trigger_dollars": 70.0,      # BE at +$70.00
+        "lock_trigger_dollars": 110.0,   # Trigger lock at +$110.00
+        "lock_amount_dollars": 80.0,     # Lock +$80.00 profit into SL
         "pip_size": 1.0
     },
     "GBPUSDm": {
         "symbol": "GBPUSDm",
         "name": "GBP/USD (Cable)",
-        "lot": 0.10,                     # 0.10 Lot ($1.00 per pip / $10,000 per full pt)
-        "tp_dollars": 60.0,              # Target: $60.00 USD Profit (60 pips = 0.00600)
-        "max_sl_dollars": 36.0,          # Risk Cap: $36.00 USD (36 pips = 0.00360)
-        "be_trigger_dollars": 20.0,      # BE at +$20.00 (20 pips)
-        "lock_trigger_dollars": 35.0,    # Trigger lock at +$35.00 (35 pips)
-        "lock_amount_dollars": 25.0,     # Lock +$25.00 profit into SL (25 pips)
+        "lot": 0.24,                     # 0.24 Lot ($2.40 per pip / $24,000 per full pt)
+        "tp_dollars": 137.5,             # Target: $137.50 USD Profit (57.3 pips)
+        "max_sl_dollars": 85.0,          # Risk Cap: $85.00 USD (35.4 pips)
+        "be_trigger_dollars": 70.0,      # BE at +$70.00 (29.2 pips)
+        "lock_trigger_dollars": 110.0,   # Trigger lock at +$110.00
+        "lock_amount_dollars": 80.0,     # Lock +$80.00 profit into SL
         "pip_size": 0.00010
     },
     "US500m": {
         "symbol": "US500m",
         "name": "S&P 500",
-        "lot": 1.0,                      # 1.0 Lot ($1.00 per index point)
-        "tp_dollars": 60.0,              # Target: $60.00 USD Profit (60.0 index pts)
-        "max_sl_dollars": 36.0,          # Risk Cap: $36.00 USD (36.0 index pts)
-        "be_trigger_dollars": 20.0,      # BE at +$20.00 (20.0 index pts)
-        "lock_trigger_dollars": 35.0,    # Trigger lock at +$35.00 (35.0 index pts)
-        "lock_amount_dollars": 25.0,     # Lock +$25.00 profit into SL (25.0 index pts)
+        "lot": 2.36,                     # 2.36 Lot ($2.36 per index point)
+        "tp_dollars": 137.5,             # Target: $137.50 USD Profit (58.3 index pts)
+        "max_sl_dollars": 85.0,          # Risk Cap: $85.00 USD (36.0 index pts)
+        "be_trigger_dollars": 70.0,      # BE at +$70.00
+        "lock_trigger_dollars": 110.0,   # Trigger lock at +$110.00
+        "lock_amount_dollars": 80.0,     # Lock +$80.00 profit into SL
         "pip_size": 0.1
     },
     "GBPJPYm": {
         "symbol": "GBPJPYm",
         "name": "GBP/JPY (Guppy)",
-        "lot": 0.05,                     # 0.05 Lot (~$0.317 per pip)
-        "tp_dollars": 60.0,              # Target: $60.00 USD Profit (~189 pips = 1.89)
-        "max_sl_dollars": 36.0,          # Risk Cap: $36.00 USD (~114 pips = 1.14)
-        "be_trigger_dollars": 20.0,      # BE at +$20.00 (63 pips = 0.63)
-        "lock_trigger_dollars": 35.0,    # Trigger lock at +$35.00 (110 pips = 1.10)
-        "lock_amount_dollars": 25.0,     # Lock +$25.00 profit into SL (79 pips = 0.79)
+        "lot": 0.12,                     # 0.12 Lot (~$0.753 per pip)
+        "tp_dollars": 137.5,             # Target: $137.50 USD Profit (~182.6 pips)
+        "max_sl_dollars": 85.0,          # Risk Cap: $85.00 USD (~112.9 pips)
+        "be_trigger_dollars": 70.0,      # BE at +$70.00
+        "lock_trigger_dollars": 110.0,   # Trigger lock at +$110.00
+        "lock_amount_dollars": 80.0,     # Lock +$80.00 profit into SL
         "pip_size": 0.01
     }
 }

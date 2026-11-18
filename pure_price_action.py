@@ -37,66 +37,66 @@ def is_weekend_quiet(dt_utc: datetime | None = None) -> bool:
 
 CALIBRATED_ASSET_SPECS = {
     "XAUUSDm": {
-        "lot": 0.02,
-        "tp_dollars": 55.0,
-        "tp_catalyst_dollars": 70.0,
-        "be_trigger_dollars": 28.0,
-        "lock_trigger_dollars": 44.0,
-        "lock_amount_dollars": 32.0,
-        "lock2_trigger_dollars": 56.0,
-        "lock2_amount_dollars": 45.0,
-        "max_sl_dollars": 34.0,
+        "lot": 0.05,
+        "tp_dollars": 137.5,
+        "tp_catalyst_dollars": 175.0,
+        "be_trigger_dollars": 70.0,
+        "lock_trigger_dollars": 110.0,
+        "lock_amount_dollars": 80.0,
+        "lock2_trigger_dollars": 140.0,
+        "lock2_amount_dollars": 112.5,
+        "max_sl_dollars": 85.0,
         "spread_pts": 0.24,
     },
     "USOILm": {
-        "lot": 0.05,
-        "tp_dollars": 55.0,
-        "tp_catalyst_dollars": 70.0,
-        "be_trigger_dollars": 28.0,
-        "lock_trigger_dollars": 44.0,
-        "lock_amount_dollars": 32.0,
-        "lock2_trigger_dollars": 56.0,
-        "lock2_amount_dollars": 45.0,
-        "max_sl_dollars": 34.0,
+        "lot": 0.12,
+        "tp_dollars": 137.5,
+        "tp_catalyst_dollars": 175.0,
+        "be_trigger_dollars": 70.0,
+        "lock_trigger_dollars": 110.0,
+        "lock_amount_dollars": 80.0,
+        "lock2_trigger_dollars": 140.0,
+        "lock2_amount_dollars": 112.5,
+        "max_sl_dollars": 85.0,
         "spread_pts": 0.014,
     },
     "US30m": {
-        "lot": 0.25,
-        "tp_dollars": 55.0,
-        "tp_catalyst_dollars": 70.0,
-        "be_trigger_dollars": 28.0,
-        "lock_trigger_dollars": 44.0,
-        "lock_amount_dollars": 32.0,
-        "lock2_trigger_dollars": 56.0,
-        "lock2_amount_dollars": 45.0,
-        "max_sl_dollars": 34.0,
+        "lot": 0.62,
+        "tp_dollars": 137.5,
+        "tp_catalyst_dollars": 175.0,
+        "be_trigger_dollars": 70.0,
+        "lock_trigger_dollars": 110.0,
+        "lock_amount_dollars": 80.0,
+        "lock2_trigger_dollars": 140.0,
+        "lock2_amount_dollars": 112.5,
+        "max_sl_dollars": 85.0,
         "spread_pts": 1.30,
     },
     "DE30m": {
-        "lot": 0.45,
-        "tp_dollars": 55.0,
-        "tp_catalyst_dollars": 70.0,
-        "be_trigger_dollars": 28.0,
-        "lock_trigger_dollars": 44.0,
-        "lock_amount_dollars": 32.0,
-        "lock2_trigger_dollars": 56.0,
-        "lock2_amount_dollars": 45.0,
-        "max_sl_dollars": 34.0,
+        "lot": 1.12,
+        "tp_dollars": 137.5,
+        "tp_catalyst_dollars": 175.0,
+        "be_trigger_dollars": 70.0,
+        "lock_trigger_dollars": 110.0,
+        "lock_amount_dollars": 80.0,
+        "lock2_trigger_dollars": 140.0,
+        "lock2_amount_dollars": 112.5,
+        "max_sl_dollars": 85.0,
         "spread_pts": 0.70,
     },
 }
 
 
-def compute_equity_scale(balance_usd: float, max_scale: float = 5.0) -> float:
+def compute_equity_scale(balance_usd: float, max_scale: float = 4.0) -> float:
     """
-    Equity-tiered position multiplier preserving ~6.4% initial risk per trade:
-      - < $800        -> 1.0x ($34 SL / $55 TP)
-      - $800 - $1,099 -> 1.5x ($51 SL / $82.50 TP)
-      - $1,100+       -> +0.5x per +$300 equity tier (capped at max_scale)
+    Equity-tiered position multiplier anchored to the 2.5x base ($85 SL / $137.50 TP):
+      - < $2,000        -> 1.0x ($85 SL / $137.50 TP, Gold 0.05)
+      - $2,000 - $2,749 -> 1.5x ($127.50 SL / $206.25 TP, Gold 0.08)
+      - $2,750+         -> +0.5x per +$750 equity tier (capped at max_scale)
     """
-    if balance_usd < 800.0:
+    if balance_usd < 2000.0:
         return 1.0
-    steps = int((balance_usd - 500.0) // 300.0)
+    steps = int((balance_usd - 1250.0) // 750.0)
     return min(float(max_scale), round(1.0 + 0.5 * max(0, steps), 2))
 
 

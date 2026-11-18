@@ -1837,26 +1837,26 @@ if __name__ == "__main__":
     logger.info("  ALPHAEDGE — PURE PRICE ACTION 3-TF INSTITUTIONAL SWING ENGINE")
     logger.info("  Live Assets: Gold (XAUUSDm) | Crude Oil (USOILm) | Dow Jones (US30m) | DAX 40 (DE30m)")
     logger.info("  Strategy: H4 Fractal Structure + 75%/25% Leg | PDH/Asian/H4 Sweeps | M5 Reclaim")
-    logger.info("  Base 1x: Gold 0.02 | Oil 0.05 | US30 0.25 | DE30m 0.45 -> $55 TP / $34 SL / +$28 BE / $44->$32 Lock")
-    logger.info("  Compounding: Equity-Tiered Scaling (+0.5x per +$300 above $500 -> ~6.4% risk cap)")
-    logger.info("  Killzones: Mon-Fri 06-19 UTC (09:00-22:59 EAT Continuous) | Anti-Widen SL Guard | Max Conc: 2")
+    logger.info("  Base 2.5x: Gold 0.05 | Oil 0.12 | US30 0.62 | DE30m 1.12 -> $137.50 TP / $85.00 SL / +$70 BE / $110->$80 Lock")
+    logger.info("  Compounding: Equity-Tiered Scaling (+0.5x per +$750 above $2,000) | Daily DD Cap: -$150")
+    logger.info("  Session: Mon-Fri 06-19 UTC (09:00-22:59 EAT Continuous) | Anti-Widen SL Guard | Max Conc: 2")
     logger.info("  Guidance: ForexFactory Real-Time Macro News (USD/EUR, 15m Pre-Freeze) | Friday 20:45 UTC Close")
     logger.info("=" * 65)
 
     # 1. Send Online Startup Notification to Telegram
     startup_msg = (
         "<b>🏛 AlphaEdge — Pure Price Action 3-TF Engine Active</b>\n\n"
-        "<b>Live Trading Assets (4 Assets | Equity-Tiered Scaling):</b>\n"
-        "• <b>Gold (XAUUSDm):</b> <b>0.02</b> base lot | $55 TP | $34 SL (17 pts) | 09:00–22:59 EAT\n"
-        "• <b>Crude Oil (USOILm):</b> <b>0.05</b> base lot | $55 TP | $34 SL ($0.68) | 09:00–22:59 EAT\n"
-        "• <b>Dow Jones (US30m):</b> <b>0.25</b> base lot | $55 TP | $34 SL (136 pts) | 09:00–22:59 EAT\n"
-        "• <b>DAX 40 (DE30m):</b> <b>0.45</b> base lot | $55 TP | $34 SL (68 pts) | 09:00–22:59 EAT\n"
-        "<b>Shadow Observation (5 Assets):</b> EURUSDm · USTECm (Nasdaq) · GBPUSDm · US500m (S&P 500) · GBPJPYm (paper mode)\n\n"
+        "<b>Live Trading Assets (4 Assets | 2.5x Lots | -$150 Daily DD Cap):</b>\n"
+        "• <b>Gold (XAUUSDm):</b> <b>0.05</b> lot | $137.50 TP | $85.00 SL (17 pts) | 09:00–22:59 EAT\n"
+        "• <b>Crude Oil (USOILm):</b> <b>0.12</b> lot | $137.50 TP | $85.00 SL ($0.71) | 09:00–22:59 EAT\n"
+        "• <b>Dow Jones (US30m):</b> <b>0.62</b> lot | $137.50 TP | $85.00 SL (137 pts) | 09:00–22:59 EAT\n"
+        "• <b>DAX 40 (DE30m):</b> <b>1.12</b> lot | $137.50 TP | $85.00 SL (69 pts) | 09:00–22:59 EAT\n"
+        "<b>Shadow Observation (5 Assets | 2.5x Lots):</b> EURUSDm (0.24) · USTECm (0.59) · GBPUSDm (0.24) · US500m (2.36) · GBPJPYm (0.12)\n\n"
         "<b>Pure Price Action 3-TF & Capital Hardening:</b>\n"
-        "• <b>TF1 (D1 + H4):</b> Fractal Swing Structure (3-state) + 75%/25% Swing Leg Equilibrium.\n"
+        "• <b>TF1 (D1 + H4):</b> Fractal Swing Structure (3-state) + 75%/25% Range Guard.\n"
         "• <b>TF2 (Pools + M15):</b> PDH/PDL, Asian H/L & Closed H4 H/L Sweeps + Anti-Crash Validation.\n"
         "• <b>TF3 (M5 Precision):</b> 2-Bar Sweep Reclaim & Turn + Anti-Climax Guard.\n"
-        "• <b>Smart Compounding:</b> 1.0x below $800 → steps +0.5x every +$300 equity (~6.4% risk).\n"
+        "• <b>Profit Shield:</b> BE +$70 (+$5 buffer) | Lock1 +$110→+$80 | Lock2 +$140→+$112.50.\n"
         "• <b>Hard Shields:</b> Auto Anti-Widen SL Guard | 15m News Pre-Freeze | Max 2 Concurrent | Sat/Sun Muted.\n\n"
         "<b>Status:</b> 🟢 Armed & Waiting for Pure PA Liquidity Sweeps."
     )
@@ -1967,7 +1967,7 @@ if __name__ == "__main__":
                             f"<b>Killzone Coverage Summary:</b>\n"
                             f"• London Killzone (09–13 EAT): Completed\n"
                             f"• NY Session (17–23 EAT): Closing shortly\n\n"
-                            f"<b>Bot Status:</b> 🟢 Pure PA 3-TF Active | Lots: 0.02 / 0.05 / 0.25 | -$50 Daily DD Cap"
+                            f"<b>Bot Status:</b> 🟢 Pure PA 3-TF Active | Lots: 0.05 / 0.12 / 0.62 / 1.12 | -$150 Daily DD Cap"
                         )
                         send_telegram_alert(eod_msg)
                         logger.info("[Scalp] End-of-Day daily analysis sent to Telegram.")

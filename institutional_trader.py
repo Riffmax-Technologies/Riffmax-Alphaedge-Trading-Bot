@@ -8,15 +8,15 @@ High-conviction Pure Price Action multi-timeframe swing engine (zero lagging ind
                            Closed H4 H/L with M15 anti-crash blowout validation.
   - TF3 (M5 Execution): 2-bar sweep-and-reclaim + directional engulf/turn candle
                         breaking prior bar extreme + anti-climax range guard.
-  - Calibrated Exits (XAUUSDm 0.02 | USOILm 0.05 | US30m 0.25):
-      * TP = $55.00 USD (Catalyst: $70.00) | Hard SL = $34.00 USD
-      * Stage 1 BE: +$28.00 -> move SL to Entry + $2.00 buffer
-      * Stage 2 Profit Lock: +$44.00 -> lock +$32.00
-      * Stage 3 Super-Runner Lock: +$56.00 -> lock +$45.00
+  - Calibrated Exits (XAUUSDm 0.05 | USOILm 0.12 | US30m 0.62 | DE30m 1.12):
+      * TP = $137.50 USD (Catalyst: $175.00) | Hard SL = $85.00 USD
+      * Stage 1 BE: +$70.00 -> move SL to Entry + $5.00 buffer
+      * Stage 2 Profit Lock: +$110.00 -> lock +$80.00
+      * Stage 3 Super-Runner Lock: +$140.00 -> lock +$112.50
   - Risk & Session Shields:
-      * Mon-Fri London (06-09 UTC / 09-13 EAT) & NY (14-19 UTC / 17-23 EAT) Killzones.
-      * Strict -$50.00 daily drawdown hard stop, max 2 concurrent positions, 60-min cooldown.
-      * Friday 20:45+ UTC weekend-close protection; zero SL widening overnight.
+      * Mon-Fri 06-19 UTC (09:00-22:59 EAT) continuous window.
+      * Strict -$150.00 daily drawdown hard stop, max 2 concurrent positions, 60-min cooldown.
+      * Friday 20:45+ UTC weekend-close protection; Anti-Widen SL guard.
 """
 
 import os
@@ -49,7 +49,7 @@ from m15_trade_analysis_logger import (
 
 logger = logging.getLogger("AlphaEdge.Institutional")
 
-MAX_DAILY_DRAWDOWN_USD = 50.0
+MAX_DAILY_DRAWDOWN_USD = 150.0
 MAX_CONCURRENT_POSITIONS = 2
 _DAILY_DD_ALERT_DATE = None
 
@@ -155,38 +155,38 @@ def apply_ai_learned_settings():
                 learned = symbols_cfg.get(sym, {})
                 if not learned:
                     learned = {
-                        "tp_dollars": c.get("gold_tp_dollars", spec.get("tp_dollars", 55.0)),
-                        "tp_catalyst_dollars": c.get("gold_tp_catalyst_dollars", spec.get("tp_catalyst_dollars", 70.0)),
-                        "be_trigger_dollars": c.get("gold_be_trigger_dollars", spec.get("be_trigger_dollars", 28.0)),
-                        "lock_trigger_dollars": c.get("gold_lock_trigger_dollars", spec.get("lock_trigger_dollars", 44.0)),
-                        "lock_amount_dollars": c.get("gold_lock_amount_dollars", spec.get("lock_amount_dollars", 32.0)),
-                        "lock2_trigger_dollars": c.get("gold_lock2_trigger_dollars", spec.get("lock2_trigger_dollars", 56.0)),
-                        "lock2_amount_dollars": c.get("gold_lock2_amount_dollars", spec.get("lock2_amount_dollars", 45.0)),
+                        "tp_dollars": c.get("gold_tp_dollars", spec.get("tp_dollars", 137.5)),
+                        "tp_catalyst_dollars": c.get("gold_tp_catalyst_dollars", spec.get("tp_catalyst_dollars", 175.0)),
+                        "be_trigger_dollars": c.get("gold_be_trigger_dollars", spec.get("be_trigger_dollars", 70.0)),
+                        "lock_trigger_dollars": c.get("gold_lock_trigger_dollars", spec.get("lock_trigger_dollars", 110.0)),
+                        "lock_amount_dollars": c.get("gold_lock_amount_dollars", spec.get("lock_amount_dollars", 80.0)),
+                        "lock2_trigger_dollars": c.get("gold_lock2_trigger_dollars", spec.get("lock2_trigger_dollars", 140.0)),
+                        "lock2_amount_dollars": c.get("gold_lock2_amount_dollars", spec.get("lock2_amount_dollars", 112.5)),
                     }
 
-                tp_val = float(learned.get("tp_dollars", spec.get("tp_dollars", 55.0)))
-                asset_cfg["tp_dollars"] = max(45.0, min(75.0, tp_val))
+                tp_val = float(learned.get("tp_dollars", spec.get("tp_dollars", 137.5)))
+                asset_cfg["tp_dollars"] = max(112.5, min(187.5, tp_val))
 
-                tp_cat = float(learned.get("tp_catalyst_dollars", spec.get("tp_catalyst_dollars", 70.0)))
-                asset_cfg["tp_catalyst_dollars"] = max(60.0, min(90.0, tp_cat))
+                tp_cat = float(learned.get("tp_catalyst_dollars", spec.get("tp_catalyst_dollars", 175.0)))
+                asset_cfg["tp_catalyst_dollars"] = max(150.0, min(225.0, tp_cat))
 
-                be_trig = float(learned.get("be_trigger_dollars", spec.get("be_trigger_dollars", 28.0)))
-                asset_cfg["be_trigger_dollars"] = max(22.0, min(34.0, be_trig))
+                be_trig = float(learned.get("be_trigger_dollars", spec.get("be_trigger_dollars", 70.0)))
+                asset_cfg["be_trigger_dollars"] = max(55.0, min(85.0, be_trig))
 
-                l1_trig = float(learned.get("lock_trigger_dollars", spec.get("lock_trigger_dollars", 44.0)))
-                asset_cfg["lock_trigger_dollars"] = max(36.0, min(52.0, l1_trig))
+                l1_trig = float(learned.get("lock_trigger_dollars", spec.get("lock_trigger_dollars", 110.0)))
+                asset_cfg["lock_trigger_dollars"] = max(90.0, min(130.0, l1_trig))
 
-                l1_amt = float(learned.get("lock_amount_dollars", spec.get("lock_amount_dollars", 32.0)))
-                asset_cfg["lock_amount_dollars"] = max(24.0, min(38.0, l1_amt))
+                l1_amt = float(learned.get("lock_amount_dollars", spec.get("lock_amount_dollars", 80.0)))
+                asset_cfg["lock_amount_dollars"] = max(60.0, min(95.0, l1_amt))
 
-                l2_trig = float(learned.get("lock2_trigger_dollars", spec.get("lock2_trigger_dollars", 56.0)))
-                asset_cfg["lock2_trigger_dollars"] = max(48.0, min(68.0, l2_trig))
+                l2_trig = float(learned.get("lock2_trigger_dollars", spec.get("lock2_trigger_dollars", 140.0)))
+                asset_cfg["lock2_trigger_dollars"] = max(120.0, min(170.0, l2_trig))
 
-                l2_amt = float(learned.get("lock2_amount_dollars", spec.get("lock2_amount_dollars", 45.0)))
-                asset_cfg["lock2_amount_dollars"] = max(36.0, min(52.0, l2_amt))
+                l2_amt = float(learned.get("lock2_amount_dollars", spec.get("lock2_amount_dollars", 112.5)))
+                asset_cfg["lock2_amount_dollars"] = max(90.0, min(130.0, l2_amt))
 
-                # SAFETY INVIOLABILITY: initial max_sl_dollars ($34) is NEVER widened
-                asset_cfg["max_sl_dollars"] = float(spec.get("max_sl_dollars", 34.0))
+                # SAFETY INVIOLABILITY: initial max_sl_dollars ($85) is NEVER widened
+                asset_cfg["max_sl_dollars"] = float(spec.get("max_sl_dollars", 85.0))
         except Exception as e:
             logger.debug(f"[Institutional] Dynamic config load skipped: {e}")
 
@@ -455,7 +455,7 @@ def manage_open_positions(symbol, cfg, catalyst_state):
         pos_type = "BUY" if pos.type == mt5.ORDER_TYPE_BUY else "SELL"
         current_price = pos.price_current
         pos_vol = float(getattr(pos, "volume", base_lot) or base_lot)
-        pos_scale = max(1.0, pos_vol / base_lot) if base_lot > 0 else 1.0
+        pos_scale = max(0.2, pos_vol / base_lot) if base_lot > 0 else 1.0
         dollar_per_point = get_dollar_per_pt(symbol, pos_vol)
 
         pts_gain = (current_price - entry_price) if pos_type == "BUY" else (entry_price - current_price)
@@ -463,7 +463,7 @@ def manage_open_positions(symbol, cfg, catalyst_state):
 
         # 0. Hard Anti-Widen SL Guard: never let SL sit worse than -max_sl_usd * pos_scale
         is_be_active = ACTIVE_BE_TRACKED.get(ticket, False)
-        max_sl_usd = cfg.get('max_sl_dollars', 34.0) * pos_scale
+        max_sl_usd = cfg.get('max_sl_dollars', 85.0) * pos_scale
         allowed_sl_dist = (max_sl_usd / dollar_per_point) if dollar_per_point > 0 else 17.0
         strict_sl = round((entry_price - allowed_sl_dist) if pos_type == "BUY" else (entry_price + allowed_sl_dist), dp)
         if not is_be_active and allowed_sl_dist > 0:
@@ -483,11 +483,11 @@ def manage_open_positions(symbol, cfg, catalyst_state):
         # 1. Stage 1: Dynamic Break-Even Shield Check (scaled to actual open lot)
         if not is_be_active:
             be_condition = False
-            be_target_usd = cfg.get('be_trigger_dollars', 28.0) * pos_scale
+            be_target_usd = cfg.get('be_trigger_dollars', 70.0) * pos_scale
             if dollar_gain >= be_target_usd:
                 be_condition = True
-                # Lock +$2.00 * pos_scale consistently across Gold/Oil/US30/DE30m to cover spread cleanly
-                be_buffer = ((2.0 * pos_scale) / dollar_per_point) if dollar_per_point > 0 else 0.5
+                # Lock +$5.00 * pos_scale ($5 at 2.5x) to cover spread cleanly
+                be_buffer = ((5.0 * pos_scale) / dollar_per_point) if dollar_per_point > 0 else 1.0
 
             if be_condition:
                 new_sl = entry_price + be_buffer if pos_type == "BUY" else entry_price - be_buffer
@@ -507,11 +507,11 @@ def manage_open_positions(symbol, cfg, catalyst_state):
         is_lock_active = ACTIVE_LOCK_TRACKED.get(ticket, False)
         if not is_lock_active:
             lock_condition = False
-            lock_target_usd = cfg.get('lock_trigger_dollars', 44.0) * pos_scale
-            lock_amount_usd = cfg.get('lock_amount_dollars', 32.0) * pos_scale
+            lock_target_usd = cfg.get('lock_trigger_dollars', 110.0) * pos_scale
+            lock_amount_usd = cfg.get('lock_amount_dollars', 80.0) * pos_scale
             if dollar_gain >= lock_target_usd:
                 lock_condition = True
-                lock_dist = lock_amount_usd / dollar_per_point if dollar_per_point > 0 else 12.5
+                lock_dist = lock_amount_usd / dollar_per_point if dollar_per_point > 0 else 16.0
                 locked_profit_desc = f"+${lock_amount_usd:.2f}"
 
             if lock_condition:
@@ -532,8 +532,8 @@ def manage_open_positions(symbol, cfg, catalyst_state):
         is_lock2_active = ACTIVE_LOCK2_TRACKED.get(ticket, False)
         if not is_lock2_active:
             lock2_condition = False
-            lock2_target_usd = cfg.get('lock2_trigger_dollars', 56.0) * pos_scale
-            lock2_amount_usd = cfg.get('lock2_amount_dollars', 45.0) * pos_scale
+            lock2_target_usd = cfg.get('lock2_trigger_dollars', 140.0) * pos_scale
+            lock2_amount_usd = cfg.get('lock2_amount_dollars', 112.5) * pos_scale
             if dollar_gain >= lock2_target_usd:
                 lock2_condition = True
                 lock2_dist = lock2_amount_usd / dollar_per_point if dollar_per_point > 0 else 22.5
@@ -795,9 +795,12 @@ def run_pre_session_secure_gate():
         if cfg is None:
             continue
 
-        lot           = cfg['lot']
-        dollar_per_pt = get_dollar_per_pt(symbol, lot)
+        base_lot      = cfg['lot']
+        pos_vol       = float(getattr(pos, "volume", base_lot) or base_lot)
+        pos_scale     = max(0.2, pos_vol / base_lot) if base_lot > 0 else 1.0
+        dollar_per_pt = get_dollar_per_pt(symbol, pos_vol)
         dp            = _sym_digits(symbol)
+        deep_cutoff   = -62.5 * pos_scale
 
         # Case 1: Already secured at BE or profit lock
         already_secured = (
@@ -813,7 +816,7 @@ def run_pre_session_secure_gate():
             continue
 
         # Case 2: Deeply losing — cut early rather than widening risk
-        if profit < DEEP_LOSS_CUTOFF_USD:
+        if profit < deep_cutoff:
             tick        = mt5.symbol_info_tick(symbol)
             close_price = tick.bid if pos_type == "BUY" else tick.ask
             close_type  = mt5.ORDER_TYPE_SELL if pos_type == "BUY" else mt5.ORDER_TYPE_BUY
@@ -844,16 +847,16 @@ def run_pre_session_secure_gate():
                 logger.error(f"[NightlyGuard] Failed to close deep-loss {symbol} #{ticket}: {getattr(res, 'comment', 'ERR')}")
             continue
 
-        # Case 3: In good profit (>= +$20) — lock BE + $2 buffer; NEVER widen initial $34 SL
-        if profit >= 20.0:
-            be_buf = (2.0 / dollar_per_pt) if dollar_per_pt > 0 else 0.5
+        # Case 3: In good profit (>= +$50 * pos_scale) — lock BE + $5*pos_scale buffer; NEVER widen initial SL
+        if profit >= (50.0 * pos_scale):
+            be_buf = ((5.0 * pos_scale) / dollar_per_pt) if dollar_per_pt > 0 else 1.0
             new_sl = round((entry + be_buf) if pos_type == "BUY" else (entry - be_buf), dp)
             modify_sl(ticket, symbol, new_sl, tp)
             ACTIVE_BE_TRACKED[ticket] = True
             update_trade_be(ticket)
-            action_desc = f"BE + $2.00 buffer secured at {new_sl:.{dp}f} (profit +${profit:.2f})"
+            action_desc = f"BE + ${5.0 * pos_scale:.2f} buffer secured at {new_sl:.{dp}f} (profit +${profit:.2f})"
         else:
-            action_desc = f"Hard $34 SL preserved at {sl:.{dp}f} (never widened)"
+            action_desc = f"Hard ${85.0 * pos_scale:.0f} SL preserved at {sl:.{dp}f} (never widened)"
 
         pnl_str = (f"+${profit:.2f}") if profit >= 0 else (f"-${abs(profit):.2f}")
         logger.info(f"[NightlyGuard] {symbol} #{ticket} | Profit: {pnl_str} | {action_desc}")
@@ -1022,13 +1025,13 @@ def run_institutional_cycle():
             trade_scale = (trade_lot / cfg['lot']) if cfg['lot'] > 0 else 1.0
 
             dollar_per_pt = get_dollar_per_pt(symbol, trade_lot)
-            max_sl_usd = cfg.get('max_sl_dollars', 34.0) * trade_scale
+            max_sl_usd = cfg.get('max_sl_dollars', 85.0) * trade_scale
 
             if catalyst.get('state') == 'CATALYST_IMPULSE':
                 vol_boost = catalyst.get('volatility_multiplier', 1.0)
-                tp_target_usd = cfg.get('tp_catalyst_dollars', 70.0) * trade_scale * vol_boost
+                tp_target_usd = cfg.get('tp_catalyst_dollars', 175.0) * trade_scale * vol_boost
             else:
-                tp_target_usd = cfg.get('tp_dollars', 55.0) * trade_scale
+                tp_target_usd = cfg.get('tp_dollars', 137.5) * trade_scale
 
             target_tp_dist = tp_target_usd / dollar_per_pt if dollar_per_pt > 0 else 27.5
             target_sl_dist = max_sl_usd / dollar_per_pt if dollar_per_pt > 0 else 17.0

@@ -664,29 +664,32 @@ class InstitutionalEngine:
         ut_signal_m15 = ("PA_" + "+".join(pa_res["swept_pools"])) if pa_res["swept_pools"] else "PURE_PA"
         whale_gate_ok = True
         if symbol == "XAUUSDm":
-            min_sl_pts = 17.0   # 17.0 pts ($34 USD at 0.02 lot)
-            min_tp_pts = 27.5   # 27.5 pts ($55 USD at 0.02 lot)
+            min_sl_pts = 17.0   # 17.0 pts ($85 USD at 0.05 lot)
+            min_tp_pts = 27.5   # 27.5 pts ($137.50 USD at 0.05 lot)
         elif "OIL" in symbol:
-            min_sl_pts = 0.68   # $0.68 ($34 USD at 0.05 lot)
-            min_tp_pts = 1.10   # $1.10 ($55 USD at 0.05 lot)
+            min_sl_pts = 0.708  # $0.708 ($85 USD at 0.12 lot)
+            min_tp_pts = 1.146  # $1.146 ($137.50 USD at 0.12 lot)
         elif "DE30" in symbol or "GER" in symbol:
-            min_sl_pts = 68.0   # 68.0 pts ($34 USD at 0.45 lot)
-            min_tp_pts = 110.0  # 110.0 pts ($55 USD at 0.45 lot)
-        elif "30" in symbol or "USTEC" in symbol or "NAS" in symbol:
-            min_sl_pts = 136.0  # 136 pts ($34 USD at 0.25 lot)
-            min_tp_pts = 220.0  # 220 pts ($55 USD at 0.25 lot)
+            min_sl_pts = 69.21  # 69.21 pts ($85 USD at 1.12 lot)
+            min_tp_pts = 111.96 # 111.96 pts ($137.50 USD at 1.12 lot)
+        elif "USTEC" in symbol or "NAS" in symbol:
+            min_sl_pts = 144.07 # 144.07 pts ($85 USD at 0.59 lot)
+            min_tp_pts = 233.05 # 233.05 pts ($137.50 USD at 0.59 lot)
+        elif "30" in symbol:
+            min_sl_pts = 137.10 # 137.10 pts ($85 USD at 0.62 lot)
+            min_tp_pts = 221.77 # 221.77 pts ($137.50 USD at 0.62 lot)
         elif "XAG" in symbol or "SILVER" in symbol:
-            min_sl_pts = 0.36   # $0.36 ($36 USD at 0.02 lot)
-            min_tp_pts = 0.60   # $0.60 ($60 USD at 0.02 lot)
+            min_sl_pts = 0.85   # $0.85 ($85 USD at 0.05 lot)
+            min_tp_pts = 1.38   # $1.38 ($137.50 USD at 0.05 lot)
         elif "500" in symbol or "SPX" in symbol:
-            min_sl_pts = 36.0   # 36.0 pts ($36 USD at 1.0 lot)
-            min_tp_pts = 60.0   # 60.0 pts ($60 USD at 1.0 lot)
+            min_sl_pts = 36.02  # 36.02 pts ($85 USD at 2.36 lot)
+            min_tp_pts = 58.26  # 58.26 pts ($137.50 USD at 2.36 lot)
         elif "JPY" in symbol:
-            min_sl_pts = 1.14   # 114 pips ($36 USD at 0.05 lot)
-            min_tp_pts = 1.89   # 189 pips ($60 USD at 0.05 lot)
+            min_sl_pts = 1.129  # 112.9 pips ($85 USD at 0.12 lot)
+            min_tp_pts = 1.826  # 182.6 pips ($137.50 USD at 0.12 lot)
         else:
-            min_sl_pts = 0.0036 # Forex 36 pips ($36 USD at 0.10 lot)
-            min_tp_pts = 0.0060 # Forex 60 pips ($60 USD at 0.10 lot)
+            min_sl_pts = 0.00354 # Forex 35.4 pips ($85 USD at 0.24 lot)
+            min_tp_pts = 0.00573 # Forex 57.3 pips ($137.50 USD at 0.24 lot)
         sl_buffer = max(round(m15_atr * 1.5, 4), min_sl_pts)
 
         # Institutional Volume Gate: Gold fires on UT Bot signal or sweep (high liquidity).

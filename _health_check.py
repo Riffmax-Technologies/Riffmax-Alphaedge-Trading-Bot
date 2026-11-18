@@ -64,26 +64,31 @@ from ai_learning import AutoLearner
 import m15_trade_analysis_logger as tlog
 
 print("\n--- 2. Calibrated Asset Specs, Shadow Promotion & Equity Scaling ---")
-check("Daily DD Cap", it.MAX_DAILY_DRAWDOWN_USD == 50.0, f"-${it.MAX_DAILY_DRAWDOWN_USD:.2f}")
+check("Daily DD Cap", it.MAX_DAILY_DRAWDOWN_USD == 150.0, f"-${it.MAX_DAILY_DRAWDOWN_USD:.2f}")
 check("Max Concurrent", it.MAX_CONCURRENT_POSITIONS == 2, f"{it.MAX_CONCURRENT_POSITIONS} trades")
 check("DE30m removed from shadow", "DE30m" not in st.SHADOW_CONFIGS, f"shadow={list(st.SHADOW_CONFIGS.keys())}")
-for sym, expected_lot in [("XAUUSDm", 0.02), ("USOILm", 0.05), ("US30m", 0.25), ("DE30m", 0.45)]:
+for sym, expected_lot in [("XAUUSDm", 0.05), ("USOILm", 0.12), ("US30m", 0.62), ("DE30m", 1.12)]:
     cfg = it.ASSET_CONFIGS.get(sym, {})
     ok = (
         cfg.get("lot") == expected_lot
-        and cfg.get("max_sl_dollars") == 34.0
-        and cfg.get("tp_dollars") == 55.0
-        and cfg.get("be_trigger_dollars") == 28.0
-        and cfg.get("lock_trigger_dollars") == 44.0
-        and cfg.get("lock_amount_dollars") == 32.0
+        and cfg.get("max_sl_dollars") == 85.0
+        and cfg.get("tp_dollars") == 137.5
+        and cfg.get("be_trigger_dollars") == 70.0
+        and cfg.get("lock_trigger_dollars") == 110.0
+        and cfg.get("lock_amount_dollars") == 80.0
     )
     check(f"Spec {sym}", ok, f"lot={cfg.get('lot')}, SL=${cfg.get('max_sl_dollars')}, TP=${cfg.get('tp_dollars')}, BE=${cfg.get('be_trigger_dollars')}")
 
+for sym_sh, exp_lot_sh in [("EURUSDm", 0.24), ("USTECm", 0.59), ("GBPUSDm", 0.24), ("US500m", 2.36), ("GBPJPYm", 0.12)]:
+    sc = st.SHADOW_CONFIGS.get(sym_sh, {})
+    ok_sh = sc.get("lot") == exp_lot_sh and sc.get("max_sl_dollars") == 85.0 and sc.get("tp_dollars") == 137.5
+    check(f"Shadow {sym_sh}", ok_sh, f"lot={sc.get('lot')}, SL=${sc.get('max_sl_dollars')}, TP=${sc.get('tp_dollars')}")
+
 check("Equity scale $534 -> 1.0x", ppa.compute_equity_scale(534.0) == 1.0, f"got={ppa.compute_equity_scale(534.0)}")
-check("Equity scale $800 -> 1.5x", ppa.compute_equity_scale(800.0) == 1.5, f"got={ppa.compute_equity_scale(800.0)}")
-check("Equity scale $1100 -> 2.0x", ppa.compute_equity_scale(1100.0) == 2.0, f"got={ppa.compute_equity_scale(1100.0)}")
-check("Scaled lot Gold 1.5x", ppa.scale_symbol_lot(0.02, 1.5) == 0.03, f"got={ppa.scale_symbol_lot(0.02, 1.5)}")
-check("Scaled lot DE30m 1.5x", ppa.scale_symbol_lot(0.45, 1.5) == 0.68, f"got={ppa.scale_symbol_lot(0.45, 1.5)}")
+check("Equity scale $2000 -> 1.5x", ppa.compute_equity_scale(2000.0) == 1.5, f"got={ppa.compute_equity_scale(2000.0)}")
+check("Equity scale $2750 -> 2.0x", ppa.compute_equity_scale(2750.0) == 2.0, f"got={ppa.compute_equity_scale(2750.0)}")
+check("Scaled lot Gold 1.5x", ppa.scale_symbol_lot(0.05, 1.5) == 0.08, f"got={ppa.scale_symbol_lot(0.05, 1.5)}")
+check("Scaled lot DE30m 1.5x", ppa.scale_symbol_lot(1.12, 1.5) == 1.68, f"got={ppa.scale_symbol_lot(1.12, 1.5)}")
 
 print("\n--- 3. Mon-Fri London & NY Killzone Schedule ---")
 # Mondays & Fridays MUST trade during Killzones; weekends & off-hours MUST block
@@ -229,7 +234,7 @@ learner = AutoLearner()
 cfg_ai = learner.load_config()
 check(
     "AI Config bounds",
-    45.0 <= cfg_ai.get("gold_tp_dollars", 0) <= 75.0 and cfg_ai.get("gold_be_trigger_dollars", 0) >= 24.0,
+    112.5 <= cfg_ai.get("gold_tp_dollars", 0) <= 187.5 and cfg_ai.get("gold_be_trigger_dollars", 0) >= 60.0,
     f"TP=${cfg_ai.get('gold_tp_dollars')}, BE=${cfg_ai.get('gold_be_trigger_dollars')}",
 )
 eng = InstitutionalEngine()

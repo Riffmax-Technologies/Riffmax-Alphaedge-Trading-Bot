@@ -78,14 +78,14 @@ class AutoLearner:
             except Exception as e:
                 logger.error(f"Error loading {self.config_path}: {e}")
         return {
-            "gold_tp_dollars": 65.0,
-            "gold_tp_catalyst_dollars": 85.0,
-            "gold_be_trigger_dollars": 20.0,
-            "gold_lock_trigger_dollars": 35.0,
-            "gold_lock_amount_dollars": 25.0,
-            "gold_lock2_trigger_dollars": 60.0,
-            "gold_lock2_amount_dollars": 45.0,
-            "regime": "BALANCED_INSTITUTIONAL_SWING",
+            "gold_tp_dollars": 137.5,
+            "gold_tp_catalyst_dollars": 175.0,
+            "gold_be_trigger_dollars": 70.0,
+            "gold_lock_trigger_dollars": 110.0,
+            "gold_lock_amount_dollars": 80.0,
+            "gold_lock2_trigger_dollars": 140.0,
+            "gold_lock2_amount_dollars": 112.5,
+            "regime": "BALANCED_PURE_PA_SWING",
             "volatility_regime": "NORMAL",
             "win_rate": 50.0,
             "total_trades": 0,
@@ -157,15 +157,15 @@ class AutoLearner:
         date_to   = datetime.now()
         deals = mt5.history_deals_get(date_from, date_to)
 
-        # Baseline Defaults (Calibrated Pure PA 3-TF Swing - $55 TP / $34 SL / $28 BE / $44->$32 Lock1)
-        gold_tp = 55.0
-        gold_tp_catalyst = 70.0
-        gold_be = 28.0
-        lock1_trig = 44.0
-        lock1_amt = 32.0
-        lock2_trig = 56.0
-        lock2_amt = 45.0
-        regime = "BALANCED_INSTITUTIONAL_SWING"
+        # Baseline Defaults (2.5x Lot Scaled Pure PA: $137.50 TP / $85 SL / $70 BE / $110->$80 Lock1)
+        gold_tp = 137.5
+        gold_tp_catalyst = 175.0
+        gold_be = 70.0
+        lock1_trig = 110.0
+        lock1_amt = 80.0
+        lock2_trig = 140.0
+        lock2_amt = 112.5
+        regime = "BALANCED_PURE_PA_SWING"
 
         total_trades = 0
         win_rate = 50.0
@@ -210,51 +210,51 @@ class AutoLearner:
             f"Win Rate: {win_rate}% | Net PnL: ${net_pnl:+.2f} | Volatility: {vol_state} (ATR Ratio: {vol_info.get('ratio', 1.0)})"
         )
 
-        # ── Dynamic Quantitative Adaptation Decisions (Calibrated Pure PA Bounds) ──
+        # ── Dynamic Quantitative Adaptation Decisions (Calibrated 2.5x Pure PA Bounds) ──
         if total_trades >= 5:
             if win_rate >= 60.0 and net_pnl > 0:
                 regime = "HIGH_CONVICTION_PURE_PA_SWING"
-                gold_tp = 62.0
-                gold_tp_catalyst = 75.0
-                gold_be = 28.0
-                lock1_trig = 44.0
-                lock1_amt = 32.0
-                lock2_trig = 56.0
-                lock2_amt = 45.0
+                gold_tp = 155.0
+                gold_tp_catalyst = 187.5
+                gold_be = 70.0
+                lock1_trig = 110.0
+                lock1_amt = 80.0
+                lock2_trig = 140.0
+                lock2_amt = 112.5
             elif win_rate < 45.0:
                 regime = "DEFENSIVE_PURE_PA_SWING"
-                gold_tp = 50.0
-                gold_tp_catalyst = 65.0
-                gold_be = 26.0
-                lock1_trig = 40.0
-                lock1_amt = 28.0
-                lock2_trig = 52.0
-                lock2_amt = 40.0
+                gold_tp = 125.0
+                gold_tp_catalyst = 162.5
+                gold_be = 65.0
+                lock1_trig = 100.0
+                lock1_amt = 70.0
+                lock2_trig = 130.0
+                lock2_amt = 100.0
             else:
                 regime = "BALANCED_PURE_PA_SWING"
-                gold_tp = 55.0
-                gold_tp_catalyst = 70.0
-                gold_be = 28.0
-                lock1_trig = 44.0
-                lock1_amt = 32.0
-                lock2_trig = 56.0
-                lock2_amt = 45.0
+                gold_tp = 137.5
+                gold_tp_catalyst = 175.0
+                gold_be = 70.0
+                lock1_trig = 110.0
+                lock1_amt = 80.0
+                lock2_trig = 140.0
+                lock2_amt = 112.5
         else:
             regime = "INITIAL_PURE_PA_SWING"
-            gold_tp = 55.0
-            gold_tp_catalyst = 70.0
-            gold_be = 28.0
-            lock1_trig = 44.0
-            lock1_amt = 32.0
-            lock2_trig = 56.0
-            lock2_amt = 45.0
+            gold_tp = 137.5
+            gold_tp_catalyst = 175.0
+            gold_be = 70.0
+            lock1_trig = 110.0
+            lock1_amt = 80.0
+            lock2_trig = 140.0
+            lock2_amt = 112.5
 
-        # Dynamic Volatility Overlay (Never widens initial $34 SL or squeezes BE below $24!)
+        # Dynamic Volatility Overlay (Never widens initial $85 SL or squeezes BE below $60!)
         if vol_state == "EXPANSION":
-            gold_tp = min(65.0, round(gold_tp * 1.10, 1))
-            gold_tp_catalyst = min(75.0, round(gold_tp_catalyst * 1.10, 1))
+            gold_tp = min(162.5, round(gold_tp * 1.10, 1))
+            gold_tp_catalyst = min(187.5, round(gold_tp_catalyst * 1.10, 1))
         elif vol_state == "COMPRESSION":
-            gold_be = max(24.0, round(gold_be - 2.0, 1))
+            gold_be = max(60.0, round(gold_be - 5.0, 1))
 
         old_config = self.load_config()
         new_config = {
@@ -280,7 +280,7 @@ class AutoLearner:
                     "lock_amount_dollars": lock1_amt,
                     "lock2_trigger_dollars": lock2_trig,
                     "lock2_amount_dollars": lock2_amt,
-                    "max_sl_dollars": 34.0
+                    "max_sl_dollars": 85.0
                 },
                 "USOILm": {
                     "tp_dollars": gold_tp,
@@ -290,7 +290,7 @@ class AutoLearner:
                     "lock_amount_dollars": lock1_amt,
                     "lock2_trigger_dollars": lock2_trig,
                     "lock2_amount_dollars": lock2_amt,
-                    "max_sl_dollars": 34.0
+                    "max_sl_dollars": 85.0
                 },
                 "US30m": {
                     "tp_dollars": gold_tp,
@@ -300,7 +300,7 @@ class AutoLearner:
                     "lock_amount_dollars": lock1_amt,
                     "lock2_trigger_dollars": lock2_trig,
                     "lock2_amount_dollars": lock2_amt,
-                    "max_sl_dollars": 34.0
+                    "max_sl_dollars": 85.0
                 },
                 "DE30m": {
                     "tp_dollars": gold_tp,
@@ -310,7 +310,7 @@ class AutoLearner:
                     "lock_amount_dollars": lock1_amt,
                     "lock2_trigger_dollars": lock2_trig,
                     "lock2_amount_dollars": lock2_amt,
-                    "max_sl_dollars": 34.0
+                    "max_sl_dollars": 85.0
                 }
             },
             "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S")

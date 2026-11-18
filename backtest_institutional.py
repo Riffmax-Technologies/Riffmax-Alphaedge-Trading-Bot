@@ -31,7 +31,7 @@ from pure_price_action import (
 
 SYMBOLS = list(CALIBRATED_ASSET_SPECS.keys())
 MAX_CONCURRENT = 2
-DAILY_DD_CAP_USD = 50.0
+DAILY_DD_CAP_USD = 150.0
 COOLDOWN_SEC = 3600
 START_BALANCE_USD = 534.0
 
@@ -332,7 +332,7 @@ def run_portfolio_backtest():
                     "scale": pos_scale,
                     "tp_usd": spec["tp_dollars"] * pos_scale,
                     "be_trig_usd": spec["be_trigger_dollars"] * pos_scale,
-                    "be_buf": (2.0 * pos_scale) / dpp,
+                    "be_buf": (5.0 * pos_scale) / dpp,
                     "lock_trig_usd": spec["lock_trigger_dollars"] * pos_scale,
                     "lock_amt_usd": spec["lock_amount_dollars"] * pos_scale,
                     "be": False,
@@ -369,8 +369,8 @@ def run_portfolio_backtest():
 
     trades, _ = _sim(dynamic_scaling=False)
     print("=" * 105)
-    print("ALPHAEDGE PURE PRICE ACTION 3-TF 4-ASSET BACKTEST (BASE 1x: SL=$34 | TP=$55 | BE=+$28 | Lock1=+$44->$32)")
-    print(f"Assets: {', '.join(SYMBOLS)} | Window: {datetime.fromtimestamp(common_start, tz=timezone.utc).strftime('%Y-%m-%d')} -> {datetime.fromtimestamp(end_ts, tz=timezone.utc).strftime('%Y-%m-%d')} | Max Conc: {MAX_CONCURRENT}")
+    print("ALPHAEDGE PURE PRICE ACTION 3-TF 4-ASSET BACKTEST (2.5x LOTS: SL=$85 | TP=$137.50 | BE=+$70 | Lock1=+$110->$80)")
+    print(f"Assets: {', '.join(SYMBOLS)} | Window: {datetime.fromtimestamp(common_start, tz=timezone.utc).strftime('%Y-%m-%d')} -> {datetime.fromtimestamp(end_ts, tz=timezone.utc).strftime('%Y-%m-%d')} | Max Conc: {MAX_CONCURRENT} | Daily DD Cap: -${DAILY_DD_CAP_USD:.0f}")
     print("=" * 105)
 
     split_ts = int(common_start + (end_ts - common_start) * 0.58)
@@ -387,7 +387,7 @@ def run_portfolio_backtest():
     comp_trades, comp_end_bal = _sim(dynamic_scaling=True)
     print("-" * 105)
     summarize("COMPOUNDED (Tiered)", comp_trades)
-    print(f"Compounded Balance ($534 start, +0.5x per +$300 tier >= $800): ${START_BALANCE_USD:.2f} -> ${comp_end_bal:.2f} (Max Tier Used: {max(t['scale'] for t in comp_trades):.1f}x)")
+    print(f"Compounded Balance ($534 start, +0.5x per +$750 tier >= $2000): ${START_BALANCE_USD:.2f} -> ${comp_end_bal:.2f} (Max Tier Used: {max(t['scale'] for t in comp_trades):.1f}x)")
     print("=" * 105)
 
 
